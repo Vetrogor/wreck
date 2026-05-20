@@ -7,6 +7,7 @@ WRECK_VERSION = '1.1.5b'
 # 4) Troop's skills check against maximum allowed value specified in 'module_skills.py'.
 # 5) Messages improved with colorama.
 # 6) Added operations length check for some like <store_add>, <val_add> etc.
+# 7) Added check of the hero troops weapon equipment.
 
 # The MIT License (MIT)
 #

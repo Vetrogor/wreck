@@ -1068,10 +1068,22 @@ def preprocess_entities_internal(glob):
 
 	#troops check
 	for e in glob['troops']:
+		troop_is_hero = 0
+		duplicate_items = []
+		num_weapon_items = 0
 		if (e[3] & tf_is_merchant) == tf_is_merchant: continue
+		if (e[3] & tf_hero) and not(e[3] & tf_inactive): troop_is_hero = 1
 		if not isinstance(e[8], AGGREGATE): e[8] = unparse_attr_aggregate(e[8])
 		for item, modifier in e[7]:
 			item_list = glob['items'][parse_int(item)]
+			item_type = (item_list[4] & 0xFF)
+			if troop_is_hero:
+				if item in duplicate_items: WRECK.warnings.append("Duplicate weapon item {0}{9}{3} in the hero troop {0}{10}{3}".format(*COLORAMA, item.name, e[0]))
+				if ((itp_type_one_handed_wpn <= item_type <= itp_type_polearm) or (itp_type_bow <= item_type <= itp_type_crossbow) or (itp_type_pistol <= item_type <= itp_type_musket)):
+					duplicate_items.append(item)
+					num_weapon_items += 1
+				elif (itp_type_arrows <= item_type <= itp_type_bolts) or (item_type == itp_type_thrown) or (item_type == itp_type_bullets):
+					num_weapon_items += 1
 			difficulty = item_list[7].get('diff', 0)
 			if modifier == imod_stubborn: difficulty += 1
 			elif modifier == imod_timid: difficulty -= 1
@@ -1079,37 +1091,36 @@ def preprocess_entities_internal(glob):
 			elif modifier == imod_masterwork: difficulty += 4
 			elif modifier == imod_heavy: difficulty += 1
 			elif modifier == imod_strong: difficulty += 2
-			type = (item_list[4] & 0xFF)
 			notice = ""
 			if modifier == 0:
 				str_modifier = ""
 			else:
 				str_modifier = " with modifier imod_" + glob['item_modifiers'][modifier][0]
-			if type == itp_type_horse:
+			if item_type == itp_type_horse:
 				riding = (e[10] >> (skl_riding << 2)) & 0xf
 				if riding < difficulty:
 					notice = "{0}trp.{9}{6} doesn't have riding skill to handle {0}itm.{10}{11}{6}. Required {0}{12}{6}.".format(*COLORAMA, e[0], item_list[0], str_modifier, difficulty)
-			elif (type == itp_type_one_handed_wpn) or (type == itp_type_two_handed_wpn) or (type == itp_type_polearm):
+			elif (item_type == itp_type_one_handed_wpn) or (item_type == itp_type_two_handed_wpn) or (item_type == itp_type_polearm):
 				strength = e[8].get('str', 0)
 				if strength < difficulty:
 					notice = "{0}trp.{9}{6} doesn't have enough strength to handle {0}itm.{10}{11}{6}. Required {0}{12}{6}.".format(*COLORAMA, e[0], item_list[0], str_modifier, difficulty)
-			elif type == itp_type_shield:
+			elif item_type == itp_type_shield:
 				shield = (e[10] >> (skl_shield <<2)) & 0xf
 				if shield < difficulty:
 					notice = "{0}trp.{9}{6} doesn't have shield skill to handle {0}itm.{10}{11}{6}. Required {0}{12}{6}.".format(*COLORAMA, e[0], item_list[0], str_modifier, difficulty)
-			elif type == itp_type_bow:
+			elif item_type == itp_type_bow:
 				power_draw = (e[10] >> (skl_power_draw <<2)) & 0xf
 				if power_draw < difficulty:
 					notice = "{0}trp.{9}{6} doesn't have power draw skill to handle {0}itm.{10}{11}{6}. Required {0}{12}{6}.".format(*COLORAMA, e[0], item_list[0], str_modifier, difficulty)
-			elif type == itp_type_thrown:
+			elif item_type == itp_type_thrown:
 				power_throw = (e[10] >> (skl_power_throw <<2)) & 0xf
 				if power_throw < difficulty:
 					notice = "{0}trp.{9}{6} doesn't have power throw skill to handle {0}itm.{10}{11}{6}. Required {0}{12}{6}.".format(*COLORAMA, e[0], item_list[0], str_modifier, difficulty)
-			elif (type == itp_type_head_armor) or (type == itp_type_body_armor) or (type == itp_type_foot_armor) or (type == itp_type_hand_armor):
+			elif (item_type == itp_type_head_armor) or (item_type == itp_type_body_armor) or (item_type == itp_type_foot_armor) or (item_type == itp_type_hand_armor):
 				strength = e[8].get('str', 0)
 				if strength < difficulty:
 					notice = "{0}trp.{9}{6} doesn't have enough strength to handle {0}itm.{10}{11}{6}. Required {0}{12}{6}.".format(*COLORAMA, e[0], item_list[0], str_modifier, difficulty)
-			elif (type == itp_type_musket) or (type == itp_type_pistol) or (type == itp_type_crossbow):
+			elif (item_type == itp_type_musket) or (item_type == itp_type_pistol) or (item_type == itp_type_crossbow):
 				strength = e[8].get('str', 0)
 				if strength < difficulty:
 					notice = "{0}trp.{9}{6} doesn't have enough strength to handle {0}itm.{10}{11}{6}. Required {0}{12}{6}.".format(*COLORAMA, e[0], item_list[0], str_modifier, difficulty)
@@ -1122,6 +1133,7 @@ def preprocess_entities_internal(glob):
 				notice = "{0}trp.{9}{6} skill {0}{10} {11}{6} is exceeding maximum {0}{12}{6} allowed by 'module_skills.py'.".format(*COLORAMA, e[0], WRECK.skills_maximums[i][0], skill, WRECK.skills_maximums[i][1])
 				WRECK.notices.append(notice)
 			skill_mask >>= 4
+		if num_weapon_items > 4: WRECK.warnings.append("Num equiped weapon items grater than 4 of the hero troop {0}{9}{3}".format(*COLORAMA, e[0]))
 
 #	for e in glob['scripts']:
 #		script_id = e[0].lower()
