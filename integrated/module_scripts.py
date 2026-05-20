@@ -1,4 +1,4 @@
-from compiler import *
+from compiler import * # should be after all imports
 
 ####################################################################################################################
 # scripts is a list of script records.
@@ -7,11 +7,10 @@ from compiler import *
 # 2) Operation block: This must be a valid operation block. See header_operations.py for reference.
 ####################################################################################################################
 
-
 scripts = [
 
 
-  #script_game_start:
+  #script.game_start:
   # This script is called when a new game is started
   # INPUT: none
   ("game_start",
@@ -884,7 +883,7 @@ scripts = [
       (try_end),
     ]),
 
-  #script_game_get_use_string
+  #script.game_get_use_string
   # This script is called from the game engine for getting using information text
   # INPUT: used_scene_prop_id  
   # OUTPUT: s0
@@ -944,6 +943,22 @@ scripts = [
        (else_try),
          (str_store_string, s0, "str_close_door"),
        (try_end),
+     #INVASION MODE START
+     (else_try),
+       #(display_message, "@could it be?"),
+       (eq, ":scene_prop_id", "spr_multiplayer_coop_item_drop"),
+       #(display_message, "@one of those!"),
+       (str_store_string, s0, "str_coop_open_chest"),
+       (multiplayer_get_my_player, ":player_no"),
+       (try_for_range, ":cur_slot", slot_player_coop_opened_chests_begin, slot_player_coop_opened_chests_end),
+         (player_get_slot, ":cur_instance", ":player_no", ":cur_slot"),
+         (try_begin),
+           (eq, ":cur_instance", ":instance_id"),
+           (neg|is_presentation_active, "prsnt_coop_assign_drop_to_group_member"),
+           (str_store_string, s0, "str_coop_already_opened"),
+         (try_end),
+       (try_end),
+     #INVASION MODE END
      (else_try), #raising/dropping ladder
        (try_begin),
          (eq, ":item_situation", 0),
@@ -954,7 +969,7 @@ scripts = [
      (try_end),
    ]),
 
-  #script_game_quick_start
+  #script.game_quick_start
   # This script is called from the game engine for initializing the global variables for tutorial, multiplayer and custom battle modes.
   # INPUT:
   # none
@@ -1054,6 +1069,11 @@ scripts = [
       (assign, "$g_multiplayer_initial_gold_multiplier", 100),
       (assign, "$g_multiplayer_battle_earnings_multiplier", 100),
       (assign, "$g_multiplayer_round_earnings_multiplier", 100),
+      
+      #INVASION MODE START
+	  (assign, "$g_multiplayer_is_game_type_captain", 0),
+      (assign, "$g_multiplayer_ccoop_difficulty", 1),
+      #INVASION MODE END
   
       #faction banners
       (faction_set_slot, "fac_kingdom_1", slot_faction_banner, "mesh_banner_kingdom_f"),
@@ -1452,7 +1472,27 @@ scripts = [
       (item_set_slot, "itm_arabian_horse_b", slot_item_multiplayer_item_class, multi_item_class_type_horse),
 	  (item_set_slot, "itm_warhorse_steppe", slot_item_multiplayer_item_class, multi_item_class_type_horse),
 	  (item_set_slot, "itm_warhorse_sarranid", slot_item_multiplayer_item_class, multi_item_class_type_horse),
-	  
+      
+      #INVASION MODE START
+      #DEBUG FOR SPECIAL ITEMS
+	  #(item_set_slot, "itm_javelin_bow", slot_item_multiplayer_item_class, multi_item_class_type_bow),
+	  #(item_set_slot, "itm_knockdown_mace", slot_item_multiplayer_item_class, multi_item_class_type_blunt),
+	  #(item_set_slot, "itm_blood_drain_throwing_knives", slot_item_multiplayer_item_class, multi_item_class_type_throwing),
+	  #(item_set_slot, "itm_doom_javelins", slot_item_multiplayer_item_class, multi_item_class_type_throwing),
+	  #(item_set_slot, "itm_disarming_throwing_axe", slot_item_multiplayer_item_class, multi_item_class_type_throwing),
+	  #(item_set_slot, "itm_instakill_knife", slot_item_multiplayer_item_class, multi_item_class_type_sword),
+	  #(item_set_slot, "itm_running_boots", slot_item_multiplayer_item_class, multi_item_class_type_light_foot),
+	  #(item_set_slot, "itm_power_gloves", slot_item_multiplayer_item_class, multi_item_class_type_glove),
+	  #(item_set_slot, "itm_wielding_gloves", slot_item_multiplayer_item_class, multi_item_class_type_glove),
+	  #(item_set_slot, "itm_invulnerable_helmet", slot_item_multiplayer_item_class, multi_item_class_type_light_helm),
+	  #(item_set_slot, "itm_kicking_boots", slot_item_multiplayer_item_class, multi_item_class_type_light_foot),
+	  #(item_set_slot, "itm_javelin_bow_ammo", slot_item_multiplayer_item_class, multi_item_class_type_throwing),
+	  #(item_set_slot, "itm_weak_beserker_dart", slot_item_multiplayer_item_class, multi_item_class_type_throwing),
+	  #(item_set_slot, "itm_team_change_dart", slot_item_multiplayer_item_class, multi_item_class_type_throwing),
+	  #(item_set_slot, "itm_awesome_spear", slot_item_multiplayer_item_class, multi_item_class_type_spear),
+	  #(item_set_slot, "itm_restore_health_armour", slot_item_multiplayer_item_class, multi_item_class_type_light_armor),
+	  #(item_set_slot, "itm_extra_life_helmet", slot_item_multiplayer_item_class, multi_item_class_type_light_helm),
+	  #INVASION MODE END
 
       #1-Swadian Warriors
       #1a-Swadian Crossbowman
@@ -1520,6 +1560,14 @@ scripts = [
       (call_script, "script_multiplayer_set_item_available_for_troop", "itm_mail_mittens", "trp_swadian_infantry_multiplayer"),
       (call_script, "script_multiplayer_set_item_available_for_troop", "itm_scale_gauntlets", "trp_swadian_infantry_multiplayer"),
       (call_script, "script_multiplayer_set_item_available_for_troop", "itm_gauntlets", "trp_swadian_infantry_multiplayer"),
+
+      #INVASION MODE START
+      ###DEBUG SPECIAL ITEM TESTING
+      #(try_for_range, ":cur_item", coop_drops_begin, coop_new_items_end),
+      #  (call_script, "script_multiplayer_set_item_available_for_troop", ":cur_item", "trp_swadian_infantry_multiplayer"),
+      #(try_end),
+      ###DEBUG SPECIAL ITEM TESTING
+      #INVASION MODE END
 
       #1c-Swadian Man At Arms
       (call_script, "script_multiplayer_set_item_available_for_troop", "itm_darts", "trp_swadian_man_at_arms_multiplayer"),
@@ -2159,9 +2207,18 @@ scripts = [
 	  (call_script, "script_multiplayer_set_item_available_for_troop", "itm_scale_gauntlets", "trp_sarranid_mamluke_multiplayer"),
 
 
+	  #INVASION MODE START      
+      (scene_set_slot, "scn_multi_scene_11", slot_scene_ccoop_disallow_horses, 1),
+      (scene_set_slot, "scn_multi_scene_12", slot_scene_ccoop_disallow_horses, 1),
+      (scene_set_slot, "scn_multi_scene_18", slot_scene_ccoop_disallow_horses, 1),
+      (scene_set_slot, "scn_multi_scene_20", slot_scene_ccoop_disallow_horses, 1),
+      
+      (item_set_slot, "itm_javelin_bow", slot_item_ccoop_has_ammo, 1),
+      #INVASION MODE END
+	  
       ]),
 
-  #script_get_army_size_from_slider_value
+  #script.get_army_size_from_slider_value
   # INPUT: arg1 = slider_value
   # OUTPUT: reg0 = army_size
   ("get_army_size_from_slider_value",
@@ -2182,7 +2239,7 @@ scripts = [
      (assign, reg0, ":army_size"),
   ]),
   
-  #script_spawn_quick_battle_army
+  #script.spawn_quick_battle_army
   # INPUT: arg1 = initial_entry_point, arg2 = faction_no, arg3 = infantry_ratio, arg4 = archers_ratio, arg5 = cavalry_ratio, arg6 = divide_archer_entry_points, arg7 = player_team
   # OUTPUT: none
   ("spawn_quick_battle_army",
@@ -2350,7 +2407,7 @@ scripts = [
 	]),
 
 
-  #script_game_set_multiplayer_mission_end
+  #script.game_set_multiplayer_mission_end
   # This script is called from the game engine when a multiplayer map is ended in clients (not in server).
   # INPUT:
   # none
@@ -2360,7 +2417,7 @@ scripts = [
     [
       (assign, "$g_multiplayer_mission_end_screen", 1),
   ]),
-  #script_game_enable_cheat_menu
+  #script.game_enable_cheat_menu
   # This script is called from the game engine when user enters "cheatmenu from command console (ctrl+~).
   # INPUT:
   # none
@@ -2378,7 +2435,7 @@ scripts = [
       (try_end),
       ]),
 
-  #script_game_get_console_command
+  #script.game_get_console_command
   # This script is called from the game engine when a console command is entered from the dedicated server.
   # INPUT: anything
   # OUTPUT: s0 = result text
@@ -2849,12 +2906,31 @@ scripts = [
          (str_store_string, s0, "str_input_is_not_correct_for_the_command_type_help_for_more_information"),
        (try_end),
      (else_try),
+     #INVASION MODE START
+		(eq, ":input", 83), # get_invasion_difficulty # returns the difficulty for Invasion mode
+		(assign, ":string_index", "$g_multiplayer_ccoop_difficulty"),
+		(val_add, ":string_index", "str_ccoop_easy"),
+		(str_store_string, s0, ":string_index"),
+		(str_store_string, s0, "str_ccoop_difficulty_s0"),
+	 (else_try),
+		(eq, ":input", 84), # set_invasion_difficulty # returns the squad size for captain mode
+        (try_begin),
+		  (is_between, ":val1", 0, 3),
+		  (assign, "$g_multiplayer_ccoop_difficulty", ":val1"),
+		  (store_add, ":string_index", "str_ccoop_easy", "$g_multiplayer_ccoop_difficulty"),
+		  (str_store_string, s0, ":string_index"),
+		  (str_store_string, s0, "str_ccoop_difficulty_s0"),
+        (else_try),
+		  (str_store_string, s0, "str_input_is_not_correct_for_the_command_type_help_for_more_information"),
+		(try_end),
+	 (else_try),
+     #INVASION MODE END
        (str_store_string, s0, "@{!}DEBUG : SYSTEM ERROR!"),
      (try_end),
   ]),
   
 
-  # script_game_event_party_encounter:
+  # script.game_event_party_encounter:
   # This script is called from the game engine whenever player party encounters another party or a battle on the world map
   # INPUT:
   # param1: encountered_party
@@ -2982,7 +3058,7 @@ scripts = [
        (assign,"$auto_besiege_town",0),
       ]),
 
-  #script_game_event_simulate_battle:
+  #script.game_event_simulate_battle:
   # This script is called whenever the game simulates the battle between two parties on the map.
   # INPUT:
   # param1: Defender Party
@@ -3482,7 +3558,7 @@ scripts = [
        (set_trigger_result, ":trigger_result"),
   ]),
 
-  #script_game_event_battle_end:
+  #script.game_event_battle_end:
   # This script is called whenever the game ends the battle between two parties on the map.
   # INPUT:
   # param1: Defender Party
@@ -3585,7 +3661,7 @@ scripts = [
       (try_end),
   ]),   
   
-  #script_order_best_besieger_party_to_guard_center:
+  #script.order_best_besieger_party_to_guard_center:
   # INPUT:
   # param1: defeated_center, param2: winner_faction
   # OUTPUT:
@@ -3632,7 +3708,7 @@ scripts = [
       (try_end),
       ]),
 
-  #script_game_get_item_buy_price_factor:
+  #script.game_get_item_buy_price_factor:
   # This script is called from the game engine for calculating the buying price of any item.
   # INPUT:
   # param1: item_kind_id
@@ -3677,7 +3753,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
   
-  #script_game_get_item_sell_price_factor:
+  #script.game_get_item_sell_price_factor:
   # This script is called from the game engine for calculating the selling price of any item.
   # INPUT:
   # param1: item_kind_id
@@ -3713,7 +3789,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
   
-  # script_get_trade_penalty
+  # script.get_trade_penalty
   # 
   # Input:
   # param1: troop_id,
@@ -3724,7 +3800,7 @@ scripts = [
       (store_script_param_1, ":item_kind_id"),
       (assign, ":penalty",0),
       
-      (party_get_skill_level, ":trade_skill", "p_main_party", skl_trade),
+      (party_get_skill_level, ":trade_skill", "p_main_party", skl.trade),
       (try_begin),
         (is_between, ":item_kind_id", trade_goods_begin, trade_goods_end),
         (assign, ":penalty", 12), #reduced slightly 20-15-12
@@ -3796,7 +3872,7 @@ scripts = [
       (assign, reg0, ":penalty"),
   ]),
   
-  #script_game_event_buy_item:
+  #script.game_event_buy_item:
   # This script is called from the game engine when player buys an item.
   # INPUT:
   # param1: item_kind_id
@@ -3830,7 +3906,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_game_event_sell_item:
+  #script.game_event_sell_item:
   # This script is called from the game engine when player sells an item.
   # INPUT:
   # param1: item_kind_id
@@ -3864,7 +3940,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_start_wedding_cutscene
+  #script.start_wedding_cutscene
   # INPUT: arg1 = groom_troop, arg2 = bride_troop
   # OUTPUT: none
   ("start_wedding_cutscene",
@@ -3963,7 +4039,7 @@ scripts = [
     ]),
 	
   
-  # script_game_get_troop_wage
+  # script.game_get_troop_wage
   # This script is called from the game engine for calculating troop wages.
   # Input:
   # param1: troop_id, param2: party-id
@@ -3972,7 +4048,7 @@ scripts = [
   ("game_get_troop_wage",
     [
       (store_script_param_1, ":troop_id"),
-      #(store_script_param_2, ":unused"), #party id
+      (store_script_param_2, ":unused"), #party id
       
       (assign,":wage", 0),
       (try_begin),
@@ -4023,7 +4099,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
 
-  # script_game_get_total_wage
+  # script.game_get_total_wage
   # This script is called from the game engine for calculating total wage of the player party which is shown at the party window.
   # Input: none
   # Output: reg0: weekly wage
@@ -4043,7 +4119,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
   
-  # script_game_get_join_cost
+  # script.game_get_join_cost
   # This script is called from the game engine for calculating troop join cost.
   # Input:
   # param1: troop_id,
@@ -4072,7 +4148,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
   
-  # script_game_get_upgrade_xp
+  # script.game_get_upgrade_xp
   # This script is called from game engine for calculating needed troop upgrade exp
   # Input:
   # param1: troop_id,
@@ -4099,7 +4175,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
   
-  # script_game_get_upgrade_cost
+  # script.game_get_upgrade_cost
   # This script is called from game engine for calculating needed troop upgrade exp
   # Input:
   # param1: troop_id,
@@ -4135,7 +4211,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
 
-  # script_game_get_prisoner_price
+  # script.game_get_prisoner_price
   # This script is called from the game engine for calculating prisoner price
   # Input:
   # param1: troop_id,
@@ -4161,7 +4237,7 @@ scripts = [
   ]),
 
 
-  # script_game_check_prisoner_can_be_sold
+  # script.game_check_prisoner_can_be_sold
   # This script is called from the game engine for checking if a given troop can be sold.
   # Input: 
   # param1: troop_id,
@@ -4178,7 +4254,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
   
-  # script_game_get_morale_of_troops_from_faction
+  # script.game_get_morale_of_troops_from_faction
   # This script is called from the game engine 
   # Input: 
   # param1: faction_no,
@@ -4213,7 +4289,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
   
-  #script_game_event_detect_party:
+  #script.game_event_detect_party:
   # This script is called from the game engine when player party inspects another party.
   # INPUT:
   # param1: Party-id
@@ -4237,7 +4313,7 @@ scripts = [
         (try_end),
   ]),
 
-  #script_game_event_undetect_party:
+  #script.game_event_undetect_party:
   # This script is called from the game engine when player party inspects another party.
   # INPUT:
   # param1: Party-id
@@ -4252,7 +4328,7 @@ scripts = [
         (try_end),
   ]),
 
-  #script_game_get_statistics_line:
+  #script.game_get_statistics_line:
   # This script is called from the game engine when statistics page is opened.
   # INPUT:
   # param1: line_no
@@ -4282,7 +4358,7 @@ scripts = [
       (try_end),
   ]),
 
-  #script_game_get_date_text:
+  #script.game_get_date_text:
   # This script is called from the game engine when the date needs to be displayed.
   # INPUT: arg1 = number of days passed since the beginning of the game
   # OUTPUT: result string = date
@@ -4375,7 +4451,7 @@ scripts = [
       (set_result_string, s1),
     ]),  
   
-  #script_game_get_money_text:
+  #script.game_get_money_text:
   # This script is called from the game engine when an amount of money needs to be displayed.
   # INPUT: arg1 = amount in units
   # OUTPUT: result string = money in text
@@ -4392,7 +4468,7 @@ scripts = [
       (set_result_string, s1),
   ]),
 
-  #script_game_get_party_companion_limit:
+  #script.game_get_party_companion_limit:
   # This script is called from the game engine when the companion limit is needed for a party.
   # INPUT: arg1 = none
   # OUTPUT: reg0 = companion_limit
@@ -4416,7 +4492,7 @@ scripts = [
   ]),
 
 
-  #script_game_reset_player_party_name:
+  #script.game_reset_player_party_name:
   # This script is called from the game engine when the player name is changed.
   # INPUT: none
   # OUTPUT: none
@@ -4425,7 +4501,7 @@ scripts = [
      (party_set_name, "p_main_party", s5),
      ]),
 
-  #script_game_get_troop_note
+  #script.game_get_troop_note
   # This script is called from the game engine when the notes of a troop is needed.
   # INPUT: arg1 = troop_no, arg2 = note_index
   # OUTPUT: s0 = note
@@ -4698,7 +4774,7 @@ scripts = [
       (try_end),
      ]),
   
-  #script_game_get_center_note
+  #script.game_get_center_note
   # This script is called from the game engine when the notes of a center is needed.
   # INPUT: arg1 = center_no, arg2 = note_index
   # OUTPUT: s0 = note
@@ -4773,7 +4849,7 @@ scripts = [
       (try_end),
      ]),
 
-  #script_game_get_faction_note
+  #script.game_get_faction_note
   # This script is called from the game engine when the notes of a faction is needed.
   # INPUT: arg1 = faction_no, arg2 = note_index
   # OUTPUT: s0 = note
@@ -5013,7 +5089,7 @@ scripts = [
       (try_end),
      ]),
 
-  #script_game_get_quest_note
+  #script.game_get_quest_note
   # This script is called from the game engine when the notes of a quest is needed.
   # INPUT: arg1 = quest_no, arg2 = note_index
   # OUTPUT: s0 = note
@@ -5024,7 +5100,7 @@ scripts = [
       (set_trigger_result, 0), # set it to 1 if this script is wanted to be used rather than static notes
      ]),
 
-  #script_game_get_info_page_note
+  #script.game_get_info_page_note
   # This script is called from the game engine when the notes of a info_page is needed.
   # INPUT: arg1 = info_page_no, arg2 = note_index
   # OUTPUT: s0 = note
@@ -5035,7 +5111,7 @@ scripts = [
       (set_trigger_result, 0), # set it to 1 if this script is wanted to be used rather than static notes
      ]),
 
-  #script_game_get_scene_name
+  #script.game_get_scene_name
   # This script is called from the game engine when a name for the scene is needed.
   # INPUT: arg1 = scene_no
   # OUTPUT: s0 = name
@@ -5050,7 +5126,7 @@ scripts = [
       (try_end),
      ]),
   
-  #script_game_get_mission_template_name
+  #script.game_get_mission_template_name
   # This script is called from the game engine when a name for the mission template is needed.
   # INPUT: arg1 = mission_template_no
   # OUTPUT: s0 = name
@@ -5066,7 +5142,7 @@ scripts = [
       (try_end),
      ]),
 
-  #script_add_kill_death_counts
+  #script.add_kill_death_counts
   # INPUT: arg1 = killer_agent_no, arg2 = dead_agent_no
   # OUTPUT: none
   ("add_kill_death_counts",
@@ -5074,6 +5150,26 @@ scripts = [
       (store_script_param, ":killer_agent_no", 1),
       (store_script_param, ":dead_agent_no", 2),
       
+      #INVASION MODE START
+	  (try_begin),
+		(eq, "$g_multiplayer_is_game_type_captain", 1),
+		(try_begin),
+			(ge, ":killer_agent_no", 0),
+			(agent_is_human, ":killer_agent_no"),
+			(agent_get_group, ":agent_group", ":killer_agent_no"),
+			(player_is_active, ":agent_group"),
+			(player_get_agent_id, ":killer_agent_no", ":agent_group"),
+		(try_end),
+		(try_begin),
+			(ge, ":dead_agent_no", 0),
+			(agent_is_human, ":dead_agent_no"),
+			(agent_get_group, ":agent_group", ":dead_agent_no"),
+			(player_is_active, ":agent_group"), 		
+			(player_get_agent_id, ":dead_agent_no", ":agent_group"), 
+		(try_end),
+	  (try_end),
+      #INVASION MODE END
+	  
       (try_begin),
         (ge, ":killer_agent_no", 0),
         (agent_get_team, ":killer_agent_team", ":killer_agent_no"),
@@ -5172,7 +5268,7 @@ scripts = [
       (try_end),
     ]),
 
-  #script_warn_player_about_auto_team_balance
+  #script.warn_player_about_auto_team_balance
   # INPUT: none
   # OUTPUT: none
   ("warn_player_about_auto_team_balance",
@@ -5181,7 +5277,7 @@ scripts = [
      (start_presentation, "prsnt_multiplayer_message_2"),
      ]),
 
-  #script_check_team_balance
+  #script.check_team_balance
   # INPUT: none
   # OUTPUT: none
   ("check_team_balance",
@@ -5308,7 +5404,7 @@ scripts = [
      (try_end),
    ]),
 
-  #script_check_creating_ladder_dust_effect
+  #script.check_creating_ladder_dust_effect
   # INPUT: arg1 = instance_id, arg2 = remaining_time
   # OUTPUT: none
   ("check_creating_ladder_dust_effect",
@@ -5392,7 +5488,7 @@ scripts = [
       (try_end),
       ]),
 
-  #script_money_management_after_agent_death
+  #script.money_management_after_agent_death
   # INPUT: arg1 = killer_agent_no, arg2 = dead_agent_no
   # OUTPUT: none
   ("money_management_after_agent_death",
@@ -5466,6 +5562,9 @@ scripts = [
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_duel), #(4/3x) share if current mod is duel
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_team_deathmatch), #(4/3x) share if current mod is team_deathmatch
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_capture_the_flag), #(4/3x) share if current mod is capture the flag
+             #INVASION MODE START
+             (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop), #(4/3x) share if current mod is captain coop
+             #INVASION MODE END
              (eq, "$g_multiplayer_game_type", multiplayer_game_type_headquarters), #(4/3x) share if current mod is headquarters
              (val_mul, ":share_of_dead_agent", 4),
              (val_div, ":share_of_dead_agent", 3),
@@ -5493,6 +5592,9 @@ scripts = [
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_duel), #(4/3x) share if current mod is duel
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_team_deathmatch), #(4/3x) share if current mod is team_deathmatch
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_capture_the_flag), #(4/3x) share if current mod is capture the flag
+             #INVASION MODE START
+             (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop), #(4/3x) share if current mod is captain coop
+             #INVASION MODE END
              (eq, "$g_multiplayer_game_type", multiplayer_game_type_headquarters), #(4/3x) share if current mod is headquarters
              (val_mul, ":killer_agent_standard_money_addition", 4),
              (val_div, ":killer_agent_standard_money_addition", 3),
@@ -5517,6 +5619,9 @@ scripts = [
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_duel), #(4/3x) share if current mod is duel
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_team_deathmatch), #(4/3x) share if current mod is team_deathmatch
              (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_capture_the_flag), #(4/3x) share if current mod is capture the flag
+             #INVASION MODE START
+             (this_or_next|eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop), #(4/3x) share if current mod is captain coop
+             #INVASION MODE END
              (eq, "$g_multiplayer_game_type", multiplayer_game_type_headquarters), #(4/3x) share if current mod is headquarters
              (val_mul, ":share_of_killer_agent", 4),
              (val_div, ":share_of_killer_agent", 3),
@@ -5530,7 +5635,44 @@ scripts = [
            (else_try),
              (val_add, ":player_gold", ":share_of_killer_agent"), #(3/3x) share if current mod is siege
            (try_end),
+           
+           #INVASION MODE START
+    	   (try_begin),
+             (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+             (player_get_gold, ":player_gold", ":player_no"),
+             (store_mul, ":share_of_killer_agent", "$g_multiplayer_ccoop_wave_no", 20),
+             (val_sub, ":share_of_killer_agent", 20),
+             (val_add, ":share_of_killer_agent", multi_killer_captain_coop_add),
+             (val_mul, ":share_of_killer_agent", "$g_multiplayer_battle_earnings_multiplier"),
+             (val_div, ":share_of_killer_agent", 100),
+             (val_add, ":player_gold", ":share_of_killer_agent"),
+    	   (try_end),
+           #INVASION MODE END
+           
            (player_set_gold, ":player_no", ":player_gold", multi_max_gold_that_can_be_stored),
+         #INVASION MODE START
+         (else_try),
+           (agent_get_player_id, ":player_no", ":killer_agent_no"),
+           (eq, ":player_no", -1), #if killer agent is a bot
+           (eq, "$g_multiplayer_is_game_type_captain", 1),
+
+           (agent_get_group, ":agent_group", ":killer_agent_no"),
+           (player_is_active, ":agent_group"),
+
+           (player_get_gold, ":player_gold", ":agent_group"),
+           (try_begin),
+             (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+             (store_mul, ":share_of_killer_agent", "$g_multiplayer_ccoop_wave_no", 20),
+             (val_sub, ":share_of_killer_agent", 20),
+             (val_add, ":share_of_killer_agent", multi_killer_captain_coop_add),
+             (val_mul, ":share_of_killer_agent", "$g_multiplayer_battle_earnings_multiplier"),
+             (val_div, ":share_of_killer_agent", 100),
+             (val_add, ":player_gold", ":share_of_killer_agent"),
+           (else_try),
+             (val_add, ":player_gold", multi_killer_captain_add),
+           (try_end),
+           (player_set_gold, ":agent_group", ":player_gold", multi_max_gold_that_can_be_stored),
+         #INVASION MODE END
          (try_end),
        (try_end),
      (try_end),
@@ -5555,6 +5697,31 @@ scripts = [
        (player_set_gold, ":dead_agent_player_id", ":player_gold"),
      (try_end),
      #new money system addition end          
+     #INVASION MODE START
+     (try_begin),
+       (multiplayer_is_server),
+       #we add gold to player if bot kill enemy
+       #multi_killer_captain_add
+       (eq, "$g_multiplayer_is_game_type_captain", 1),
+       #(store_script_param, ":killer_agent_no", 1),
+       #(store_script_param, ":dead_agent_no", 2),
+       (ge, ":killer_agent_no", 0),
+       (ge, ":dead_agent_no", 0),
+       (agent_is_human, ":killer_agent_no"),
+       (agent_is_non_player, ":killer_agent_no"),
+       (agent_get_group, ":agent_group", ":killer_agent_no"), # get the controlling player of this bot
+       (agent_get_team, ":killer_team", ":killer_agent_no"), 
+       (agent_get_team, ":dead_team", ":dead_agent_no"), 
+       (neq, ":killer_team", ":dead_team"), 
+       (player_is_active, ":agent_group"),
+       (player_get_gold, ":player_gold", ":agent_group"),
+	   (try_begin),
+		 (neq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+		 (val_add, ":player_gold", multi_killer_captain_add),
+	   (try_end),
+	   (player_set_gold, ":agent_group", ":player_gold", multi_max_gold_that_can_be_stored),
+     (try_end), 
+     #INVASION MODE END
      ]),
 
 	("initialize_aristocracy",
@@ -7140,7 +7307,7 @@ scripts = [
 	(call_script, "script_calculate_castle_prosperities_by_using_its_villages"),
     ]),
 	 
-  #script_initialize_all_scene_prop_slots
+  #script.initialize_all_scene_prop_slots
   # INPUT: arg1 = scene_prop_no
   # OUTPUT: none
   ("initialize_all_scene_prop_slots",
@@ -7162,7 +7329,7 @@ scripts = [
      (call_script, "script_initialize_scene_prop_slots", "spr_winch_b"),
     ]),
 
-  #script_initialize_scene_prop_slots
+  #script.initialize_scene_prop_slots
   # INPUT: arg1 = scene_prop_no
   # OUTPUT: none
   ("initialize_scene_prop_slots",
@@ -7178,7 +7345,7 @@ scripts = [
      (try_end),
      ]),
   
-  #script_use_item
+  #script.use_item
   # INPUT: arg1 = agent_id, arg2 = instance_id
   # OUTPUT: none
   ("use_item",
@@ -7411,7 +7578,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_determine_team_flags
+  #script.determine_team_flags
   # INPUT: none
   # OUTPUT: none
   ("determine_team_flags",
@@ -7526,7 +7693,7 @@ scripts = [
    ]),
    
 
-  #script_calculate_flag_move_time
+  #script.calculate_flag_move_time
   # INPUT: arg1 = number_of_total_agents_around_flag, arg2 = dist_between_flag_and_its_pole
   # OUTPUT: reg0 = flag move time
   ("calculate_flag_move_time",
@@ -7593,7 +7760,7 @@ scripts = [
      (val_div, reg0, 10000), #100x for number of players around flag, 100x for number of players in game
      ]),
 
-  #script_move_death_mode_flags_down
+  #script.move_death_mode_flags_down
   # INPUT: none
   # OUTPUT: none
   ("move_death_mode_flags_down",
@@ -7631,7 +7798,7 @@ scripts = [
      (try_end),
    ]),
 
-  #script_move_flag
+  #script.move_flag
   # INPUT: arg1 = shown_flag_id, arg2 = move time in seconds, pos0 = target position
   # OUTPUT: none
   ("move_flag",
@@ -7651,7 +7818,7 @@ scripts = [
      (try_end),
    ]),
 
-  #script_move_headquarters_flags
+  #script.move_headquarters_flags
   # INPUT: arg1 = current_owner, arg2 = number_of_agents_around_flag_team_1, arg3 = number_of_agents_around_flag_team_2
   # OUTPUT: none
   ("move_headquarters_flags",
@@ -7795,7 +7962,7 @@ scripts = [
      (call_script, "script_move_flag", ":shown_flag_id", reg0), #pos0 : target position
      ]),
 
-  #script_set_num_agents_around_flag
+  #script.set_num_agents_around_flag
   # INPUT: arg1 = flag_no, arg2 = owner_code
   # OUTPUT: none
   ("set_num_agents_around_flag",
@@ -7812,7 +7979,7 @@ scripts = [
      (call_script, "script_move_headquarters_flags", ":flag_no", ":number_of_agents_around_flag_team_1", ":number_of_agents_around_flag_team_2"),
   ]),
   
-  #script_change_flag_owner
+  #script.change_flag_owner
   # INPUT: arg1 = flag_no, arg2 = owner_code
   # OUTPUT: none
   ("change_flag_owner",
@@ -7908,7 +8075,7 @@ scripts = [
      (call_script, "script_move_headquarters_flags", ":flag_no", ":number_of_agents_around_flag_team_1", ":number_of_agents_around_flag_team_2"),
    ]),
 
-  #script_move_object_to_nearest_entry_point
+  #script.move_object_to_nearest_entry_point
   # INPUT: none
   # OUTPUT: none
   ("move_object_to_nearest_entry_point",
@@ -7942,7 +8109,7 @@ scripts = [
    ]),
 
 
-  #script_multiplayer_server_on_agent_spawn_common
+  #script.multiplayer_server_on_agent_spawn_common
   # INPUT: arg1 = agent_no
   # OUTPUT: none
   ("multiplayer_server_on_agent_spawn_common",
@@ -7952,10 +8119,20 @@ scripts = [
      (try_begin),
        (agent_is_non_player, ":agent_no"),
        (assign, "$g_multiplayer_ready_for_spawning_agent", 1),
+     #INVASION MODE START
+	 (else_try),
+	   # if player is spawning and can have squad
+	   (call_script, "script_cf_multiplayer_can_buy_squad"),
+	   # order squad to follow the player
+	   (agent_get_player_id, ":player_team_no", ":agent_no"),
+	   (set_show_messages, 0),
+	   (team_give_order, ":player_team_no", grc_everyone, mordr_follow),
+	   (set_show_messages, 1),
+     #INVASION MODE END
      (try_end),
      ]),
 
-  #script_multiplayer_server_player_joined_common
+  #script.multiplayer_server_player_joined_common
   # INPUT: arg1 = player_no
   # OUTPUT: none
   ("multiplayer_server_player_joined_common",
@@ -7983,7 +8160,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_multiplayer_server_before_mission_start_common
+  #script.multiplayer_server_before_mission_start_common
   # INPUT: none
   # OUTPUT: none
   ("multiplayer_server_before_mission_start_common",
@@ -7991,6 +8168,15 @@ scripts = [
      (try_begin),
        (scene_allows_mounted_units),
        (assign, "$g_horses_are_avaliable", 1),
+       #INVASION MODE START
+       (try_begin),
+         (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+         (store_current_scene, ":cur_scene"),
+         (scene_get_slot, "$g_ccoop_disallow_horses", ":cur_scene", slot_scene_ccoop_disallow_horses),
+         (eq, "$g_ccoop_disallow_horses", 1),
+         (assign, "$g_horses_are_avaliable", 0),
+       (try_end),
+       #INVASION MODE END
      (else_try),
        (assign, "$g_horses_are_avaliable", 0),
      (try_end),
@@ -8007,9 +8193,14 @@ scripts = [
        (player_set_gold, ":player_no", ":initial_gold"),
        (player_set_slot, ":player_no", slot_player_first_spawn, 1), #not required in siege, bt, fd
      (try_end),
+     
+     #INVASION MODE START
+	 (call_script, "script_multiplayer_set_g_multiplayer_is_game_type_captain"),
+     #INVASION MODE END
+
      ]),
 
-  #script_multiplayer_server_on_agent_killed_or_wounded_common
+  #script.multiplayer_server_on_agent_killed_or_wounded_common
   # INPUT: arg1 = dead_agent_no, arg2 = killer_agent_no
   # OUTPUT: none
   ("multiplayer_server_on_agent_killed_or_wounded_common",
@@ -8093,13 +8284,32 @@ scripts = [
          (player_set_score, ":killer_agent_player_id", ":killer_agent_player_score"),
        (try_end),
      (try_end),
+     
+     #INVASION MODE START
+	 (try_begin),
+	   # if its captain mode and player is dead
+	   (eq, "$g_multiplayer_is_game_type_captain", 1),
+	   (ge, ":dead_agent_no", 0),
+	   (neg|agent_is_non_player, ":dead_agent_no"),
+	   # then reset his squad's orders
+	   (agent_get_team, ":dead_team_no", ":dead_agent_no"),
+	   (agent_get_player_id, ":dead_player_no", ":dead_agent_no"),
+	   (player_is_active, ":dead_player_no"),
+	   (set_show_messages, 0),
+	   (team_give_order, ":dead_player_no", grc_everyone, mordr_charge),
+	   (team_give_order, ":dead_player_no", grc_everyone, mordr_fire_at_will),
+	   (team_give_order, ":dead_player_no", grc_everyone, mordr_use_any_weapon),
+	   #(team_give_order, ":dead_player_no", grc_everyone, mordr_form_2_row),
+	   (set_show_messages, 1),
+	 (try_end),
+     #INVASION MODE END
 
      (call_script, "script_add_kill_death_counts", ":killer_agent_no", ":dead_agent_no"),
      #money management
      (call_script, "script_money_management_after_agent_death", ":killer_agent_no", ":dead_agent_no"),
      ]),
 
-  #script_multiplayer_close_gate_if_it_is_open
+  #script.multiplayer_close_gate_if_it_is_open
   # INPUT: none
   # OUTPUT: none
   ("multiplayer_close_gate_if_it_is_open",
@@ -8114,7 +8324,7 @@ scripts = [
      (try_end),
    ]),  
 
-  #script_multiplayer_move_moveable_objects_initial_positions
+  #script.multiplayer_move_moveable_objects_initial_positions
   # INPUT: none
   # OUTPUT: none
   ("multiplayer_move_moveable_objects_initial_positions",
@@ -8126,7 +8336,7 @@ scripts = [
      (call_script, "script_move_object_to_nearest_entry_point", "spr_siege_ladder_move_14m"),
    ]),
 
-  #script_move_belfries_to_their_first_entry_point
+  #script.move_belfries_to_their_first_entry_point
   # INPUT: none
   # OUTPUT: none
   ("move_belfries_to_their_first_entry_point",
@@ -8305,7 +8515,7 @@ scripts = [
     (try_end),
     ]),
 
-  #script_team_set_score
+  #script.team_set_score
   # INPUT: arg1 = team_no, arg2 = score
   # OUTPUT: none
   ("team_set_score",
@@ -8316,7 +8526,7 @@ scripts = [
      (team_set_score, ":team_no", ":score"),
    ]),
 
-  #script_player_set_score
+  #script.player_set_score
   # INPUT: arg1 = player_no, arg2 = score
   # OUTPUT: none
   ("player_set_score",
@@ -8327,7 +8537,7 @@ scripts = [
      (player_set_score, ":player_no", ":score"),
    ]),
 
-  #script_player_set_kill_count
+  #script.player_set_kill_count
   # INPUT: arg1 = player_no, arg2 = score
   # OUTPUT: none
   ("player_set_kill_count",
@@ -8338,7 +8548,7 @@ scripts = [
      (player_set_kill_count, ":player_no", ":score"),
    ]),
 
-  #script_player_set_death_count
+  #script.player_set_death_count
   # INPUT: arg1 = player_no, arg2 = score
   # OUTPUT: none
   ("player_set_death_count",
@@ -8349,7 +8559,7 @@ scripts = [
      (player_set_death_count, ":player_no", ":score"),
    ]),
 
-  #script_set_attached_scene_prop
+  #script.set_attached_scene_prop
   # INPUT: arg1 = agent_id, arg2 = flag_id
   # OUTPUT: none
   ("set_attached_scene_prop",
@@ -8379,7 +8589,7 @@ scripts = [
      (agent_set_attached_scene_prop_z, ":agent_id", 50),
    ]),  
 
-  #script_set_team_flag_situation
+  #script.set_team_flag_situation
   # INPUT: arg1 = team_no, arg2 = score
   # OUTPUT: none
   ("set_team_flag_situation",
@@ -8390,7 +8600,7 @@ scripts = [
      (team_set_slot, ":team_no", slot_team_flag_situation, ":flag_situation"),
    ]),
 
-  #script_start_death_mode
+  #script.start_death_mode
   # INPUT: none
   # OUTPUT: none
   ("start_death_mode",
@@ -8399,7 +8609,7 @@ scripts = [
      (start_presentation, "prsnt_multiplayer_message_1"),
    ]),
 
-  #script_calculate_new_death_waiting_time_at_death_mod
+  #script.calculate_new_death_waiting_time_at_death_mod
   # INPUT: none
   # OUTPUT: none
   ("calculate_new_death_waiting_time_at_death_mod",
@@ -8421,7 +8631,7 @@ scripts = [
      (store_mission_timer_a, "$g_death_mode_part_1_start_time"),
    ]),
   
-  #script_calculate_number_of_targets_destroyed
+  #script.calculate_number_of_targets_destroyed
   # INPUT: none
   # OUTPUT: none
 
@@ -8449,7 +8659,7 @@ scripts = [
      (try_end),    
      ]),
 
-  #script_initialize_objects
+  #script.initialize_objects
   # INPUT: none
   # OUTPUT: none
   ("initialize_objects",
@@ -8588,7 +8798,7 @@ scripts = [
      (try_end),     
      ]),
   
-  #script_initialize_objects_clients
+  #script.initialize_objects_clients
   # INPUT: none
   # OUTPUT: none
   ("initialize_objects_clients",
@@ -8697,7 +8907,7 @@ scripts = [
      (try_end),     
      ]),
 
-  #script_show_multiplayer_message
+  #script.show_multiplayer_message
   # INPUT: arg1 = multiplayer_message_type
   # OUTPUT: none
   ("show_multiplayer_message",
@@ -8791,7 +9001,7 @@ scripts = [
     (try_end),
     ]),
 
-  #script_get_headquarters_scores
+  #script.get_headquarters_scores
   # INPUT: none
   # OUTPUT: reg0 = team_1_num_flags, reg1 = team_2_num_flags
   ("get_headquarters_scores",
@@ -8814,7 +9024,7 @@ scripts = [
      ]),
 
 
-  #script_draw_this_round
+  #script.draw_this_round
   # INPUT: arg1 = value
   ("draw_this_round",
    [
@@ -8907,7 +9117,7 @@ scripts = [
     #LAST_MAN_STANDING achievement end
     ]),   
     
-  #script_check_achievement_last_man_standing
+  #script.check_achievement_last_man_standing
   #INPUT: arg1 = value
   ("check_achievement_last_man_standing",
    [
@@ -8930,7 +9140,7 @@ scripts = [
     #LAST_MAN_STANDING achievement end
     ]),
 
-  #script_find_most_suitable_bot_to_control
+  #script.find_most_suitable_bot_to_control
   # INPUT: arg1 = value
   ("find_most_suitable_bot_to_control",
    [
@@ -9012,7 +9222,7 @@ scripts = [
       (assign, reg0, ":most_suitable_bot"),
     ]),
 
-  #script_game_receive_url_response
+  #script.game_receive_url_response
   #response format should be like this:
   #  [a number or a string]|[another number or a string]|[yet another number or a string] ...
   # here is an example response:
@@ -9040,7 +9250,7 @@ scripts = [
     (assign, reg0, "$cheat_mode"),
   ]),    
   
-  #script_game_receive_network_message
+  #script.game_receive_network_message
   # This script is called from the game engine when a new network message is received.
   # INPUT: arg1 = player_no, arg2 = event_type, arg3 = value, arg4 = value_2, arg5 = value_3, arg6 = value_4
   ("game_receive_network_message",
@@ -9169,10 +9379,18 @@ scripts = [
           (eq, ":is_valid", 1),
           #condition checks are done
           (assign, "$g_multiplayer_game_type", ":value_2"),
+          #INVASION MODE START
+		  (call_script, "script_multiplayer_set_g_multiplayer_is_game_type_captain"),
+          #INVASION MODE END
           (assign, "$g_multiplayer_selected_map", ":value"),
           (team_set_faction, 0, "$g_multiplayer_next_team_1_faction"),
           (team_set_faction, 1, "$g_multiplayer_next_team_2_faction"),
           (call_script, "script_game_multiplayer_get_game_type_mission_template", "$g_multiplayer_game_type"),
+          (try_begin),
+            (neq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+            (neg|is_between, "$g_multiplayer_next_team_2_faction", kingdoms_begin, kingdoms_end),
+            (team_set_faction, 1, "fac_kingdom_1"),
+          (try_end),
           (start_multiplayer_mission, reg0, "$g_multiplayer_selected_map", 1),
         (try_end),
       (else_try),
@@ -9183,6 +9401,10 @@ scripts = [
           (player_is_admin, ":player_no"),
           (is_between, ":value", 2, 201),
           #condition checks are done
+          (try_begin),
+            (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+            (val_min, ":value", ccoop_max_num_players),
+          (try_end),
           (server_set_max_num_players, ":value"),      
         (try_end),
       (else_try),
@@ -9215,7 +9437,7 @@ scripts = [
           (player_is_admin, ":player_no"),
           (is_between, ":value", 0, 2),
           #condition checks are done
-          (server_set_anti_cheat, ":value"),
+          (server_set_anti_cheat, 0),
         (try_end),
       (else_try),
         (eq, ":event_type", multiplayer_event_admin_set_friendly_fire),
@@ -9458,7 +9680,7 @@ scripts = [
           #validity check
           (player_is_admin, ":player_no"),
           (is_between, ":value", 1, 3),
-          (is_between, ":value_2", npc_kingdoms_begin, npc_kingdoms_end),
+          
 ##          (assign, ":is_valid", 0),
 ##          (try_begin),
 ##            (eq, ":value", 1),
@@ -9472,8 +9694,15 @@ scripts = [
           #condition checks are done
           (try_begin),
             (eq, ":value", 1),
+            (is_between, ":value_2", npc_kingdoms_begin, npc_kingdoms_end),
             (assign, "$g_multiplayer_next_team_1_faction", ":value_2"),
           (else_try),
+          #INVASION MODE START
+            (this_or_next|is_between, ":value_2", npc_kingdoms_begin, npc_kingdoms_end),
+            (this_or_next|eq, ":value_2", "fac_outlaws"),
+            (eq, ":value_2", "fac_ccoop_all_stars"),
+          #INVASION MODE END
+            
             (assign, "$g_multiplayer_next_team_2_faction", ":value_2"),
           (try_end),
         (try_end),
@@ -9516,6 +9745,9 @@ scripts = [
           (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_battle_earnings_multiplier, "$g_multiplayer_battle_earnings_multiplier"),
           (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_round_earnings_multiplier, "$g_multiplayer_round_earnings_multiplier"),
           (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_valid_vote_ratio, "$g_multiplayer_valid_vote_ratio"),
+          #INVASION MODE START
+		  (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_ccoop_difficulty, "$g_multiplayer_ccoop_difficulty"),			  
+          #INVASION MODE END
           (str_store_server_name, s0),
           (multiplayer_send_string_to_player, ":player_no", multiplayer_event_return_server_name, s0),
           (multiplayer_send_message_to_player, ":player_no", multiplayer_event_return_open_game_rules),
@@ -9566,6 +9798,9 @@ scripts = [
           (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_round_earnings_multiplier, "$g_multiplayer_round_earnings_multiplier"),
           (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_valid_vote_ratio, "$g_multiplayer_valid_vote_ratio"),
           (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_max_num_bots, "$g_multiplayer_max_num_bots"),
+          #INVASION MODE START
+		  (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_ccoop_difficulty, "$g_multiplayer_ccoop_difficulty"),			  
+          #INVASION MODE END
           (str_store_server_name, s0),
           (multiplayer_send_string_to_player, ":player_no", multiplayer_event_return_server_name, s0),
           (str_store_server_password, s0),
@@ -9916,6 +10151,251 @@ scripts = [
           #condition checks are done
           (assign, "$g_multiplayer_disallow_ranged_weapons", ":value"),
         (try_end),
+      #INVASION MODE START
+	  (else_try),
+	  
+	    # MCA  new events			
+			(eq, ":event_type", multiplayer_event_other_events),
+			(store_script_param, ":value", 3),			
+			(try_begin),
+				(eq, ":value", multiplayer_event_other_event_set_bot_purchase),
+				(store_script_param, ":bot_slot", 4),
+				(store_script_param, ":bot_id", 5),
+                #(player_set_slot, ":player_no", ":bot_slot", ":bot_id"),
+				(try_begin),
+					(eq, "$g_multiplayer_is_game_type_captain", 1),
+                    (try_begin),
+                      (is_between, ":bot_slot", slot_player_companion_ids_begin, slot_player_companion_ids_end),
+                      (is_between, ":bot_id", multiplayer_coop_companion_equipment_sets_begin, multiplayer_coop_companion_first_equipment_sets_end),
+                      (player_slot_eq, ":player_no", slot_player_companion_ids_locked, 0),
+					  (player_set_slot, ":player_no", ":bot_slot", ":bot_id"),
+                    (else_try),
+                      (is_between, ":bot_slot", slot_player_companion_classes_begin, slot_player_companion_classes_end),
+                      (store_troop_faction, ":troop_faction", ":bot_id"),
+                      (team_get_faction, ":team_0_faction", 0), 
+                      (store_sub, ":bot_id_i", ":bot_slot", 2),
+                      (player_get_slot, ":companion_no", ":player_no", ":bot_id_i"),
+                      (try_begin),
+                        (eq, ":companion_no", ":bot_id"),
+					    (player_set_slot, ":player_no", ":bot_slot", ":bot_id"),
+                      (else_try),
+                        (eq, ":team_0_faction", ":troop_faction"),
+                        (store_character_level, ":bot_level", ":bot_id"), 
+                        (eq, ":bot_level", 4), 
+					    (player_set_slot, ":player_no", ":bot_slot", ":bot_id"),
+                      (try_end),
+                    (try_end),
+				(try_end),	  
+                #(try_begin),
+                #  (eq, ":bot_slot", slot_player_companion_classes_begin + 1),
+                #  (try_for_range, ":cur_slot", slot_player_companion_ids_begin, slot_player_companion_classes_end),
+                #    (assign, reg1, ":cur_slot"),
+                #    (player_get_slot, reg2, ":player_no", ":cur_slot"),
+                #    (multiplayer_send_string_to_player, ":player_no", multiplayer_event_show_server_message, "@{!}slot: {reg1}   value {reg2}"),
+				#  (try_end),	  
+				#(try_end),	  
+				
+			######## WAVE Mode Events
+            (else_try),
+              (eq, ":value", multiplayer_event_admin_set_ccoop_difficulty),
+              (try_begin),
+                (store_script_param, ":difficulty", 4),
+                #validity check
+                (player_is_admin, ":player_no"),
+                (is_between, ":difficulty", 0, 3),
+                #condition checks are done
+                (assign, "$g_multiplayer_ccoop_difficulty", ":difficulty"),
+                (assign, reg0, ":difficulty"),
+                #(display_message, "@storing difficulty as: {reg0}"),
+              (try_end),
+			(else_try),
+              (eq, ":value", multiplayer_event_coop_send_drop_assignment_to_server),
+              (store_script_param, ":value", 4),
+              (try_begin),
+                (ge, ":value", 0),
+                (call_script, "script_cf_coop_give_item_to_assigned_group_member", ":player_no", ":value"),
+              (else_try),
+                (player_set_slot, ":player_no", slot_player_coop_dropped_item, -1),
+              (try_end),
+			(else_try),
+                (neg|multiplayer_is_dedicated_server),
+                (try_begin),
+    				(this_or_next|eq, ":value", multiplayer_event_other_event_ccoop_count_down_visible),
+    				(eq, ":value", multiplayer_event_other_event_ccoop_count_down_invisible),
+    				(store_script_param, "$g_multiplayer_ccoop_enemy_respawn_secs", 4),								
+    				(store_script_param, "$g_multiplayer_ccoop_wave_no", 5),
+    				
+    				
+    				(assign, "$g_multiplayer_ccoop_enable_count_down", 1),
+    				
+    				(try_begin),
+    					(eq, ":value", multiplayer_event_other_event_ccoop_count_down_visible),
+    					(assign, ":show_presentation", 1),
+    				(else_try),
+    					(eq, ":value", multiplayer_event_other_event_ccoop_count_down_invisible),
+    					(assign, ":show_presentation", 0),
+    				(try_end),
+    				
+    				(try_begin),
+    					(gt, ":show_presentation", 0),
+    					(store_mission_timer_a, "$g_multiplayer_ccoop_next_wave_start_time"),
+    					(val_add, "$g_multiplayer_ccoop_next_wave_start_time", "$g_multiplayer_ccoop_enemy_respawn_secs"),
+    					(start_presentation, "prsnt_multiplayer_ccoop_next_wave_time_counter"),
+    				(try_end),	
+    				
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_event_unequip_item),		
+                    (try_begin),
+                      (neg|multiplayer_is_server),
+    				  (store_script_param, ":player_agent", 4),
+    				  (store_script_param, ":agent_item", 5),
+    				  (store_script_param, ":item_slot", 6),				
+    				  (agent_is_active, ":player_agent"),
+    				  (agent_is_human, ":player_agent"),
+    				  (agent_is_alive, ":player_agent"),
+    				  (ge, ":agent_item", 0),
+    				  (agent_unequip_item, ":player_agent", ":agent_item", ":item_slot"),
+                    (try_end),
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_event_equip_item),	
+                    (try_begin),
+                      (neg|multiplayer_is_server),
+    				  (store_script_param, ":player_agent", 4),
+    				  (store_script_param, ":item_id", 5),				
+    				  (agent_is_active, ":player_agent"),
+    				  (agent_is_human, ":player_agent"),
+    				  (agent_is_alive, ":player_agent"),
+    				  (ge, ":item_id", 0),
+    				  (agent_equip_item, ":player_agent", ":item_id"),
+                    (try_end),
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_spawn_prison_cart),
+    				(store_script_param, "$g_prison_cart_point", 4),
+    				(store_script_param, ":door_hit_points", 5),
+    				
+    				
+    				(call_script, "script_multiplayer_ccoop_set_prison_cart_visibility", 1),
+    				(scene_prop_get_instance, ":prison_cart_door_right", "spr_prison_cart_door_right", 0),
+    				(scene_prop_set_hit_points, ":prison_cart_door_right", ":door_hit_points"),
+    				(scene_prop_get_instance, ":prison_cart_door_left", "spr_prison_cart_door_left", 0),
+    				(scene_prop_set_hit_points, ":prison_cart_door_left", ":door_hit_points"),
+    				
+    				# display prison cart hint message to alive players
+    				(try_begin),
+    					(get_player_agent_no, ":player_agent"),
+    					(ge, ":player_agent", 0),
+    					(display_message, "str_prison_cart_hint"),
+    				(try_end),
+    				
+    				(start_presentation, "prsnt_multiplayer_ccoop_next_wave_time_counter"), # to display ask for help to respawn hint
+    				
+    			(else_try),			
+    				(eq, ":value", multiplayer_event_other_destroy_prison_cart),
+    								
+    				(call_script, "script_multiplayer_ccoop_set_prison_cart_visibility", 0),
+    				
+    				# animate doors
+    				(scene_prop_get_instance, ":prison_cart_door_left", "spr_prison_cart_door_left", 0),
+    				(scene_prop_get_instance, ":prison_cart_door_right", "spr_prison_cart_door_right", 0),
+    				
+    				(store_random_in_range, ":left_angle", 35, 80),
+    				(store_random_in_range, ":right_angle", -80, -35),
+    				(store_random_in_range, ":left_time", 100, 350),
+    				(store_random_in_range, ":right_time", 100, 350),
+    				
+    				(prop_instance_get_position, pos1, ":prison_cart_door_left"),
+    				(position_rotate_z, pos1, ":left_angle", 1),
+    				(prop_instance_animate_to_position, ":prison_cart_door_left", pos1, ":left_time"),
+    				
+    				(prop_instance_get_position, pos1, ":prison_cart_door_right"),
+    				(position_rotate_z, pos1, ":right_angle", 1),
+    				(prop_instance_animate_to_position, ":prison_cart_door_right", pos1, ":right_time"),
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_event_ccoop_update_spawn_data_1),
+    				(store_script_param, ":data1", 4),
+    				(store_script_param, ":data2", 5),
+    				(store_script_param, ":data3", 6),
+    				
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin, ":data1"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 1, ":data2"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 2, ":data3"),
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_event_ccoop_update_spawn_data_2),
+    				(store_script_param, ":data1", 4),
+    				(store_script_param, ":data2", 5),
+    				(store_script_param, ":data3", 6),
+    				
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 3, ":data1"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 4, ":data2"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 5, ":data3"),
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_event_ccoop_update_spawn_data_3),
+    				(store_script_param, ":data1", 4),
+    				(store_script_param, ":data2", 5),
+    				(store_script_param, ":data3", 6),
+    				
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 6, ":data1"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 7, ":data2"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 8, ":data3"),
+    			
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_event_ccoop_update_spawn_data_4),
+    				(store_script_param, ":data1", 4),
+    				(store_script_param, ":data2", 5),
+    				(store_script_param, ":data3", 6),
+    				
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 9, ":data1"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 10, ":data2"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 11, ":data3"),
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_event_ccoop_update_spawn_data_5),
+    				(store_script_param, ":data1", 4),
+    				(store_script_param, ":data2", 5),
+    				(store_script_param, ":data3", 6),
+    				
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 12, ":data1"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 13, ":data2"),
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 14, ":data3"),
+    			(else_try),
+    				(eq, ":value", multiplayer_event_other_event_ccoop_update_spawn_data_6),
+    				(store_script_param, ":data1", 4),				
+    				
+    				(troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 15, ":data1"),
+    
+    				(start_presentation, "prsnt_multiplayer_flag_projection_display_ccoop_wave"),
+    			(else_try),
+                  (eq, ":value", multiplayer_event_coop_set_agent_team_and_group),
+                  (store_script_param, ":agent_no", 4),
+                  (store_script_param, ":team_no", 5),
+                  (store_script_param, ":group_no", 6),
+                  (try_begin),
+                    (agent_is_active, ":agent_no"),
+                    (agent_is_alive, ":agent_no"),
+                    (agent_is_non_player, ":agent_no"),
+                    (is_between, ":team_no", 0, 2),
+                    (agent_set_team, ":agent_no", ":team_no"),
+                    (player_is_active, ":group_no"),
+                    (agent_set_group, ":agent_no", ":group_no"),
+                  (try_end),
+    			(else_try),
+                  (eq, ":value", multiplayer_event_other_event_ccoop_lock_companions),
+                  (store_script_param, ":my_player_spawn_status", 4),
+                  (multiplayer_get_my_player, ":my_player_no"),
+                  (player_set_slot, ":my_player_no", slot_player_companion_ids_locked, ":my_player_spawn_status"),
+    			(else_try),
+                  (eq, ":value", multiplayer_event_other_events_change_companion_level),
+                  (store_script_param, ":level_slot", 4),
+                  (store_script_param, ":level_value", 5),
+                  #validity check
+                  (is_between, ":level_value", 0, 4),
+                  (is_between, ":level_slot", slot_player_companion_levels_begin, slot_player_companion_levels_end),
+                  #validity check done
+                  (multiplayer_get_my_player, ":my_player_no"),
+                  (player_set_slot, ":my_player_no", ":level_slot", ":level_value"),
+			    (try_end),
+			(try_end),
+			#INVASION MODE END
+
       (else_try),
         ###############
         #CLIENT EVENTS#
@@ -9956,7 +10436,7 @@ scripts = [
         (else_try),
           (eq, ":event_type", multiplayer_event_return_anti_cheat),
           (store_script_param, ":value", 3),
-          (server_set_anti_cheat, ":value"),
+          (server_set_anti_cheat, 0),
         (else_try),
           (eq, ":event_type", multiplayer_event_return_friendly_fire),
           (store_script_param, ":value", 3),
@@ -10046,6 +10526,9 @@ scripts = [
           (eq, ":event_type", multiplayer_event_return_game_type),
           (store_script_param, ":value", 3),
           (assign, "$g_multiplayer_game_type", ":value"),
+          #INVASION MODE START
+		  (call_script, "script_multiplayer_set_g_multiplayer_is_game_type_captain"),
+          #INVASION MODE END
         (else_try),
           (eq, ":event_type", multiplayer_event_return_valid_vote_ratio),
           (store_script_param, ":value", 3),
@@ -10183,6 +10666,25 @@ scripts = [
           (store_script_param, ":value_2", 4),
           (call_script, "script_use_item", ":value", ":value_2"),
         (else_try),
+        #INVASION MODE START
+          (eq, ":event_type", multiplayer_event_coop_chest_opened),
+          (store_script_param, ":value", 3),
+          (store_script_param, ":value_2", 4),
+          (try_begin),
+            (is_between, ":value", slot_player_coop_opened_chests_begin, slot_player_coop_opened_chests_end),
+            (multiplayer_get_my_player, ":player_no"),
+            (player_set_slot, ":player_no", ":value", ":value_2"),
+            #(display_message, "@script called"), #debug
+          (try_end),
+        (else_try),
+          (eq, ":event_type", multiplayer_event_coop_drop_item),
+          (store_script_param, ":value", 3),
+          (store_script_param, ":value_2", 4),
+          (store_script_param, ":value_3", 5),
+          (call_script, "script_coop_drop_item", ":value", ":value_2", ":value_3"),
+          #(display_message, "@script called"), #debug
+        (else_try),
+        #INVASION MODE END
           (eq, ":event_type", multiplayer_event_set_scene_prop_open_or_close),
           (store_script_param, ":instance_id", 3),       
         
@@ -10362,11 +10864,53 @@ scripts = [
         (else_try),
           (eq, ":event_type", multiplayer_event_show_server_message),
           (display_message, "str_server_s0", 0xFFFF6666),
+		#INVASION MODE START
+		(else_try), 
+		  (eq, ":event_type", multiplayer_event_return_set_bot_selection),
+		  (store_script_param, ":slot_no", 3),
+		  (store_script_param, ":value", 4),
+          (is_between, ":slot_no", slot_player_bot_type_1_wanted, slot_player_bot_type_4_wanted + 1),
+          (is_between, ":value", 0, 2),
+		  (player_set_slot, ":player_no", ":slot_no", ":value"),
+		(else_try), 
+          (eq, ":event_type", multiplayer_event_return_ccoop_difficulty),
+          (store_script_param, ":value", 3),
+          (assign, reg0, ":value"),
+          #(display_message, "@returning difficulty as: {reg0}"),
+		  (assign, "$g_multiplayer_ccoop_difficulty", ":value"),			  
+        (else_try),
+          (eq, ":event_type", multiplayer_event_ccoop_victory_message),
+          (store_script_param, "$g_multiplayer_ccoop_difficulty_string_i", 3),
+		  (start_presentation, "prsnt_multiplayer_ccoop_victory_message"),			  
+        (else_try),
+          (eq, ":event_type", multiplayer_event_ccoop_return_of_the_king),
+          (store_script_param, "$g_ccoop_king_troop", 3),
+        (else_try),
+          (eq, ":event_type", multiplayer_event_return_sound_at_pos),
+          (store_script_param, ":xvalue", 3),
+          (store_script_param, ":yvalue", 4),
+          (store_script_param, ":zvalue", 5),
+          (store_script_param, ":sound_id", 6),
+          
+          (try_begin),
+            (is_between, ":sound_id", 0, "snd_sounds_end"), # Valid sound
+            
+            (set_fixed_point_multiplier, 100),
+            (init_position, pos1),
+            (position_set_x, pos1, ":xvalue"),
+            (position_set_y, pos1, ":yvalue"),
+            (position_set_z, pos1, ":zvalue"),
+            
+            (play_sound_at_position, ":sound_id", pos1),
+          (try_end),
+        #INVASION MODE END
         (try_end),
+      #INVASION MODE START
       (try_end),
+      #INVASION MODE END
      ]),
 
-  # script_cf_multiplayer_evaluate_poll
+  # script.cf_multiplayer_evaluate_poll
   # Input: none
   # Output: none (can fail)
   ("cf_multiplayer_evaluate_poll",
@@ -10422,7 +10966,7 @@ scripts = [
      (eq, ":result", 1),
      ]),
 
-  # script_multiplayer_accept_duel
+  # script.multiplayer_accept_duel
   # Input: arg1 = agent_no, arg2 = agent_no_offerer
   # Output: none
   ("multiplayer_accept_duel",
@@ -10481,7 +11025,7 @@ scripts = [
      (agent_set_slot, ":agent_no_offerer", slot_agent_duel_start_time, ":mission_timer"),
      ]),
 
-  # script_game_get_multiplayer_server_option_for_mission_template
+  # script.game_get_multiplayer_server_option_for_mission_template
   # Input: arg1 = mission_template_id, arg2 = option_index
   # Output: trigger_result = 1 for option available, 0 for not available
   # reg0 = option_value
@@ -10613,7 +11157,7 @@ scripts = [
      (try_end),     
      ]),
 
-  # script_game_multiplayer_server_option_for_mission_template_to_string
+  # script.game_multiplayer_server_option_for_mission_template_to_string
   # Input: arg1 = mission_template_id, arg2 = option_index, arg3 = option_value
   # Output: s0 = option_text
   ("game_multiplayer_server_option_for_mission_template_to_string",
@@ -10823,7 +11367,7 @@ scripts = [
      (try_end),
      ]),
 
-  # script_cf_multiplayer_team_is_available
+  # script.cf_multiplayer_team_is_available
   # Input: arg1 = player_no, arg2 = team_no
   # Output: none, true or false 
   ("cf_multiplayer_team_is_available",
@@ -10832,6 +11376,18 @@ scripts = [
      (store_script_param, ":team_no", 2),
      (assign, ":continue_change_team", 1),
      (try_begin),
+     #INVASION MODE START
+	   # second faction is always disabled in captain coop
+	   (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+	   (eq, ":team_no", 1),
+	   (assign, ":continue_change_team", 0),
+	 (else_try),
+	   # first faction is always available in captain coop
+	   (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+	   (eq, ":team_no", 0),
+	   (assign, ":continue_change_team", 1),
+     (else_try),
+     #INVASION MODE END
        (neq, "$g_multiplayer_game_type", multiplayer_game_type_deathmatch),
        (neq, "$g_multiplayer_game_type", multiplayer_game_type_duel),
        (is_between, ":team_no", 0, multi_team_spectator),
@@ -10876,7 +11432,7 @@ scripts = [
      (eq, ":continue_change_team", 1),
      ]),
 
-  # script_find_number_of_agents_constant
+  # script.find_number_of_agents_constant
   # Input: none
   # Output: reg0 = 100xconstant (100..500)
   ("find_number_of_agents_constant",
@@ -10923,7 +11479,7 @@ scripts = [
      (try_end),
      ]),
 
-  # script_game_multiplayer_event_duel_offered
+  # script.game_multiplayer_event_duel_offered
   # Input: arg1 = agent_no
   # Output: none
   ("game_multiplayer_event_duel_offered",
@@ -10947,7 +11503,7 @@ scripts = [
      (try_end),
      ]),
 	 
-  # script_game_get_multiplayer_game_type_enum
+  # script.game_get_multiplayer_game_type_enum
   # Input: none
   # Output: reg0:first type, reg1:type count
   ("game_get_multiplayer_game_type_enum",
@@ -10956,7 +11512,7 @@ scripts = [
 	 (assign, reg1, multiplayer_num_game_types),
 	 ]),
 
-  # script_game_multiplayer_get_game_type_mission_template
+  # script.game_multiplayer_get_game_type_mission_template
   # Input: arg1 = game_type
   # Output: mission_template 
   ("game_multiplayer_get_game_type_mission_template",
@@ -10987,11 +11543,16 @@ scripts = [
      (else_try),
        (eq, ":game_type", multiplayer_game_type_duel),
        (assign, ":selected_mt", "mt_multiplayer_duel"),
+     #INVASION MODE START
+     (else_try),
+       (eq, ":game_type", multiplayer_game_type_captain_coop),
+       (assign, ":selected_mt", "mt_multiplayer_ccoop"),
+     #INVASION MODE END
      (try_end),
      (assign, reg0, ":selected_mt"),
      ]),
 
-  # script_multiplayer_get_mission_template_game_type
+  # script.multiplayer_get_mission_template_game_type
   # Input: arg1 = mission_template_no
   # Output: game_type 
   ("multiplayer_get_mission_template_game_type",
@@ -11022,12 +11583,17 @@ scripts = [
      (else_try),
        (eq, ":mission_template_no", "mt_multiplayer_duel"),
        (assign, ":game_type", multiplayer_game_type_duel),
+     #INVASION MODE START
+	 (else_try),
+       (eq, ":mission_template_no", "mt_multiplayer_ccoop"),
+       (assign, ":game_type", multiplayer_game_type_captain_coop),
+     #INVASION MODE END
      (try_end),
      (assign, reg0, ":game_type"),
      ]),
 
 
-  # script_multiplayer_fill_available_factions_combo_button
+  # script.multiplayer_fill_available_factions_combo_button
   # Input: arg1 = overlay_id, arg2 = selected_faction_no, arg3 = opposite_team_selected_faction_no
   # Output: none 
   ("multiplayer_fill_available_factions_combo_button",
@@ -11053,12 +11619,38 @@ scripts = [
        (str_store_faction_name, s0, ":cur_faction"),
        (overlay_add_item, ":overlay_id", s0),
      (try_end),
-     (val_sub, ":selected_faction_no", "fac_kingdom_1"),
-     (overlay_set_val, ":overlay_id", ":selected_faction_no"),
+     #INVASION MODE START
+     (try_begin),
+       (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+       (eq, ":overlay_id", "$g_presentation_obj_admin_panel_12"),
+       (str_store_faction_name, s0, "fac_outlaws"),
+       (overlay_add_item, ":overlay_id", s0),
+       (str_store_faction_name, s0, "fac_ccoop_all_stars"),
+       (overlay_add_item, ":overlay_id", s0),
+       (try_begin),
+         (eq, ":selected_faction_no", "fac_outlaws"),
+         (overlay_set_val, ":overlay_id", 6),
+       (else_try),
+         (eq, ":selected_faction_no", "fac_ccoop_all_stars"),
+         (overlay_set_val, ":overlay_id", 7),
+       (else_try),
+         (val_sub, ":selected_faction_no", "fac_kingdom_1"),
+         (overlay_set_val, ":overlay_id", ":selected_faction_no"),
+       (try_end),
+     (else_try),
+       (try_begin),
+         (gt, ":selected_faction_no", kingdoms_end),
+         (overlay_set_val, ":overlay_id", 1),
+       (else_try),
+         (val_sub, ":selected_faction_no", "fac_kingdom_1"),
+         (overlay_set_val, ":overlay_id", ":selected_faction_no"),
+       (try_end),
+     (try_end),
+     #INVASION MODE END
      ]),
   
 
-  # script_multiplayer_get_troop_class
+  # script.multiplayer_get_troop_class
   # Input: arg1 = troop_no
   # Output: reg0: troop_class 
   ("multiplayer_get_troop_class",
@@ -11099,7 +11691,7 @@ scripts = [
      (assign, reg0, ":troop_class"),
      ]),
 
-  #script_multiplayer_clear_player_selected_items
+  #script.multiplayer_clear_player_selected_items
   # Input: arg1 = player_no
   # Output: none
   ("multiplayer_clear_player_selected_items",
@@ -11111,7 +11703,7 @@ scripts = [
      ]),
   
 
-  #script_multiplayer_init_player_slots
+  #script.multiplayer_init_player_slots
   # Input: arg1 = player_no
   # Output: none
   ("multiplayer_init_player_slots",
@@ -11128,7 +11720,7 @@ scripts = [
      (player_set_slot, ":player_no", slot_player_bot_type_4_wanted, 0),
      ]),
 
-  #script_multiplayer_initialize_belfry_wheel_rotations
+  #script.multiplayer_initialize_belfry_wheel_rotations
   # Input: none
   # Output: none
   ("multiplayer_initialize_belfry_wheel_rotations",
@@ -11185,7 +11777,7 @@ scripts = [
       (try_end),
      ]),
 
-  #script_send_open_close_information_of_object
+  #script.send_open_close_information_of_object
   # Input: arg1 = mission_object_id
   # Output: none
   ("send_open_close_information_of_object",
@@ -11205,7 +11797,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_multiplayer_send_initial_information
+  #script.multiplayer_send_initial_information
   # Input: arg1 = player_no
   # Output: none
   ("multiplayer_send_initial_information",
@@ -11227,7 +11819,10 @@ scripts = [
      (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_round_max_seconds, "$g_multiplayer_round_max_seconds"),
      (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_game_type, "$g_multiplayer_game_type"),
      (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_player_respawn_as_bot, "$g_multiplayer_player_respawn_as_bot"),
-     
+     #INVASION MODE START
+	 (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_ccoop_difficulty, "$g_multiplayer_ccoop_difficulty"),
+     #INVASION MODE END
+
      (store_mission_timer_a, ":mission_timer"),
      (multiplayer_send_int_to_player, ":player_no", multiplayer_event_return_server_mission_timer_while_player_joined, ":mission_timer"),
 
@@ -11328,7 +11923,7 @@ scripts = [
      #(multiplayer_send_2_int_to_player, ":player_no", multiplayer_event_set_day_time, "$g_round_day_time"),
     ]),
 
-  #script_multiplayer_remove_headquarters_flags
+  #script.multiplayer_remove_headquarters_flags
   # Input: none
   # Output: none
   ("multiplayer_remove_headquarters_flags",
@@ -11339,7 +11934,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_multiplayer_remove_destroy_mod_targets
+  #script.multiplayer_remove_destroy_mod_targets
   # Input: none
   # Output: none
   ("multiplayer_remove_destroy_mod_targets",
@@ -11348,7 +11943,7 @@ scripts = [
        (replace_scene_props, "spr_trebuchet_destructible", "spr_empty"),
      ]),
   
-  #script_multiplayer_init_mission_variables
+  #script.multiplayer_init_mission_variables
   ("multiplayer_init_mission_variables",
    [
      (assign, "$g_multiplayer_team_1_first_spawn", 1),
@@ -11371,7 +11966,7 @@ scripts = [
      (call_script, "script_music_set_situation_with_culture", mtf_sit_multiplayer_fight),
      ]),
 
-  #script_multiplayer_event_mission_end
+  #script.multiplayer_event_mission_end
   # Input: none
   # Output: none
   ("multiplayer_event_mission_end",
@@ -11389,7 +11984,7 @@ scripts = [
      ]),
   
 
-  #script_multiplayer_event_agent_killed_or_wounded
+  #script.multiplayer_event_agent_killed_or_wounded
   # Input: arg1 = dead_agent_no, arg2 = killer_agent_no
   # Output: none
   ("multiplayer_event_agent_killed_or_wounded",
@@ -11399,6 +11994,67 @@ scripts = [
      
      (multiplayer_get_my_player, ":my_player_no"),
      (try_begin),
+     #INVASION MODE START
+	   #MCA: ccoop do not show respawn timer
+	   (neq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+       (player_get_agent_id, ":my_player_agent", ":my_player_no"),
+       (neq, ":my_player_agent",-1),
+       (eq, ":my_player_agent", ":dead_agent_no"),
+       (store_mission_timer_a, "$g_multiplayer_respawn_start_time"),
+     (try_end),
+
+     (try_begin),
+		#MCA: ccoop do not show respawn timer
+	   (neq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+       (is_between, ":my_player_no", 0, multiplayer_max_possible_player_id),
+       (player_get_agent_id, ":player_agent", ":my_player_no"),
+       (eq, ":dead_agent_no", ":player_agent"),
+     
+       (assign, ":show_respawn_counter", 0),
+       (try_begin),
+         (neq, "$g_multiplayer_game_type", multiplayer_game_type_battle),
+         (assign, ":show_respawn_counter", 1),
+       (else_try),         
+         (eq, "$g_multiplayer_player_respawn_as_bot", 1),
+         (player_get_team_no, ":my_player_team", ":my_player_no"),
+         (assign, ":is_found", 0),
+         (try_for_agents, ":cur_agent"),
+           (eq, ":is_found", 0),
+           (agent_is_alive, ":cur_agent"),
+           (agent_is_human, ":cur_agent"),
+           (agent_is_non_player, ":cur_agent"),
+           (agent_get_team ,":cur_team", ":cur_agent"),
+           (eq, ":cur_team", ":my_player_team"),
+           (assign, ":is_found", 1),
+         (try_end),
+         (eq, ":is_found", 1),
+         (assign, ":show_respawn_counter", 1),
+       (try_end),
+       
+       (try_begin),
+         (eq, "$g_multiplayer_game_type", multiplayer_game_type_siege),
+         (gt, "$g_multiplayer_number_of_respawn_count", 0),         
+     
+         (ge, "$g_my_spawn_count", "$g_multiplayer_number_of_respawn_count"),
+     
+         (multiplayer_get_my_player, ":my_player_no"),
+         (player_get_team_no, ":my_player_team", ":my_player_no"),
+
+         (this_or_next|eq, ":my_player_team", 0),
+         (ge, "$g_my_spawn_count", 999),
+    
+         (assign, "$g_show_no_more_respawns_remained", 1),
+       (else_try),
+         (assign, "$g_show_no_more_respawns_remained", 0),
+       (try_end),
+
+       (eq, ":show_respawn_counter", 1),             
+
+       (start_presentation, "prsnt_multiplayer_respawn_time_counter"),
+     (try_end),
+
+     (try_begin),
+     #INVASION MODE END
        (is_between, ":my_player_no", 0, multiplayer_max_possible_player_id),
        (player_get_agent_id, ":my_player_agent", ":my_player_no"),
        (ge, ":my_player_agent", 0),
@@ -11527,8 +12183,15 @@ scripts = [
          #TODO: add other game types with no respawns here
          (neq, "$g_multiplayer_game_type", multiplayer_game_type_battle),
          (neq, "$g_multiplayer_game_type", multiplayer_game_type_destroy),
+         #INVASION MODE START
+         (neq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+         #INVASION MODE END
          (assign, ":show_respawn_counter", 1),
        (else_try),         
+         #INVASION MODE START
+         (neq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+         #INVASION MODE END
+
          (eq, "$g_multiplayer_player_respawn_as_bot", 1),
          (player_get_team_no, ":my_player_team", ":my_player_no"),
          (assign, ":is_found", 0),
@@ -11569,7 +12232,7 @@ scripts = [
      (try_end),
      ]),
      
-  #script_multiplayer_get_item_value_for_troop
+  #script.multiplayer_get_item_value_for_troop
   # Input: arg1 = item_no, arg2 = troop_no
   # Output: reg0: item_value
   ("multiplayer_get_item_value_for_troop",
@@ -11591,7 +12254,7 @@ scripts = [
      (assign, reg0, ":item_value"),
      ]),
 
-  #script_multiplayer_get_previous_item_for_item_and_troop
+  #script.multiplayer_get_previous_item_for_item_and_troop
   # Input: arg1 = item_no, arg2 = troop_no
   # Output: reg0: previous_item_no (-1 if it is the root item, 0 if the item is invalid) 
   ("multiplayer_get_previous_item_for_item_and_troop",
@@ -11720,7 +12383,7 @@ scripts = [
      (assign, reg0, ":max_item_no"),
      ]),
 
-  #script_cf_multiplayer_is_item_default_for_troop
+  #script.cf_multiplayer_is_item_default_for_troop
   # Input: arg1 = item_no, arg2 = troop_no
   # Output: reg0: total_cost
   ("cf_multiplayer_is_item_default_for_troop",
@@ -11744,7 +12407,7 @@ scripts = [
      (eq, ":default_item", 1),
      ]),
   
-  #script_multiplayer_calculate_cur_selected_items_cost
+  #script.multiplayer_calculate_cur_selected_items_cost
   # Input: arg1 = player_no
   # Output: reg0: total_cost
   ("multiplayer_calculate_cur_selected_items_cost",
@@ -11772,7 +12435,7 @@ scripts = [
      (assign, reg0, ":total_cost"),
      ]),
 
-  #script_multiplayer_set_item_available_for_troop
+  #script.multiplayer_set_item_available_for_troop
   # Input: arg1 = item_no, arg2 = troop_no
   # Output: none
   ("multiplayer_set_item_available_for_troop",
@@ -11784,7 +12447,7 @@ scripts = [
      (item_set_slot, ":item_no", ":item_troop_slot", 1),
      ]),
 
-  #script_multiplayer_send_item_selections
+  #script.multiplayer_send_item_selections
   # Input: none
   # Output: none
   ("multiplayer_send_item_selections",
@@ -11794,9 +12457,18 @@ scripts = [
        (player_get_slot, ":item_id", ":my_player_no", ":i_item"),
        (multiplayer_send_2_int_to_server, multiplayer_event_set_item_selection, ":i_item", ":item_id"),
      (try_end),
+     #INVASION MODE START
+	 (try_begin),
+	   (call_script, "script_cf_multiplayer_can_buy_squad"),
+	   (try_for_range, ":bot_slot", slot_player_companion_ids_begin, slot_player_companion_classes_end),
+         (player_get_slot, ":bot_id", ":my_player_no", ":bot_slot"),
+         (multiplayer_send_3_int_to_server, multiplayer_event_other_events, multiplayer_event_other_event_set_bot_purchase, ":bot_slot", ":bot_id"),
+       (try_end),
+	 (try_end),
+     #INVASION MODE END
      ]),
 
-  #script_multiplayer_set_default_item_selections_for_troop
+  #script.multiplayer_set_default_item_selections_for_troop
   # Input: arg1 = troop_no
   # Output: none
   ("multiplayer_set_default_item_selections_for_troop",
@@ -11842,7 +12514,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_multiplayer_display_available_items_for_troop_and_item_classes
+  #script.multiplayer_display_available_items_for_troop_and_item_classes
   # Input: arg1 = troop_no, arg2 = item_classes_begin, arg3 = item_classes_end, arg4 = pos_x_begin, arg5 = pos_y_begin
   # Output: none
   ("multiplayer_display_available_items_for_troop_and_item_classes",
@@ -11958,7 +12630,7 @@ scripts = [
      (try_end),
      ]),
 
-  # script_multiplayer_fill_map_game_types
+  # script.multiplayer_fill_map_game_types
   # Input: game_type
   # Output: num_maps
   ("multiplayer_fill_map_game_types",
@@ -12063,12 +12735,28 @@ scripts = [
         (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 4, "scn_multi_scene_15"),
         (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 5, "scn_multi_scene_16"),
         (assign, ":num_maps", 6),
+      #INVASION MODE START
+      (else_try),
+        (eq, ":game_type", multiplayer_game_type_captain_coop),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin, "scn_multi_scene_1"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 1, "scn_multi_scene_4"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 2, "scn_multi_scene_7"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 3, "scn_multi_scene_9"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 4, "scn_multi_scene_11"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 5, "scn_multi_scene_12"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 6, "scn_multi_scene_14"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 7, "scn_multi_scene_17"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 8, "scn_multi_scene_18"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 9, "scn_multi_scene_19"),
+        (troop_set_slot, "trp_multiplayer_data", multi_data_maps_for_game_type_begin + 10, "scn_multi_scene_20"),
+        (assign, ":num_maps", 11),
+      #INVASION MODE END
       (try_end),
       (assign, reg0, ":num_maps"),
       ]),
 
   
-  # script_multiplayer_count_players_bots
+  # script.multiplayer_count_players_bots
   # Input: none
   # Output: none
   ("multiplayer_count_players_bots",
@@ -12092,7 +12780,7 @@ scripts = [
       (try_end),
       ]),
 
-  # script_multiplayer_find_player_leader_for_bot
+  # script.multiplayer_find_player_leader_for_bot
   # Input: arg1 = team_no
   # Output: reg0 = player_no
   ("multiplayer_find_player_leader_for_bot",
@@ -12203,7 +12891,7 @@ scripts = [
       (assign, reg0, ":result_leader"),
       ]),
 
-  # script_multiplayer_find_bot_troop_and_group_for_spawn
+  # script.multiplayer_find_bot_troop_and_group_for_spawn
   # Input: arg1 = team_no
   # Output: reg0 = troop_id, reg1 = group_id
   ("multiplayer_find_bot_troop_and_group_for_spawn",
@@ -12250,7 +12938,7 @@ scripts = [
       (assign, reg1, ":leader_player"),
       ]),	
 
-  # script_multiplayer_change_leader_of_bot
+  # script.multiplayer_change_leader_of_bot
   # Input: arg1 = agent_no
   # Output: none
   ("multiplayer_change_leader_of_bot",
@@ -12344,7 +13032,7 @@ scripts = [
      (multiplayer_find_spawn_point, reg0, ":team_no", ":flags"),
   ]),
     
-  # script_multiplayer_find_spawn_point_2
+  # script.multiplayer_find_spawn_point_2
   # Input: arg1 = team_no, arg2 = examine_all_spawn_points, arg3 = is_horseman
   # Output: reg0 = entry_point_no
   ("multiplayer_find_spawn_point_2",
@@ -12845,7 +13533,7 @@ scripts = [
      (assign, reg0, ":best_entry_point"), 
      ]),
   
-  #script_multiplayer_buy_agent_equipment
+  #script.multiplayer_buy_agent_equipment
   # Input: arg1 = player_no
   # Output: none
   ("multiplayer_buy_agent_equipment",
@@ -13045,7 +13733,7 @@ scripts = [
      (try_end),
      ]),
   
-  # script_party_get_ideal_size @used for NPC parties.
+  # script.party_get_ideal_size @used for NPC parties.
   # Input: arg1 = party_no
   # Output: reg0: ideal size 
   ("party_get_ideal_size",
@@ -13107,7 +13795,7 @@ scripts = [
   ]),
 
 
-  #script_game_get_party_prisoner_limit:
+  #script.game_get_party_prisoner_limit:
   # This script is called from the game engine when the prisoner limit is needed for a party.
   # INPUT: arg1 = party_no
   # OUTPUT: reg0 = prisoner_limit
@@ -13123,7 +13811,7 @@ scripts = [
       (set_trigger_result, reg0),
   ]),
 
-  #script_game_get_item_extra_text:
+  #script.game_get_item_extra_text:
   # This script is called from the game engine when an item's properties are displayed.
   # INPUT: arg1 = item_no, arg2 = extra_text_id (this can be between 0-7 (7 included)), arg3 = item_modifier
   # OUTPUT: result_string = item extra text, trigger_result = text color (0 for default)
@@ -13142,7 +13830,7 @@ scripts = [
             (this_or_next|eq, ":item_no", "itm_pork"),
 				(eq, ":item_no", "itm_chicken"),
 				
-            (eq, ":item_modifier", imod_rotten),
+            (eq, ":item_modifier", imod.rotten),
             (assign, ":continue", 0),
           (try_end),
           (eq, ":continue", 1),
@@ -13186,7 +13874,7 @@ scripts = [
       (try_end),
   ]),
 
-  #script_game_on_disembark:
+  #script.game_on_disembark:
   # This script is called from the game engine when the player reaches the shore with a ship.
   # INPUT: pos0 = disembark position
   # OUTPUT: none
@@ -13195,7 +13883,7 @@ scripts = [
   ]),
 
 
-  #script_game_context_menu_get_buttons:
+  #script.game_context_menu_get_buttons:
   # This script is called from the game engine when the player clicks the right mouse button over a party on the map.
   # INPUT: arg1 = party_no
   # OUTPUT: none, fills the menu buttons
@@ -13232,7 +13920,7 @@ scripts = [
      (try_end),    
   ]),
 
-  #script_game_event_context_menu_button_clicked:
+  #script.game_event_context_menu_button_clicked:
   # This script is called from the game engine when the player clicks on a button at the right mouse menu.
   # INPUT: arg1 = party_no, arg2 = button_value
   # OUTPUT: none
@@ -13249,7 +13937,7 @@ scripts = [
     (try_end),
   ]),
 
-  #script_game_get_skill_modifier_for_troop
+  #script.game_get_skill_modifier_for_troop
   # This script is called from the game engine when a skill's modifiers are needed
   # INPUT: arg1 = troop_no, arg2 = skill_no
   # OUTPUT: trigger_result = modifier_value
@@ -13278,7 +13966,7 @@ scripts = [
 
 # Note to modders: Uncomment these if you'd like to use the following.
   
-##  #script_game_check_party_sees_party
+##  #script.game_check_party_sees_party
 ##  # This script is called from the game engine when a party is inside the range of another party
 ##  # INPUT: arg1 = party_no_seer, arg2 = party_no_seen
 ##  # OUTPUT: trigger_result = true or false (1 = true, 0 = false)
@@ -13289,7 +13977,7 @@ scripts = [
 ##     (set_trigger_result, 1),
 ##    ]),
 ##
-##  #script_game_get_party_speed_multiplier
+##  #script.game_get_party_speed_multiplier
 ##  # This script is called from the game engine when a skill's modifiers are needed
 ##  # INPUT: arg1 = party_no
 ##  # OUTPUT: trigger_result = multiplier (scaled by 100, meaning that giving 100 as the trigger result does not change the party speed)
@@ -13300,7 +13988,7 @@ scripts = [
 ##    ]),
   
 
-  # script_npc_get_troop_wage
+  # script.npc_get_troop_wage
   # This script is called from module system to calculate troop wages for npc parties.
   # Input:
   # param1: troop_id
@@ -13324,7 +14012,7 @@ scripts = [
       (assign, reg0, ":wage"),
   ]),
 
-  #script_setup_talk_info
+  #script.setup_talk_info
   # INPUT: $g_talk_troop, $g_talk_troop_relation
   ("setup_talk_info",
     [
@@ -13340,7 +14028,7 @@ scripts = [
   ]),
 
 #NPC companion changes begin
-  #script_setup_talk_info_companions
+  #script.setup_talk_info_companions
   ("setup_talk_info_companions",
     [
       (call_script, "script_npc_morale", "$g_talk_troop"),
@@ -13358,7 +14046,7 @@ scripts = [
   ]),
 #NPC companion changes end
 
-  #script_update_party_creation_random_limits
+  #script.update_party_creation_random_limits
   # INPUT: none
   ("update_party_creation_random_limits",
     [
@@ -13370,7 +14058,7 @@ scripts = [
       (assign, reg0, ":upper_limit"),
   ]),
 
-  #script_set_trade_route_between_centers
+  #script.set_trade_route_between_centers
   # INPUT:
   # param1: center_no_1
   # param1: center_no_2
@@ -13405,7 +14093,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_center_change_trade_good_production
+  #script.center_change_trade_good_production
   # INPUT:
   # param1: center_no
   # param2: item_id
@@ -13532,7 +14220,7 @@ scripts = [
 
 
   
-  #script_average_trade_good_productions
+  #script.average_trade_good_productions
   # INPUT: none (called only from game start?)
   #This is currently deprecated, as I was going to try to fine-tune production
   ("average_trade_good_productions",
@@ -13569,7 +14257,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_normalize_trade_good_productions 
+  #script.normalize_trade_good_productions 
   #Adjusts productions according to the amount of the item produced
   # INPUT: none
   # This currently deprecated, as I was going to try to fine-tune productions
@@ -13601,7 +14289,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_update_trade_good_prices
+  #script.update_trade_good_prices
   # INPUT: none
   ("update_trade_good_prices",
     [
@@ -13654,7 +14342,7 @@ scripts = [
       (try_end),
   ]),
 
-  #script_update_trade_good_price_for_party
+  #script.update_trade_good_price_for_party
   # INPUT: arg1 = party_no
   #Called once every 72 hours
   ("update_trade_good_price_for_party",
@@ -14135,7 +14823,7 @@ scripts = [
 	    (assign, reg2, ":consumer_consumption"),				
 	]),
   
-  #script_get_enterprise_name
+  #script.get_enterprise_name
   # INPUT: arg1 = item_no
   # Output: reg0: production string
   ("get_enterprise_name",
@@ -14173,7 +14861,7 @@ scripts = [
 		(assign, reg0, ":enterprise_name"),
 	]),
   
-  #script_do_merchant_town_trade
+  #script.do_merchant_town_trade
   # INPUT: arg1 = party_no (of the merchant), arg2 = center_no
   ("do_merchant_town_trade",
     [
@@ -14235,7 +14923,7 @@ scripts = [
       (try_end),      
   ]),
   
-  #script_party_calculate_regular_strength:
+  #script.party_calculate_regular_strength:
   # INPUT:
   # param1: Party-id
   ("party_calculate_regular_strength",
@@ -14262,7 +14950,7 @@ scripts = [
   
   
   
-  #script_party_calculate_strength:
+  #script.party_calculate_strength:
   # INPUT: arg1 = party_id, arg2 = exclude leader
   # OUTPUT: reg0 = strength
   
@@ -14302,7 +14990,7 @@ scripts = [
   ]),
 
 
-  #script_loot_player_items:
+  #script.loot_player_items:
   # INPUT: arg1 = enemy_party_no
   # Output: none
   ("loot_player_items",
@@ -14358,7 +15046,7 @@ scripts = [
       ]),
 
   
-  #script_party_calculate_loot:
+  #script.party_calculate_loot:
   # INPUT:
   # param1: Party-id
   # Returns num looted items in reg0
@@ -14465,7 +15153,7 @@ scripts = [
       (assign, reg0, ":num_looted_items"),
   ]),
   
-  #script_calculate_main_party_shares:
+  #script.calculate_main_party_shares:
   # INPUT:
   # Returns number of player party shares in reg0  
   ("calculate_main_party_shares",
@@ -14487,7 +15175,7 @@ scripts = [
       (assign, reg0, ":num_player_party_shares"),
   ]),
   
-  #script_party_give_xp_and_gold:
+  #script.party_give_xp_and_gold:
   # INPUT:
   # param1: destroyed Party-id
   # calculates and gives player paty's share of gold and xp.
@@ -14545,7 +15233,7 @@ scripts = [
   ]),
   
   
-  #script_setup_troop_meeting:
+  #script.setup_troop_meeting:
   # INPUT:
   # param1: troop_id with which meeting will be made.
   # param2: troop_dna (optional)
@@ -14570,7 +15258,7 @@ scripts = [
       (change_screen_map_conversation, ":meeting_troop"),
   ]),
   
-  #script_setup_party_meeting:
+  #script.setup_party_meeting:
   # INPUT:
   # param1: Party-id with which meeting will be made.
   
@@ -14592,7 +15280,7 @@ scripts = [
       (change_screen_map_conversation, ":meeting_troop"),
   ]),
   
-  #script_get_meeting_scene:
+  #script.get_meeting_scene:
   # INPUT: none
   # OUTPUT: reg0 contain suitable scene_no
   
@@ -14631,7 +15319,7 @@ scripts = [
   ]),
 
   
-  #script_party_remove_all_companions:
+  #script.party_remove_all_companions:
   # INPUT:
   # param1: Party-id from which  companions will be removed.
   # "$g_move_heroes" : controls if heroes will also be removed.
@@ -14711,7 +15399,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_party_remove_all_prisoners:
+  #script.party_remove_all_prisoners:
   # INPUT:
   # param1: Party-id from which  prisoners will be removed.
   # "$g_move_heroes" : controls if heroes will also be removed.
@@ -14729,7 +15417,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_party_add_party_companions:
+  #script.party_add_party_companions:
   # INPUT:
   # param1: Party-id to add the second part
   # param2: Party-id which will be added to the first one.
@@ -14751,7 +15439,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_party_add_party_prisoners:
+  #script.party_add_party_prisoners:
   # INPUT:
   # param1: Party-id to add the second party
   # param2: Party-id which will be added to the first one.
@@ -14771,7 +15459,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_party_prisoners_add_party_companions:
+  #script.party_prisoners_add_party_companions:
   # INPUT:
   # param1: Party-id to add the second part
   # param2: Party-id which will be added to the first one.
@@ -14791,7 +15479,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_party_prisoners_add_party_prisoners:
+  #script.party_prisoners_add_party_prisoners:
   # INPUT:
   # param1: Party-id to add the second part
   # param2: Party-id which will be added to the first one.
@@ -14811,7 +15499,7 @@ scripts = [
       (try_end),
   ]),
   
-  # script_party_add_party:
+  # script.party_add_party:
   # INPUT:
   # param1: Party-id to add the second part
   # param2: Party-id which will be added to the first one.
@@ -14826,7 +15514,7 @@ scripts = [
   ]),
   
   
-  #script_party_copy:
+  #script.party_copy:
   # INPUT:
   # param1: Party-id to copy the second party
   # param2: Party-id which will be copied to the first one.
@@ -14841,7 +15529,7 @@ scripts = [
   ]),
   
   
-  #script_clear_party_group:
+  #script.clear_party_group:
   # INPUT:
   # param1: Party-id of the root of the group.
   # This script will clear the root party and all parties attached to it recursively.
@@ -14859,7 +15547,7 @@ scripts = [
   ]),
   
 
-  #script_party_add_wounded_members_as_prisoners:
+  #script.party_add_wounded_members_as_prisoners:
   # INPUT:
   # param1: Party-id to add the second party
   # param2: Party-id which will be added to the first one.
@@ -14882,7 +15570,7 @@ scripts = [
   ]),
 
 
-  #script_get_nonempty_party_in_group:
+  #script.get_nonempty_party_in_group:
   # INPUT:
   # param1: Party-id of the root of the group.
   # OUTPUT: reg0: nonempy party-id
@@ -14906,7 +15594,7 @@ scripts = [
       (try_end),
   ]),
   
-  #script_collect_prisoners_from_empty_parties:
+  #script.collect_prisoners_from_empty_parties:
   # INPUT:
   # param1: Party-id of the root of the group.
   # param2: Party to collect prisoners in.
@@ -14934,7 +15622,7 @@ scripts = [
       (try_end),
   ]),
     
-  #script_change_party_morale:
+  #script.change_party_morale:
   # INPUT: party_no, morale_gained
   # OUTPUT: none
 
@@ -14958,7 +15646,7 @@ scripts = [
       (try_end),
   ]),
 
-  #script_count_casualties_and_adjust_morale:
+  #script.count_casualties_and_adjust_morale:
   # INPUT: none
   # OUTPUT: none
 
@@ -14975,7 +15663,7 @@ scripts = [
       
       (party_stack_get_num_wounded, ":num_wounded", "p_player_casualties", ":i_stack"),
       (store_mul, ":stack_size_mul_2", ":stack_size", 2),
-      (store_sub, ":stack_size_mul_2_sub_wounded", ":num_wounded"),
+      (store_sub, ":stack_size_mul_2_sub_wounded", ":stack_size_mul_2", ":num_wounded"),
       
       (store_character_level, ":level", ":stack_troop"),    
       (store_add, ":gain", ":level", 3),
@@ -15060,7 +15748,7 @@ scripts = [
         
         (party_stack_get_num_wounded, ":num_wounded", "p_ally_casualties", ":i_stack"),
         (store_mul, ":stack_size_mul_2", ":stack_size", 2),
-        (store_sub, ":stack_size_mul_2_sub_wounded", ":num_wounded"),
+        (store_sub, ":stack_size_mul_2_sub_wounded", ":stack_size_mul_2", ":num_wounded"),
 
         (store_character_level, ":level", ":stack_troop"),    
         (store_add, ":gain", ":level", 3),
@@ -15286,7 +15974,7 @@ scripts = [
         
   ]),
   
-  #script_print_casualties_to_s0:
+  #script.print_casualties_to_s0:
   # INPUT:
   # param1: Party_id, param2: 0 = use new line, 1 = use comma
   
@@ -15449,12 +16137,12 @@ scripts = [
      (try_end),
   ]),
 
-  #script_write_fit_party_members_to_stack_selection
+  #script.write_fit_party_members_to_stack_selection
   # INPUT:
   # param1: party_no, exclude_leader
   #OUTPUT:
-  # trp_stack_selection_amounts slots (slot 0 = number of stacks, 1 = number of men fit, 2..n = stack sizes (fit))
-  # trp_stack_selection_ids slots (2..n = stack troops)
+  # trp.stack_selection_amounts slots (slot 0 = number of stacks, 1 = number of men fit, 2..n = stack sizes (fit))
+  # trp.stack_selection_ids slots (2..n = stack troops)
   ("write_fit_party_members_to_stack_selection",
    [
      (store_script_param, ":party_no", 1),
@@ -15491,13 +16179,13 @@ scripts = [
      (troop_set_slot, "trp_stack_selection_amounts", 1, ":total_fit"),
     ]),
 
-  #script_remove_fit_party_member_from_stack_selection
+  #script.remove_fit_party_member_from_stack_selection
   # INPUT:
   # param1: slot_index
   #OUTPUT:
   # reg0 = troop_no
-  # trp_stack_selection_amounts slots (slot 0 = number of stacks, 1 = number of men fit, 2..n = stack sizes (fit))
-  # trp_stack_selection_ids slots (2..n = stack troops)
+  # trp.stack_selection_amounts slots (slot 0 = number of stacks, 1 = number of men fit, 2..n = stack sizes (fit))
+  # trp.stack_selection_ids slots (2..n = stack troops)
   ("remove_fit_party_member_from_stack_selection",
    [
      (store_script_param, ":slot_index", 1),
@@ -15527,13 +16215,13 @@ scripts = [
      (assign, reg0, ":troop_no"),
     ]),
 
-  #script_remove_random_fit_party_member_from_stack_selection
+  #script.remove_random_fit_party_member_from_stack_selection
   # INPUT:
   # none
   #OUTPUT:
   # reg0 = troop_no
-  # trp_stack_selection_amounts slots (slot 0 = number of stacks, 1 = number of men fit, 2..n = stack sizes (fit))
-  # trp_stack_selection_ids slots (2..n = stack troops)
+  # trp.stack_selection_amounts slots (slot 0 = number of stacks, 1 = number of men fit, 2..n = stack sizes (fit))
+  # trp.stack_selection_ids slots (2..n = stack troops)
   ("remove_random_fit_party_member_from_stack_selection",
    [
      (troop_get_slot, ":total_amount", "trp_stack_selection_amounts", 1),
@@ -15551,12 +16239,12 @@ scripts = [
     ]),
 
   
-  #script_add_routed_party
+  #script.add_routed_party
   #INPUT: none
   #OUTPUT: none
   ("add_routed_party",
    [                
-     (party_get_num_companion_stacks, ":num_stacks", "p_routed_enemies"), #question, I changed (total_enemy_casualties) with (p_routed_enemies) because this is not prisoner in p_routed_enemies party.        
+     (party_get_num_companion_stacks, ":num_stacks", "p_routed_enemies"), #question, I changed (total_enemy_casualties) with (p.routed_enemies) because this is not prisoner in p.routed_enemies party.        
      (assign, ":num_regulars", 0),
      (assign, ":deleted_stacks", 0),
      (try_for_range, ":stack_no", 0, ":num_stacks"),
@@ -15589,7 +16277,7 @@ scripts = [
 
        (assign, ":max_routed_agents", 0),
        (assign, ":routed_party_faction", "fac_neutral"),
-       (try_for_range, ":cur_faction", "fac_kingdom_1", "fac_kingdoms_end"),
+       (try_for_range, ":cur_faction", fac.kingdom_1, fac.kingdoms_end),
          (faction_get_slot, ":num_routed_agents_in_this_faction", ":cur_faction", slot_faction_num_routed_agents),
          (gt, ":num_routed_agents_in_this_faction", ":max_routed_agents"),
          (assign, ":max_routed_agents", ":num_routed_agents_in_this_faction"),
@@ -15637,9 +16325,9 @@ scripts = [
        (party_set_ai_object, ":routed_party", ":nearest_ally_city"),
        (party_set_flags, ":routed_party", pf_default_behavior, 1),
 
-       #adding party members of p_routed_enemies to routed_party
+       #adding party members of p.routed_enemies to routed_party
        (party_clear, ":routed_party"),
-       (party_get_num_companion_stacks, ":num_stacks", "p_routed_enemies"), #question, I changed (total_enemy_casualties) with (p_routed_enemies) because this is not prisoner in p_routed_enemies party.
+       (party_get_num_companion_stacks, ":num_stacks", "p_routed_enemies"), #question, I changed (total_enemy_casualties) with (p.routed_enemies) because this is not prisoner in p.routed_enemies party.
        (try_for_range, ":stack_no", 0, ":num_stacks"),
          (party_stack_get_troop_id, ":stack_troop", "p_routed_enemies", ":stack_no"),          
          (try_begin),
@@ -15653,7 +16341,7 @@ scripts = [
     ]), #ozan
 
 
-  #script_cf_training_ground_sub_routine_1_for_melee_details
+  #script.cf_training_ground_sub_routine_1_for_melee_details
   # INPUT:
   # value
   #OUTPUT:
@@ -15667,7 +16355,7 @@ scripts = [
      (str_store_troop_name, s0, ":troop_id"),
      ]),
 
-  #script_training_ground_sub_routine_2_for_melee_details
+  #script.training_ground_sub_routine_2_for_melee_details
   # INPUT:
   # value
   #OUTPUT:
@@ -15694,7 +16382,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_cf_training_ground_sub_routine_for_training_result
+  #script.cf_training_ground_sub_routine_for_training_result
   # INPUT:
   # arg1: troop_id, arg2: stack_no, arg3: troop_count, arg4: xp_ratio_to_add
   #OUTPUT:
@@ -15767,7 +16455,7 @@ scripts = [
      ]),
 
 
-##  #script_cf_print_troop_name_with_stack_index_to_s0
+##  #script.cf_print_troop_name_with_stack_index_to_s0
 ##  # INPUT:
 ##  # param1: stack_index
 ##  
@@ -15782,7 +16470,7 @@ scripts = [
 ##     (str_store_troop_name, s0, ":stack_troop"),
 ##    ]),
 
-  #script_print_troop_owned_centers_in_numbers_to_s0
+  #script.print_troop_owned_centers_in_numbers_to_s0
   # INPUT:
   # param1: troop_no
   #OUTPUT:
@@ -15844,7 +16532,7 @@ scripts = [
      (val_add, reg0, ":owned_towns"),
      ]),
 
-  #script_get_random_melee_training_weapon
+  #script.get_random_melee_training_weapon
   # INPUT: none
   # OUTPUT: reg0 = weapon_1, reg1 = weapon_2
   ("get_random_melee_training_weapon",
@@ -15866,7 +16554,7 @@ scripts = [
      (assign, reg1, ":weapon_2"),
      ]),
 
-  #script_start_training_at_training_ground
+  #script.start_training_at_training_ground
   # INPUT:
   # param1: training_weapon_type, param2: training_param
   ("start_training_at_training_ground",
@@ -16047,7 +16735,7 @@ scripts = [
      ]),
   
   
-  #script_print_party_to_s0:
+  #script.print_party_to_s0:
   # INPUT:
   # param1: Party-id
   
@@ -16082,7 +16770,7 @@ scripts = [
   
 
   
-  #script_party_count_fit_regulars:
+  #script.party_count_fit_regulars:
   # Returns the number of unwounded regular companions in a party
   # INPUT:
   # param1: Party-id
@@ -16103,7 +16791,7 @@ scripts = [
   ]),
   
   
-  #script_party_count_fit_for_battle:
+  #script.party_count_fit_for_battle:
   # Returns the number of unwounded companions in a party
   # INPUT:
   # param1: Party-id
@@ -16132,7 +16820,7 @@ scripts = [
   ]),
 
 
-  #script_party_count_members_with_full_health
+  #script.party_count_members_with_full_health
   # Returns the number of unwounded regulars, and heroes other than player with 100% hitpoints in a party
   # INPUT:
   # param1: Party-id
@@ -16195,7 +16883,7 @@ scripts = [
   ##      (try_end),
   ##  ]),
   
-  #script_get_stack_with_rank:
+  #script.get_stack_with_rank:
   # Returns the stack no, containing unwounded regular companions with rank rank.
   # INPUT:
   # param1: Party-id
@@ -16223,15 +16911,15 @@ scripts = [
       (try_end),
   ]),
   
-  #script_inflict_casualties_to_party:
+  #script.inflict_casualties_to_party:
   # INPUT:
   # param1: Party-id
   # param2: number of rounds
   
   #OUTPUT:
-  # This script doesn't return a value but populates the parties p_temp_wounded and p_temp_killed with the wounded and killed.
+  # This script doesn't return a value but populates the parties p.temp_wounded and p.temp_killed with the wounded and killed.
   #Example:
-  #  (script_inflict_casualties_to_party, "_p_main_party" ,50),
+  #  (script.inflict_casualties_to_party, "_p_main_party" ,50),
   #  Simulate 50 rounds of casualties to main_party.
   
   ("inflict_casualties_to_party",
@@ -16277,7 +16965,7 @@ scripts = [
   ]),
   
   
-  #script_move_members_with_ratio:
+  #script.move_members_with_ratio:
   # INPUT:
   # param1: Source Party-id
   # param2: Target Party-id
@@ -16312,7 +17000,7 @@ scripts = [
   ]),
   
   
-  # script_count_parties_of_faction_and_party_type:
+  # script.count_parties_of_faction_and_party_type:
   # counts number of active parties with a template and faction.
   # Input: arg1 = faction_no, arg2 = party_type
   # Output: reg0 = count
@@ -16332,7 +17020,7 @@ scripts = [
       (try_end),
   ]),
 
-# script_faction_get_number_of_armies
+# script.faction_get_number_of_armies
 # Input: arg1 = faction_no
 # Output: reg0 = number_of_armies
   ("faction_get_number_of_armies",
@@ -16359,7 +17047,7 @@ scripts = [
     ]),  
   
 
-# script_faction_recalculate_strength
+# script.faction_recalculate_strength
 # Input: arg1 = faction_no
 # Output: reg0 = strength
   ("faction_recalculate_strength",
@@ -16389,7 +17077,7 @@ scripts = [
 
     ]),  
   
-  #script_select_random_town:
+  #script.select_random_town:
   # This script selects a random town in range [towns_begin, towns_end)
   # INPUTS:
   # none
@@ -16414,7 +17102,7 @@ scripts = [
 #      (assign, "$pout_town", reg(21)),
 # ]),
   
-  #script_cf_select_random_town_with_faction:
+  #script.cf_select_random_town_with_faction:
   # This script selects a random town in range [towns_begin, towns_end)
   # such that faction of the town is equal to given_faction
   # INPUT:
@@ -16448,7 +17136,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
 
-  #script_cf_select_random_village_with_faction:
+  #script.cf_select_random_village_with_faction:
   # This script selects a random village in range [villages_begin, villages_end)
   # such that faction of the village is equal to given_faction
   # INPUT:
@@ -16483,7 +17171,7 @@ scripts = [
   ]),
   
   
-  #script_cf_select_random_walled_center_with_faction:
+  #script.cf_select_random_walled_center_with_faction:
   # This script selects a random center in range [centers_begin, centers_end)
   # such that faction of the town is equal to given_faction
   # INPUT:
@@ -16525,7 +17213,7 @@ scripts = [
   ]),
 
 
-  #script_cf_select_random_walled_center_with_faction_and_owner_priority_no_siege:
+  #script.cf_select_random_walled_center_with_faction_and_owner_priority_no_siege:
   # INPUT:
   # arg1 = faction_no
   # arg2 = owner_troop_no
@@ -16594,7 +17282,7 @@ scripts = [
   ]),
 
 
-  #script_cf_select_random_walled_center_with_faction_and_less_strength_priority:
+  #script.cf_select_random_walled_center_with_faction_and_less_strength_priority:
   # This script selects a random center in range [centers_begin, centers_end)
   # such that faction of the town is equal to given_faction
   # INPUT:
@@ -16654,7 +17342,7 @@ scripts = [
   ]),
 
   
-  #script_cf_select_random_town_at_peace_with_faction:
+  #script.cf_select_random_town_at_peace_with_faction:
   # This script selects a random town in range [towns_begin, towns_end)
   # such that faction of the town is friendly to given_faction
   # INPUT:
@@ -16690,7 +17378,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
   
-  #script_cf_select_random_town_at_peace_with_faction_in_trade_route
+  #script.cf_select_random_town_at_peace_with_faction_in_trade_route
   # INPUT:
   # arg1 = town_no
   # arg2 = faction_no
@@ -16833,7 +17521,7 @@ scripts = [
   ##  ]),
   
   
-  #script_spawn_party_at_random_town:
+  #script.spawn_party_at_random_town:
   # This script selects a random town in range [towns_begin, towns_end)
   # such that faction of the town is equal to given_faction
   # and spawns a new party there.
@@ -16852,7 +17540,7 @@ scripts = [
   ##      (assign, "$pout_party", reg(0)),
   ##  ]),
   
-  #script_cf_spawn_party_at_faction_town:
+  #script.cf_spawn_party_at_faction_town:
   # This script selects a random town in range [towns_begin, towns_end)
   # such that faction of the town is equal to given_faction
   # and spawns a new party there.
@@ -16871,7 +17559,7 @@ scripts = [
   ##      (assign, "$pout_party", reg(0)),
   ##  ]),
   
-  #script_spawn_party_at_random_town_if_below_limit:
+  #script.spawn_party_at_random_town_if_below_limit:
   # This script checks if number of parties
   # of specified template is less than limit,
   # If so, it selects a random town in range [towns_begin, towns_end)
@@ -16897,7 +17585,7 @@ scripts = [
 ##      (assign, "$pout_party", reg(0)),
 ##  ]),
   
-  ##  #script_spawn_party_at_faction_town_if_below_limit:
+  ##  #script.spawn_party_at_faction_town_if_below_limit:
   ##  # This script checks if number of parties
   ##  # of specified template is less than limit,
   ##  # If so, it selects a random town in range [towns_begin, towns_end)
@@ -16925,7 +17613,7 @@ scripts = [
   ##      (assign, "$pout_party", reg(0)),
   ##  ]),
   
-  # script_shuffle_troop_slots:
+  # script.shuffle_troop_slots:
   # Shuffles a range of slots of a given troop.
   # Used for exploiting a troop as an array.
   # Input: arg1 = troop_no, arg2 = slot_begin, arg3 = slot_end
@@ -16944,63 +17632,63 @@ scripts = [
   ]),
   
   
-  # script_get_quest - combines old get_random_quest with new get_dynamic_quest
+  # script.get_quest - combines old get_random_quest with new get_dynamic_quest
   
   # Input: arg1 = troop_no (of the troop in conversation), arg2 = min_importance (of the quest)
   # Output: reg0 = quest_no (the slots of the quest will be filled after calling this script)
   ("get_quest",
-    [            
-      (store_script_param_1, ":giver_troop"),
+  [            
+    (store_script_param_1, ":giver_troop"),
       
-      (store_character_level, ":player_level", "trp_player"),
-      (store_troop_faction, ":giver_faction_no", ":giver_troop"),
+    (store_character_level, ":player_level", "trp_player"),
+    (store_troop_faction, ":giver_faction_no", ":giver_troop"),
       
-      (troop_get_slot, ":giver_party_no", ":giver_troop", slot_troop_leaded_party),
-      (troop_get_slot, ":giver_reputation", ":giver_troop", slot_lord_reputation_type),
+    (troop_get_slot, ":giver_party_no", ":giver_troop", slot_troop_leaded_party),
+    (troop_get_slot, ":giver_reputation", ":giver_troop", slot_lord_reputation_type),
       
-      (assign, ":giver_center_no", -1),
+    (assign, ":giver_center_no", -1),
+    (try_begin),
+      (gt, ":giver_party_no", 0),
+      (party_get_attached_to, ":giver_center_no", ":giver_party_no"),
+    (else_try),
+      (is_between, "$g_encountered_party", centers_begin, centers_end),
+      (assign, ":giver_center_no", "$g_encountered_party"),
+    (try_end),
+      
+    (try_begin),
+      (troop_slot_eq, ":giver_troop", slot_troop_occupation, slto_kingdom_hero),
       (try_begin),
-        (gt, ":giver_party_no", 0),
-        (party_get_attached_to, ":giver_center_no", ":giver_party_no"),
+        (ge, "$g_talk_troop_faction_relation", 0),
+        (assign, ":quests_begin", lord_quests_begin),
+        (assign, ":quests_end", lord_quests_end),
+        (assign, ":quests_begin_2", lord_quests_begin_2),
+        (assign, ":quests_end_2", lord_quests_end_2),
       (else_try),
-        (is_between, "$g_encountered_party", centers_begin, centers_end),
-        (assign, ":giver_center_no", "$g_encountered_party"),
+        (assign, ":quests_begin", enemy_lord_quests_begin),
+        (assign, ":quests_end", enemy_lord_quests_end),
+        (assign, ":quests_begin_2", 0),
+        (assign, ":quests_end_2", 0),
       (try_end),
-      
-      (try_begin),
-        (troop_slot_eq, ":giver_troop", slot_troop_occupation, slto_kingdom_hero),
-        (try_begin),
-          (ge, "$g_talk_troop_faction_relation", 0),
-          (assign, ":quests_begin", lord_quests_begin),
-          (assign, ":quests_end", lord_quests_end),
-          (assign, ":quests_begin_2", lord_quests_begin_2),
-          (assign, ":quests_end_2", lord_quests_end_2),
-        (else_try),
-          (assign, ":quests_begin", enemy_lord_quests_begin),
-          (assign, ":quests_end", enemy_lord_quests_end),
-          (assign, ":quests_begin_2", 0),
-          (assign, ":quests_end_2", 0),
-        (try_end),
-      (else_try),
-        (is_between, ":giver_troop", village_elders_begin, village_elders_end),
-        (assign, ":quests_begin", village_elder_quests_begin),
-        (assign, ":quests_end", village_elder_quests_end),
-        (assign, ":quests_begin_2", village_elder_quests_begin_2),
-        (assign, ":quests_end_2", village_elder_quests_end_2),
-      (else_try),
-        (is_between, ":giver_troop", mayors_begin, mayors_end),
-        (assign, ":quests_begin", mayor_quests_begin),
-        (assign, ":quests_end", mayor_quests_end),
-        (assign, ":quests_begin_2", mayor_quests_begin_2),
-        (assign, ":quests_end_2", mayor_quests_end_2),
-      (else_try),
-        (assign, ":quests_begin", lady_quests_begin),
-        (assign, ":quests_end", lady_quests_end),
-        (assign, ":quests_begin_2", lady_quests_begin_2),
-        (assign, ":quests_end_2", lady_quests_end_2),
-      (try_end),
+    (else_try),
+      (is_between, ":giver_troop", village_elders_begin, village_elders_end),
+      (assign, ":quests_begin", village_elder_quests_begin),
+      (assign, ":quests_end", village_elder_quests_end),
+      (assign, ":quests_begin_2", village_elder_quests_begin_2),
+      (assign, ":quests_end_2", village_elder_quests_end_2),
+    (else_try),
+      (is_between, ":giver_troop", mayors_begin, mayors_end),
+      (assign, ":quests_begin", mayor_quests_begin),
+      (assign, ":quests_end", mayor_quests_end),
+      (assign, ":quests_begin_2", mayor_quests_begin_2),
+      (assign, ":quests_end_2", mayor_quests_end_2),
+    (else_try),
+      (assign, ":quests_begin", lady_quests_begin),
+      (assign, ":quests_end", lady_quests_end),
+      (assign, ":quests_begin_2", lady_quests_begin_2),
+      (assign, ":quests_end_2", lady_quests_end_2),
+    (try_end),
 	  
-      (assign, ":result", -1),
+    (assign, ":result", -1),
 	  (assign, ":quest_target_troop", -1),
 	  (assign, ":quest_target_center", -1),
 	  (assign, ":quest_target_faction", -1),
@@ -17029,344 +17717,344 @@ scripts = [
 		
 	    #GUILDMASTER QUESTS
 	    (try_begin),
-			(eq, ":result", "qst_track_down_bandits"), 
-			(assign, ":quest_target_party", ":relevant_party"),
-			(assign ,":quest_expiration_days", 60),
-			(assign, ":quest_xp_reward", 1000),
-			(assign, ":quest_gold_reward", 1000),
+	  		(eq, ":result", "qst_track_down_bandits"), 
+		  	(assign, ":quest_target_party", ":relevant_party"),
+			  (assign ,":quest_expiration_days", 60),
+			  (assign, ":quest_xp_reward", 1000),
+			  (assign, ":quest_gold_reward", 1000),
 			
-		(else_try),	
-			(eq, ":result", "qst_retaliate_for_border_incident"), 
-			(assign, ":quest_target_troop", ":relevant_troop"),
-			(assign, ":quest_target_faction", ":relevant_faction"),
+		  (else_try),	
+			  (eq, ":result", "qst_retaliate_for_border_incident"), 
+			  (assign, ":quest_target_troop", ":relevant_troop"),
+			  (assign, ":quest_target_faction", ":relevant_faction"),
 			
-			(assign ,":quest_expiration_days", 30),
-			(assign, ":quest_xp_reward", 1000),
-			(assign, ":quest_gold_reward", 1000),
+			  (assign ,":quest_expiration_days", 30),
+			  (assign, ":quest_xp_reward", 1000),
+			  (assign, ":quest_gold_reward", 1000),
 			
-		#KINGDOM LORD QUESTS	
-		(else_try),
-	        (eq, ":result", "qst_cause_provocation"),
-			(assign, ":quest_target_faction", ":relevant_faction"),
-	        (assign, ":quest_expiration_days", 30),
-	        (assign, ":quest_dont_give_again_period", 100),
-			(assign, ":quest_xp_reward", 1000),
-			(assign, ":quest_gold_reward", 1000),
+		  #KINGDOM LORD QUESTS	
+		  (else_try),
+	      (eq, ":result", "qst_cause_provocation"),
+			  (assign, ":quest_target_faction", ":relevant_faction"),
+	      (assign, ":quest_expiration_days", 30),
+	      (assign, ":quest_dont_give_again_period", 100),
+			  (assign, ":quest_xp_reward", 1000),
+			  (assign, ":quest_gold_reward", 1000),
 			
 	    (else_try),
-			(eq, ":result", "qst_destroy_bandit_lair"), 
-			(assign, ":quest_target_party", ":relevant_party"),
-			(assign ,":quest_expiration_days", 60),
-			(assign, ":quest_xp_reward", 3000),
-			(assign, ":quest_gold_reward", 1500),
+			  (eq, ":result", "qst_destroy_bandit_lair"), 
+			  (assign, ":quest_target_party", ":relevant_party"),
+			  (assign ,":quest_expiration_days", 60),
+			  (assign, ":quest_xp_reward", 3000),
+			  (assign, ":quest_gold_reward", 1500),
 
-		#KINGDOM LADY OR KINGDOM HERO QUESTS	
-		(else_try),	
-	        (eq, ":result", "qst_rescue_prisoner"),
-			(assign, ":quest_target_troop", ":relevant_troop"),
-			(assign, ":quest_target_center", ":relevant_party"),
+		  #KINGDOM LADY OR KINGDOM HERO QUESTS	
+		  (else_try),	
+	      (eq, ":result", "qst_rescue_prisoner"),
+			  (assign, ":quest_target_troop", ":relevant_troop"),
+			  (assign, ":quest_target_center", ":relevant_party"),
 
-	        (assign, ":quest_expiration_days", 30),
-	        (assign, ":quest_dont_give_again_period", 5),
-			(assign, ":quest_xp_reward", 1500),
-			(assign, ":quest_gold_reward", 3000),
-		(try_end),	  
+	      (assign, ":quest_expiration_days", 30),
+	      (assign, ":quest_dont_give_again_period", 5),
+			  (assign, ":quest_xp_reward", 1500),
+			  (assign, ":quest_gold_reward", 3000),
+		  (try_end),	  
 	  (try_end),
 	  
 	  #no dynamic quest available
 	  (try_begin),
-		(eq, ":result", -1),
+		  (eq, ":result", -1),
 
 	    (try_for_range, ":unused", 0, 20), #Repeat trial twenty times 
-	        (eq, ":result", -1),
-	        (assign, ":quest_target_troop", -1),
-	        (assign, ":quest_target_center", -1),
-	        (assign, ":quest_target_faction", -1),
-	        (assign, ":quest_object_faction", -1),
-	        (assign, ":quest_object_troop", -1),
-	        (assign, ":quest_object_center", -1),
-	        (assign, ":quest_target_party", -1),
-	        (assign, ":quest_target_party_template", -1),
-	        (assign, ":quest_target_amount", -1),
-	        (assign, ":quest_target_dna", -1),
-	        (assign, ":quest_target_item", -1),
-	        (assign, ":quest_importance", 1),
-	        (assign, ":quest_xp_reward", 0),
-	        (assign, ":quest_gold_reward", 0),
-	        (assign, ":quest_convince_value", 0),
-	        (assign, ":quest_expiration_days", 0),
-	        (assign, ":quest_dont_give_again_period", 0),
+	      (eq, ":result", -1),
+        (assign, ":quest_target_troop", -1),
+        (assign, ":quest_target_center", -1),
+        (assign, ":quest_target_faction", -1),
+        (assign, ":quest_object_faction", -1),
+        (assign, ":quest_object_troop", -1),
+        (assign, ":quest_object_center", -1),
+        (assign, ":quest_target_party", -1),
+        (assign, ":quest_target_party_template", -1),
+        (assign, ":quest_target_amount", -1),
+        (assign, ":quest_target_dna", -1),
+        (assign, ":quest_target_item", -1),
+        (assign, ":quest_importance", 1),
+        (assign, ":quest_xp_reward", 0),
+        (assign, ":quest_gold_reward", 0),
+        (assign, ":quest_convince_value", 0),
+        (assign, ":quest_expiration_days", 0),
+        (assign, ":quest_dont_give_again_period", 0),
 
-            (store_sub, ":num_possible_old_quests", ":quests_end", ":quests_begin"),
-            (store_sub, ":num_possible_new_quests", ":quests_end_2", ":quests_begin_2"),
-            (store_add, ":num_possible_total_quests", ":num_possible_old_quests", ":num_possible_new_quests"),
+        (store_sub, ":num_possible_old_quests", ":quests_end", ":quests_begin"),
+        (store_sub, ":num_possible_new_quests", ":quests_end_2", ":quests_begin_2"),
+        (store_add, ":num_possible_total_quests", ":num_possible_old_quests", ":num_possible_new_quests"),
+        
+        (store_random_in_range, ":quest_no", 0, ":num_possible_total_quests"),
+
+        (try_begin),
+          (lt, ":quest_no", ":num_possible_old_quests"),
+          (store_random_in_range, ":quest_no", ":quests_begin", ":quests_end"), 
+        (else_try),
+          (store_random_in_range, ":quest_no", ":quests_begin_2", ":quests_end_2"),
+        (try_end),
+      
+        (neg|check_quest_active,":quest_no"),
+        (neg|quest_slot_ge, ":quest_no", slot_quest_dont_give_again_remaining_days, 1),
+        (try_begin),
+          # Village Elder quests
+          (eq, ":quest_no", "qst_deliver_grain"),
+          (try_begin),
+            (is_between, ":giver_center_no", villages_begin, villages_end),
+            #The quest giver is the village elder
+            (call_script, "script_get_troop_item_amount", ":giver_troop", "itm_grain"),
+            (eq, reg0, 0),
+            (neg|party_slot_ge, ":giver_center_no", slot_town_prosperity, 40),
+            (assign, ":quest_target_center", ":giver_center_no"),
+            (store_random_in_range, ":quest_target_amount", 4, 8),
+            (assign, ":quest_expiration_days", 30),
+            (assign, ":quest_dont_give_again_period", 20),
+            (assign, ":result", ":quest_no"),
+          (try_end),
+        (else_try),
+          (eq, ":quest_no", "qst_deliver_cattle"),
+          (try_begin),
+            (is_between, ":giver_center_no", villages_begin, villages_end),
+            #The quest giver is the village elder
+            (party_get_slot, ":num_cattle", ":giver_center_no", slot_village_number_of_cattle),
+            (lt, ":num_cattle", 50),
+            (assign, ":quest_target_center", ":giver_center_no"),
+            (store_random_in_range, ":quest_target_amount", 5, 10),
+            (assign, ":quest_expiration_days", 30),
+            (assign, ":quest_dont_give_again_period", 20),
+            (assign, ":result", ":quest_no"),
+          (try_end),
+        (else_try),
+          (eq, ":quest_no", "qst_train_peasants_against_bandits"),
+          (try_begin),
+            (is_between, ":giver_center_no", villages_begin, villages_end),
+            #The quest giver is the village elder
+            (store_skill_level, ":player_trainer", "skl_trainer", "trp_player"),
+            (gt, ":player_trainer", 0),            
+            (store_random_in_range, ":quest_target_amount", 5, 8),
+            (assign, ":quest_target_center", ":giver_center_no"),
+            (assign, ":quest_expiration_days", 20),
+            (assign, ":quest_dont_give_again_period", 40),
+            (assign, ":result", ":quest_no"),
+          (try_end),
+        (else_try),
+          # Mayor quests
+          (eq, ":quest_no", "qst_escort_merchant_caravan"),
+          (is_between, ":giver_center_no", centers_begin, centers_end),
+          (store_random_party_in_range, ":quest_target_center", towns_begin, towns_end),
+          (store_distance_to_party_from_party, ":dist", ":giver_center_no",":quest_target_center"),
+          (assign, ":quest_gold_reward", ":dist"),
+          (val_add, ":quest_gold_reward", 25),
+          (val_mul, ":quest_gold_reward", 25),
+          (val_div, ":quest_gold_reward", 20),
+          (store_random_in_range, ":quest_target_amount", 6, 12),
+          (assign, "$escort_merchant_caravan_mode", 0),
+          (assign, ":result", ":quest_no"),
+        (else_try),
+          (eq, ":quest_no", "qst_deliver_wine"),
+          (is_between, ":giver_center_no", centers_begin, centers_end),
+          (store_random_party_in_range, ":quest_target_center", towns_begin, towns_end),
+          (store_random_in_range, ":random_no", 0, 2),
+          (try_begin),
+            (eq, ":random_no", 0),
+            (assign, ":quest_target_item", "itm_quest_wine"),
+          (else_try),
+            (assign, ":quest_target_item", "itm_quest_ale"),
+          (try_end),
+          (store_random_in_range, ":quest_target_amount", 6, 12),
+          (store_distance_to_party_from_party, ":dist", ":giver_center_no",":quest_target_center"),
+          (assign, ":quest_gold_reward", ":dist"),
+          (val_add, ":quest_gold_reward", 2),
+          (assign, ":multiplier", 5),
+          (val_add, ":multiplier", ":quest_target_amount"),
+          (val_mul, ":quest_gold_reward", ":multiplier"),
+          (val_div, ":quest_gold_reward", 100),
+          (val_mul, ":quest_gold_reward", 10),
+          (store_item_value,"$qst.deliver_wine_debt",":quest_target_item"),
+          (val_mul,"$qst.deliver_wine_debt",":quest_target_amount"),
+          (val_mul,"$qst.deliver_wine_debt", 6),
+          (val_div,"$qst.deliver_wine_debt",5),
+          (assign, ":quest_expiration_days", 7),
+          (assign, ":quest_dont_give_again_period", 20),
+          (assign, ":result", ":quest_no"),
+        (else_try),
+          (eq, ":quest_no", "qst_troublesome_bandits"),
+		  (is_between, ":giver_center_no", centers_begin, centers_end),
+          (store_character_level, ":quest_gold_reward", "trp_player"),
+          (val_add, ":quest_gold_reward", 20),
+          (val_mul, ":quest_gold_reward", 35),
+          (val_div, ":quest_gold_reward",100),
+          (val_mul, ":quest_gold_reward", 10),
+          (assign, ":quest_expiration_days", 30),
+          (assign, ":quest_dont_give_again_period", 30),
+          (assign, ":result", ":quest_no"),
+        (else_try),
+          (eq, ":quest_no", "qst_kidnapped_girl"),
+          (is_between, ":giver_center_no", centers_begin, centers_end),
+          (store_random_in_range, ":quest_target_center", villages_begin, villages_end),
+          (store_character_level, ":quest_target_amount"),
+          (val_add, ":quest_target_amount", 15),
+          (store_distance_to_party_from_party, ":dist", ":giver_center_no", ":quest_target_center"),
+          (val_add, ":dist", 15),
+          (val_mul, ":dist", 2),
+          (val_mul, ":quest_target_amount", ":dist"),
+          (val_div, ":quest_target_amount",100),
+          (val_mul, ":quest_target_amount",10),
+          (assign, ":quest_gold_reward", ":quest_target_amount"),
+          (val_div, ":quest_gold_reward", 40),
+          (val_mul, ":quest_gold_reward", 10),
+                (assign, ":quest_expiration_days", 15),
+          (assign, ":quest_dont_give_again_period", 30),
+          (assign, ":result", ":quest_no"),
+        (else_try),
+          (eq, ":quest_no", "qst_move_cattle_herd"),
+          (is_between, ":giver_center_no", centers_begin, centers_end),
+          (call_script, "script_cf_select_random_town_at_peace_with_faction", ":giver_faction_no"),
+          (neq, ":giver_center_no", reg0),
+          (assign, ":quest_target_center", reg0),
+          (store_distance_to_party_from_party, ":dist",":giver_center_no",":quest_target_center"),
+          (assign, ":quest_gold_reward", ":dist"),
+          (val_add, ":quest_gold_reward", 25),
+          (val_mul, ":quest_gold_reward", 50),
+          (val_div, ":quest_gold_reward", 20),
+          (assign, ":quest_expiration_days", 30),
+          (assign, ":quest_dont_give_again_period", 20),
+          (assign, ":result", ":quest_no"),
+        (else_try),
+          (eq, ":quest_no", "qst_persuade_lords_to_make_peace"),
+          (is_between, ":giver_center_no", centers_begin, centers_end),
+          (store_faction_of_party, ":cur_object_faction", ":giver_center_no"),
+          (call_script, "script_cf_faction_get_random_enemy_faction", ":cur_object_faction"),
+          (assign, ":cur_target_faction", reg0),
+          (call_script, "script_cf_get_random_lord_except_king_with_faction", ":cur_object_faction"),
+          (assign, ":cur_object_troop", reg0),
+		  (this_or_next|troop_slot_eq, ":cur_object_troop", slot_lord_reputation_type, lrep_quarrelsome),
+		  (this_or_next|troop_slot_eq, ":cur_object_troop", slot_lord_reputation_type, lrep_selfrighteous),
+		  (this_or_next|troop_slot_eq, ":cur_object_troop", slot_lord_reputation_type, lrep_martial),
+			(troop_slot_eq, ":cur_object_troop", slot_lord_reputation_type, lrep_debauched),
+		  
+          (call_script, "script_cf_get_random_lord_except_king_with_faction", ":cur_target_faction"),
+          (assign, ":quest_target_troop", reg0),
+		  (this_or_next|troop_slot_eq, ":quest_target_troop", slot_lord_reputation_type, lrep_quarrelsome),
+		  (this_or_next|troop_slot_eq, ":quest_target_troop", slot_lord_reputation_type, lrep_selfrighteous),
+		  (this_or_next|troop_slot_eq, ":quest_target_troop", slot_lord_reputation_type, lrep_martial),
+		  (troop_slot_eq, ":quest_target_troop", slot_lord_reputation_type, lrep_debauched),
+		  			  
+          (assign, ":quest_object_troop", ":cur_object_troop"),
+          (assign, ":quest_target_faction", ":cur_target_faction"),
+          (assign, ":quest_object_faction", ":cur_object_faction"),
+          (assign, ":quest_gold_reward", 12000),
+          (assign, ":quest_convince_value", 7000),
+          (assign, ":quest_expiration_days", 30),
+          (assign, ":quest_dont_give_again_period", 100),
+          (assign, ":result", ":quest_no"),
+        (else_try),
+          (eq, ":quest_no", "qst_deal_with_looters"),
+          (is_between, ":player_level", 0, 15),
+          (is_between, ":giver_center_no", centers_begin, centers_end),
+          (store_faction_of_party, ":cur_object_faction", ":giver_center_no"),
+          (store_num_parties_destroyed_by_player, ":num_looters_destroyed", "pt_looters"),
+          (party_template_set_slot,"pt_looters",slot_party_template_num_killed,":num_looters_destroyed"),
+          (quest_set_slot,":quest_no",slot_quest_current_state,0),
+          (quest_set_slot,":quest_no",slot_quest_target_party_template,"pt_looters"),
+          (assign, ":quest_gold_reward", 500),
+          (assign, ":quest_xp_reward", 500),
+          (assign, ":quest_expiration_days", 20),
+          (assign, ":quest_dont_give_again_period", 30),
+          (assign, ":result", ":quest_no"),
+        (else_try),
+          (eq, ":quest_no", "qst_deal_with_night_bandits"),
+          (is_between, ":player_level", 0, 15),
+          (is_between, ":giver_center_no", centers_begin, centers_end),
+          (party_slot_ge, ":giver_center_no", slot_center_has_bandits, 1),
+          (assign, ":quest_target_center", ":giver_center_no"),
+          (assign, ":quest_expiration_days", 4),
+          (assign, ":quest_dont_give_again_period", 15),
+          (assign, ":result", ":quest_no"),
+        (else_try),
+          # Lady quests
+          (eq, ":quest_no", "qst_rescue_lord_by_replace"),
+		  (eq, 1, 0),
+          (try_begin),
+            (ge, "$g_talk_troop_faction_relation", 0),
+            (is_between, ":player_level", 5, 25), 
             
-            (store_random_in_range, ":quest_no", 0, ":num_possible_total_quests"),
-
+            (assign, ":prisoner_relative", -1),
+            
             (try_begin),
-              (lt, ":quest_no", ":num_possible_old_quests"),
-              (store_random_in_range, ":quest_no", ":quests_begin", ":quests_end"), 
-            (else_try),
-              (store_random_in_range, ":quest_no", ":quests_begin_2", ":quests_end_2"),
+                (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_father), #get giver_troop's father
+              (gt, ":cur_target_troop", 0), #if giver_troop has a father as a troop in game
+                (troop_slot_ge, ":cur_target_troop", slot_troop_prisoner_of_party, 0), #if giver_troop's father is in a prison
+                (assign, ":prisoner_relative", ":cur_target_troop"),	              
             (try_end),
-	        
-	        (neg|check_quest_active,":quest_no"),
-	        (neg|quest_slot_ge, ":quest_no", slot_quest_dont_give_again_remaining_days, 1),
-	        (try_begin),
-	          # Village Elder quests
-	          (eq, ":quest_no", "qst_deliver_grain"),
-	          (try_begin),
-	            (is_between, ":giver_center_no", villages_begin, villages_end),
-	            #The quest giver is the village elder
-	            (call_script, "script_get_troop_item_amount", ":giver_troop", "itm_grain"),
-	            (eq, reg0, 0),
-	            (neg|party_slot_ge, ":giver_center_no", slot_town_prosperity, 40),
-	            (assign, ":quest_target_center", ":giver_center_no"),
-	            (store_random_in_range, ":quest_target_amount", 4, 8),
-	            (assign, ":quest_expiration_days", 30),
-	            (assign, ":quest_dont_give_again_period", 20),
-	            (assign, ":result", ":quest_no"),
-	          (try_end),
-	        (else_try),
-	          (eq, ":quest_no", "qst_deliver_cattle"),
-	          (try_begin),
-	            (is_between, ":giver_center_no", villages_begin, villages_end),
-	            #The quest giver is the village elder
-	            (party_get_slot, ":num_cattle", ":giver_center_no", slot_village_number_of_cattle),
-	            (lt, ":num_cattle", 50),
-	            (assign, ":quest_target_center", ":giver_center_no"),
-	            (store_random_in_range, ":quest_target_amount", 5, 10),
-	            (assign, ":quest_expiration_days", 30),
-	            (assign, ":quest_dont_give_again_period", 20),
-	            (assign, ":result", ":quest_no"),
-	          (try_end),
-	        (else_try),
-	          (eq, ":quest_no", "qst_train_peasants_against_bandits"),
-	          (try_begin),
-	            (is_between, ":giver_center_no", villages_begin, villages_end),
-	            #The quest giver is the village elder
-	            (store_skill_level, ":player_trainer", "skl_trainer", "trp_player"),
-	            (gt, ":player_trainer", 0),
-	            (store_random_in_range, ":quest_target_amount", 5, 8),
-	            (assign, ":quest_target_center", ":giver_center_no"),
-	            (assign, ":quest_expiration_days", 20),
-	            (assign, ":quest_dont_give_again_period", 40),
-	            (assign, ":result", ":quest_no"),
-	          (try_end),
-	        (else_try),
-	          # Mayor quests
-	          (eq, ":quest_no", "qst_escort_merchant_caravan"),
-	          (is_between, ":giver_center_no", centers_begin, centers_end),
-	          (store_random_party_in_range, ":quest_target_center", towns_begin, towns_end),
-	          (store_distance_to_party_from_party, ":dist", ":giver_center_no",":quest_target_center"),
-	          (assign, ":quest_gold_reward", ":dist"),
-	          (val_add, ":quest_gold_reward", 25),
-	          (val_mul, ":quest_gold_reward", 25),
-	          (val_div, ":quest_gold_reward", 20),
-	          (store_random_in_range, ":quest_target_amount", 6, 12),
-	          (assign, "$escort_merchant_caravan_mode", 0),
-	          (assign, ":result", ":quest_no"),
-	        (else_try),
-	          (eq, ":quest_no", "qst_deliver_wine"),
-	          (is_between, ":giver_center_no", centers_begin, centers_end),
-	          (store_random_party_in_range, ":quest_target_center", towns_begin, towns_end),
-	          (store_random_in_range, ":random_no", 0, 2),
-	          (try_begin),
-	            (eq, ":random_no", 0),
-	            (assign, ":quest_target_item", "itm_quest_wine"),
-	          (else_try),
-	            (assign, ":quest_target_item", "itm_quest_ale"),
-	          (try_end),
-	          (store_random_in_range, ":quest_target_amount", 6, 12),
-	          (store_distance_to_party_from_party, ":dist", ":giver_center_no",":quest_target_center"),
-	          (assign, ":quest_gold_reward", ":dist"),
-	          (val_add, ":quest_gold_reward", 2),
-	          (assign, ":multiplier", 5),
-	          (val_add, ":multiplier", ":quest_target_amount"),
-	          (val_mul, ":quest_gold_reward", ":multiplier"),
-	          (val_div, ":quest_gold_reward", 100),
-	          (val_mul, ":quest_gold_reward", 10),
-	          (store_item_value,"$qst_deliver_wine_debt",":quest_target_item"),
-	          (val_mul,"$qst_deliver_wine_debt",":quest_target_amount"),
-	          (val_mul,"$qst_deliver_wine_debt", 6),
-	          (val_div,"$qst_deliver_wine_debt",5),
-	          (assign, ":quest_expiration_days", 7),
-	          (assign, ":quest_dont_give_again_period", 20),
-	          (assign, ":result", ":quest_no"),
-	        (else_try),
-	          (eq, ":quest_no", "qst_troublesome_bandits"),
-			  (is_between, ":giver_center_no", centers_begin, centers_end),
-	          (store_character_level, ":quest_gold_reward", "trp_player"),
-	          (val_add, ":quest_gold_reward", 20),
-	          (val_mul, ":quest_gold_reward", 35),
-	          (val_div, ":quest_gold_reward",100),
-	          (val_mul, ":quest_gold_reward", 10),
-	          (assign, ":quest_expiration_days", 30),
-	          (assign, ":quest_dont_give_again_period", 30),
-	          (assign, ":result", ":quest_no"),
-	        (else_try),
-	          (eq, ":quest_no", "qst_kidnapped_girl"),
-	          (is_between, ":giver_center_no", centers_begin, centers_end),
-	          (store_random_in_range, ":quest_target_center", villages_begin, villages_end),
-	          (store_character_level, ":quest_target_amount"),
-	          (val_add, ":quest_target_amount", 15),
-	          (store_distance_to_party_from_party, ":dist", ":giver_center_no", ":quest_target_center"),
-	          (val_add, ":dist", 15),
-	          (val_mul, ":dist", 2),
-	          (val_mul, ":quest_target_amount", ":dist"),
-	          (val_div, ":quest_target_amount",100),
-	          (val_mul, ":quest_target_amount",10),
-	          (assign, ":quest_gold_reward", ":quest_target_amount"),
-	          (val_div, ":quest_gold_reward", 40),
-	          (val_mul, ":quest_gold_reward", 10),
-                  (assign, ":quest_expiration_days", 15),
-	          (assign, ":quest_dont_give_again_period", 30),
-	          (assign, ":result", ":quest_no"),
-	        (else_try),
-	          (eq, ":quest_no", "qst_move_cattle_herd"),
-	          (is_between, ":giver_center_no", centers_begin, centers_end),
-	          (call_script, "script_cf_select_random_town_at_peace_with_faction", ":giver_faction_no"),
-	          (neq, ":giver_center_no", reg0),
-	          (assign, ":quest_target_center", reg0),
-	          (store_distance_to_party_from_party, ":dist",":giver_center_no",":quest_target_center"),
-	          (assign, ":quest_gold_reward", ":dist"),
-	          (val_add, ":quest_gold_reward", 25),
-	          (val_mul, ":quest_gold_reward", 50),
-	          (val_div, ":quest_gold_reward", 20),
-	          (assign, ":quest_expiration_days", 30),
-	          (assign, ":quest_dont_give_again_period", 20),
-	          (assign, ":result", ":quest_no"),
-	        (else_try),
-	          (eq, ":quest_no", "qst_persuade_lords_to_make_peace"),
-	          (is_between, ":giver_center_no", centers_begin, centers_end),
-	          (store_faction_of_party, ":cur_object_faction", ":giver_center_no"),
-	          (call_script, "script_cf_faction_get_random_enemy_faction", ":cur_object_faction"),
-	          (assign, ":cur_target_faction", reg0),
-	          (call_script, "script_cf_get_random_lord_except_king_with_faction", ":cur_object_faction"),
-	          (assign, ":cur_object_troop", reg0),
-			  (this_or_next|troop_slot_eq, ":cur_object_troop", slot_lord_reputation_type, lrep_quarrelsome),
-			  (this_or_next|troop_slot_eq, ":cur_object_troop", slot_lord_reputation_type, lrep_selfrighteous),
-			  (this_or_next|troop_slot_eq, ":cur_object_troop", slot_lord_reputation_type, lrep_martial),
-				(troop_slot_eq, ":cur_object_troop", slot_lord_reputation_type, lrep_debauched),
-			  
-	          (call_script, "script_cf_get_random_lord_except_king_with_faction", ":cur_target_faction"),
-	          (assign, ":quest_target_troop", reg0),
-			  (this_or_next|troop_slot_eq, ":quest_target_troop", slot_lord_reputation_type, lrep_quarrelsome),
-			  (this_or_next|troop_slot_eq, ":quest_target_troop", slot_lord_reputation_type, lrep_selfrighteous),
-			  (this_or_next|troop_slot_eq, ":quest_target_troop", slot_lord_reputation_type, lrep_martial),
-			  (troop_slot_eq, ":quest_target_troop", slot_lord_reputation_type, lrep_debauched),
-			  			  
-	          (assign, ":quest_object_troop", ":cur_object_troop"),
-	          (assign, ":quest_target_faction", ":cur_target_faction"),
-	          (assign, ":quest_object_faction", ":cur_object_faction"),
-	          (assign, ":quest_gold_reward", 12000),
-	          (assign, ":quest_convince_value", 7000),
-	          (assign, ":quest_expiration_days", 30),
-	          (assign, ":quest_dont_give_again_period", 100),
-	          (assign, ":result", ":quest_no"),
-	        (else_try),
-	          (eq, ":quest_no", "qst_deal_with_looters"),
-	          (is_between, ":player_level", 0, 15),
-	          (is_between, ":giver_center_no", centers_begin, centers_end),
-	          (store_faction_of_party, ":cur_object_faction", ":giver_center_no"),
-	          (store_num_parties_destroyed_by_player, ":num_looters_destroyed", "pt_looters"),
-	          (party_template_set_slot,"pt_looters",slot_party_template_num_killed,":num_looters_destroyed"),
-	          (quest_set_slot,":quest_no",slot_quest_current_state,0),
-	          (quest_set_slot,":quest_no",slot_quest_target_party_template,"pt_looters"),
-	          (assign, ":quest_gold_reward", 500),
-	          (assign, ":quest_xp_reward", 500),
-	          (assign, ":quest_expiration_days", 20),
-	          (assign, ":quest_dont_give_again_period", 30),
-	          (assign, ":result", ":quest_no"),
-	        (else_try),
-	          (eq, ":quest_no", "qst_deal_with_night_bandits"),
-	          (is_between, ":player_level", 0, 15),
-	          (is_between, ":giver_center_no", centers_begin, centers_end),
-	          (party_slot_ge, ":giver_center_no", slot_center_has_bandits, 1),
-	          (assign, ":quest_target_center", ":giver_center_no"),
-	          (assign, ":quest_expiration_days", 4),
-	          (assign, ":quest_dont_give_again_period", 15),
-	          (assign, ":result", ":quest_no"),
-	        (else_try),
-	          # Lady quests
-	          (eq, ":quest_no", "qst_rescue_lord_by_replace"),
-			  (eq, 1, 0),
-	          (try_begin),
-	            (ge, "$g_talk_troop_faction_relation", 0),
-	            (is_between, ":player_level", 5, 25), 
-	            
-	            (assign, ":prisoner_relative", -1),
-	            
-	            (try_begin),
-                  (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_father), #get giver_troop's father
-	              (gt, ":cur_target_troop", 0), #if giver_troop has a father as a troop in game
-                  (troop_slot_ge, ":cur_target_troop", slot_troop_prisoner_of_party, 0), #if giver_troop's father is in a prison
-                  (assign, ":prisoner_relative", ":cur_target_troop"),	              
-	            (try_end),
-	            
-	            (try_begin),
-	              (eq, ":prisoner_relative", -1), #if giver_troop has no father or giver_troop's father is not in prison.
-	              (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_spouse), #get giver_troop's spouse
-	              (gt, ":cur_target_troop", 0), #if giver_troop has a spouse as a troop in game	              
-                  (troop_slot_ge, ":cur_target_troop", slot_troop_prisoner_of_party, 0), #if giver_troop's spouse is in a prison
-	              (assign, ":prisoner_relative", ":cur_target_troop"),
-				(try_end),  
-				
-	            (try_begin),
-	              (eq, ":prisoner_relative", -1), #if ((giver_troop has no father) or (giver_troop's father is not in prison)) and ((giver_troop has no spouse) or (giver_troop's spouse is not in prison)).
-	              (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_guardian), #get giver_troop's spouse
-	              (gt, ":cur_target_troop", 0), #if giver_troop has a guardian as a troop in game	              
-                  (troop_slot_ge, ":cur_target_troop", slot_troop_prisoner_of_party, 0), #if giver_troop's guardian is in a prison
-	              (assign, ":prisoner_relative", ":cur_target_troop"),
-				(try_end),
-				
-				(try_begin),
-				  (eq, "$cheat_mode", 1),
-				  (assign, reg0, ":prisoner_relative"),
-				  (display_message, "str_prisoner_relative_is_reg0"),
-				(try_end),
-									            
-				(gt, ":prisoner_relative", -1),
-	            #(changed 2) no need to this anymore (troop_slot_ge, ":prisoner_relative", slot_troop_prisoner_of_party, 0),
-	            (call_script, "script_search_troop_prisoner_of_party", ":prisoner_relative"),
-	            (assign, ":cur_target_center", reg0),	            
-	            
-	            #(changed 3) no need to check only towns anymore (is_between, ":cur_target_center", towns_begin, towns_end),#Skip if he is not in a town
-	            (is_between, ":cur_target_center", walled_centers_begin, walled_centers_end), #Skip if he is not in a walled center
-	            
-	            (assign, ":quest_target_center", ":cur_target_center"),
-	            (assign, ":quest_target_troop", ":prisoner_relative"),
-	            (assign, ":quest_expiration_days", 30),
-	            (assign, ":quest_dont_give_again_period", 73),
-	            (assign, ":result", ":quest_no"),
-	          (try_end),
-	        (else_try),
-	          (eq, ":quest_no", "qst_deliver_message_to_prisoner_lord"),
-			  (eq, "$player_has_homage", 0),
-			  
-	          (try_begin),
-	            (ge, "$g_talk_troop_faction_relation", 0),
-	            (is_between, ":player_level", 5, 25),
-	            (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_father),
-	            (try_begin),
-	              (eq, ":cur_target_troop", 0),
-	              (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_spouse),
-	            (try_end),
-	            #(troop_slot_eq, ":cur_target_troop", slot_troop_is_prisoner, 1),#Skip if the lady's father/husband is not in prison
-				(gt, ":cur_target_troop", -1),
-	            (troop_slot_ge, ":cur_target_troop", slot_troop_prisoner_of_party, 0),
-	            (call_script, "script_search_troop_prisoner_of_party", ":cur_target_troop"),
-	            (assign, ":cur_target_center", reg0),
-	            (is_between, ":cur_target_center", towns_begin, towns_end),#Skip if he is not in a town
-	            (assign, ":quest_target_center", ":cur_target_center"),
-	            (assign, ":quest_target_troop", ":cur_target_troop"),
-	            (assign, ":quest_expiration_days", 30),
-	            (assign, ":quest_dont_give_again_period", 30),
-	            (assign, ":result", ":quest_no"),
-	          (try_end),
-	        (else_try),
-	          (eq, ":quest_no", "qst_duel_for_lady"),
-	          (try_begin),
+            
+            (try_begin),
+              (eq, ":prisoner_relative", -1), #if giver_troop has no father or giver_troop's father is not in prison.
+              (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_spouse), #get giver_troop's spouse
+              (gt, ":cur_target_troop", 0), #if giver_troop has a spouse as a troop in game	              
+                (troop_slot_ge, ":cur_target_troop", slot_troop_prisoner_of_party, 0), #if giver_troop's spouse is in a prison
+              (assign, ":prisoner_relative", ":cur_target_troop"),
+			(try_end),  
+			
+            (try_begin),
+              (eq, ":prisoner_relative", -1), #if ((giver_troop has no father) or (giver_troop's father is not in prison)) and ((giver_troop has no spouse) or (giver_troop's spouse is not in prison)).
+              (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_guardian), #get giver_troop's spouse
+              (gt, ":cur_target_troop", 0), #if giver_troop has a guardian as a troop in game	              
+                (troop_slot_ge, ":cur_target_troop", slot_troop_prisoner_of_party, 0), #if giver_troop's guardian is in a prison
+              (assign, ":prisoner_relative", ":cur_target_troop"),
+			(try_end),
+			
+			(try_begin),
+			  (eq, "$cheat_mode", 1),
+			  (assign, reg0, ":prisoner_relative"),
+			  (display_message, "str_prisoner_relative_is_reg0"),
+			(try_end),
+								            
+			(gt, ":prisoner_relative", -1),
+            #(changed 2) no need to this anymore (troop_slot_ge, ":prisoner_relative", slot_troop_prisoner_of_party, 0),
+            (call_script, "script_search_troop_prisoner_of_party", ":prisoner_relative"),
+            (assign, ":cur_target_center", reg0),	            
+            
+            #(changed 3) no need to check only towns anymore (is_between, ":cur_target_center", towns_begin, towns_end),#Skip if he is not in a town
+            (is_between, ":cur_target_center", walled_centers_begin, walled_centers_end), #Skip if he is not in a walled center
+            
+            (assign, ":quest_target_center", ":cur_target_center"),
+            (assign, ":quest_target_troop", ":prisoner_relative"),
+            (assign, ":quest_expiration_days", 30),
+            (assign, ":quest_dont_give_again_period", 73),
+            (assign, ":result", ":quest_no"),
+          (try_end),
+        (else_try),
+          (eq, ":quest_no", "qst_deliver_message_to_prisoner_lord"),
+		  (eq, "$player_has_homage", 0),
+		  
+          (try_begin),
+            (ge, "$g_talk_troop_faction_relation", 0),
+            (is_between, ":player_level", 5, 25),
+            (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_father),
+            (try_begin),
+              (eq, ":cur_target_troop", 0),
+              (troop_get_slot, ":cur_target_troop", ":giver_troop", slot_troop_spouse),
+            (try_end),
+            #(troop_slot_eq, ":cur_target_troop", slot_troop_is_prisoner, 1),#Skip if the lady's father/husband is not in prison
+			(gt, ":cur_target_troop", -1),
+            (troop_slot_ge, ":cur_target_troop", slot_troop_prisoner_of_party, 0),
+            (call_script, "script_search_troop_prisoner_of_party", ":cur_target_troop"),
+            (assign, ":cur_target_center", reg0),
+            (is_between, ":cur_target_center", towns_begin, towns_end),#Skip if he is not in a town
+            (assign, ":quest_target_center", ":cur_target_center"),
+            (assign, ":quest_target_troop", ":cur_target_troop"),
+            (assign, ":quest_expiration_days", 30),
+            (assign, ":quest_dont_give_again_period", 30),
+            (assign, ":result", ":quest_no"),
+          (try_end),
+        (else_try),
+          (eq, ":quest_no", "qst_duel_for_lady"),
+          (try_begin),
 	            (ge, "$g_talk_troop_faction_relation", 0),
 	            (ge, ":player_level", 10),
 	            (call_script, "script_cf_troop_get_random_enemy_troop_with_occupation", ":giver_troop", slto_kingdom_hero),#Can fail
@@ -17397,7 +18085,7 @@ scripts = [
 	            (try_for_range, ":i_stack", 1, ":num_stacks"),
 	              (party_stack_get_troop_id, ":stack_troop","p_main_party",":i_stack"),
 	              (troop_is_hero, ":stack_troop"),
-	              (store_skill_level, ":cur_surgery_skill", skl_surgery, ":stack_troop"),
+	              (store_skill_level, ":cur_surgery_skill", skl.surgery, ":stack_troop"),
 	              (gt, ":cur_surgery_skill", ":max_surgery_level"),
 	              (assign, ":max_surgery_level", ":cur_surgery_skill"),
 	              (assign, ":best_surgeon", ":stack_troop"),
@@ -17739,8 +18427,8 @@ scripts = [
 	              (troop_get_upgrade_troop, ":level_up_troop", ":quest_target_troop", 0),
 	              (gt, ":level_up_troop", 0),
 	              (assign, ":quest_target_troop", ":level_up_troop"),
-	              (val_mul, ":quest_gold_reward", ":quest_gold_reward", 7),
-	              (val_div, ":quest_gold_reward", ":quest_gold_reward", 4),
+	              (val_mul, ":quest_gold_reward", 7),
+	              (val_div, ":quest_gold_reward", 4),
 	            (try_end),
 	      
 	            (assign, ":quest_xp_reward", ":quest_gold_reward"),
@@ -17845,8 +18533,8 @@ scripts = [
 	            (assign, ":result", ":quest_no"),
 	            (assign, ":quest_expiration_days", 30),
 	            (assign, ":quest_dont_give_again_period", 20),
-	            (assign, "$qst_bring_back_runaway_serfs_num_parties_returned", 0),
-	            (assign, "$qst_bring_back_runaway_serfs_num_parties_fleed", 0),
+	            (assign, "$qst.bring_back_runaway_serfs_num_parties_returned", 0),
+	            (assign, "$qst.bring_back_runaway_serfs_num_parties_fleed", 0),
 	          (try_end),
 	        (else_try),
 	          (eq, ":quest_no", "qst_follow_spy"),
@@ -17881,12 +18569,12 @@ scripts = [
 	            (assign, ":quest_object_center", ":cur_object_center"),
 	            (assign, ":quest_dont_give_again_period", 50),
 	            (assign, ":result", ":quest_no"),
-	            (assign, "$qst_follow_spy_run_away", 0),
-	            (assign, "$qst_follow_spy_meeting_state", 0),
-	            (assign, "$qst_follow_spy_meeting_counter", 0),
-	            (assign, "$qst_follow_spy_spy_back_in_town", 0),
-	            (assign, "$qst_follow_spy_partner_back_in_town", 0),
-	            (assign, "$qst_follow_spy_no_active_parties", 0),
+	            (assign, "$qst.follow_spy_run_away", 0),
+	            (assign, "$qst.follow_spy_meeting_state", 0),
+	            (assign, "$qst.follow_spy_meeting_counter", 0),
+	            (assign, "$qst.follow_spy_spy_back_in_town", 0),
+	            (assign, "$qst.follow_spy_partner_back_in_town", 0),
+	            (assign, "$qst.follow_spy_no_active_parties", 0),
 	          (try_end),
 	        (else_try),
 	          (eq, ":quest_no", "qst_capture_enemy_hero"),
@@ -18000,17 +18688,17 @@ scripts = [
 ##            (val_div, ":cur_level", 5),
 ##            (val_max, ":cur_level", 3),
 ##            (store_add, ":max_parties", 4, ":cur_level"),
-##            (store_random_in_range, "$qst_capture_conspirators_num_parties_to_spawn", 4, ":max_parties"),
-##            (assign, "$qst_capture_conspirators_num_troops_to_capture", 0),
-##            (assign, "$qst_capture_conspirators_num_parties_spawned", 0),
-##            (assign, "$qst_capture_conspirators_leave_meeting_counter", 0),
-##            (assign, "$qst_capture_conspirators_party_1", 0),
-##            (assign, "$qst_capture_conspirators_party_2", 0),
-##            (assign, "$qst_capture_conspirators_party_3", 0),
-##            (assign, "$qst_capture_conspirators_party_4", 0),
-##            (assign, "$qst_capture_conspirators_party_5", 0),
-##            (assign, "$qst_capture_conspirators_party_6", 0),
-##            (assign, "$qst_capture_conspirators_party_7", 0),
+##            (store_random_in_range, "$qst.capture_conspirators_num_parties_to_spawn", 4, ":max_parties"),
+##            (assign, "$qst.capture_conspirators_num_troops_to_capture", 0),
+##            (assign, "$qst.capture_conspirators_num_parties_spawned", 0),
+##            (assign, "$qst.capture_conspirators_leave_meeting_counter", 0),
+##            (assign, "$qst.capture_conspirators_party_1", 0),
+##            (assign, "$qst.capture_conspirators_party_2", 0),
+##            (assign, "$qst.capture_conspirators_party_3", 0),
+##            (assign, "$qst.capture_conspirators_party_4", 0),
+##            (assign, "$qst.capture_conspirators_party_5", 0),
+##            (assign, "$qst.capture_conspirators_party_6", 0),
+##            (assign, "$qst.capture_conspirators_party_7", 0),
 ##          (try_end),
 ##        (else_try),
 ##          (eq, ":quest_no", "qst_defend_nobles_against_peasants"),
@@ -18029,26 +18717,26 @@ scripts = [
 ##            (val_div, ":cur_level", 5),
 ##            (val_max, ":cur_level", 4),
 ##            (store_add, ":max_parties", 4, ":cur_level"),
-##            (store_random_in_range, "$qst_defend_nobles_against_peasants_num_peasant_parties_to_spawn", 4, ":cur_level"),
-##            (store_random_in_range, "$qst_defend_nobles_against_peasants_num_noble_parties_to_spawn", 4, ":cur_level"),
-##            (assign, "$qst_defend_nobles_against_peasants_num_nobles_to_save", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_num_nobles_saved", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_peasant_party_1", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_peasant_party_2", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_peasant_party_3", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_peasant_party_4", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_peasant_party_5", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_peasant_party_6", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_peasant_party_7", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_peasant_party_8", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_noble_party_1", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_noble_party_2", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_noble_party_3", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_noble_party_4", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_noble_party_5", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_noble_party_6", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_noble_party_7", 0),
-##            (assign, "$qst_defend_nobles_against_peasants_noble_party_8", 0),
+##            (store_random_in_range, "$qst.defend_nobles_against_peasants_num_peasant_parties_to_spawn", 4, ":cur_level"),
+##            (store_random_in_range, "$qst.defend_nobles_against_peasants_num_noble_parties_to_spawn", 4, ":cur_level"),
+##            (assign, "$qst.defend_nobles_against_peasants_num_nobles_to_save", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_num_nobles_saved", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_peasant_party_1", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_peasant_party_2", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_peasant_party_3", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_peasant_party_4", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_peasant_party_5", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_peasant_party_6", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_peasant_party_7", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_peasant_party_8", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_noble_party_1", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_noble_party_2", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_noble_party_3", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_noble_party_4", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_noble_party_5", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_noble_party_6", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_noble_party_7", 0),
+##            (assign, "$qst.defend_nobles_against_peasants_noble_party_8", 0),
 ##          (try_end),
 	        (else_try),
 	          (eq, ":quest_no", "qst_incriminate_loyal_commander"),
@@ -18750,7 +19438,7 @@ scripts = [
   
   
   
-  # script_cf_get_random_enemy_center_within_range
+  # script.cf_get_random_enemy_center_within_range
   # Input: arg1 = party_no, arg2 = range (in kms)
   # Output: reg0 = center_no
   ("cf_get_random_enemy_center_within_range",
@@ -18785,7 +19473,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
   
-  # script_cf_faction_get_random_enemy_faction
+  # script.cf_faction_get_random_enemy_faction
   # Input: arg1 = faction_no
   # Output: reg0 = faction_no (Can fail)
   ("cf_faction_get_random_enemy_faction",
@@ -18816,7 +19504,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
 
-  # script_cf_faction_get_random_friendly_faction
+  # script.cf_faction_get_random_friendly_faction
   # Input: arg1 = faction_no
   # Output: reg0 = faction_no (Can fail)
   ("cf_faction_get_random_friendly_faction",
@@ -18849,7 +19537,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),  
   
-  # script_cf_troop_get_random_enemy_troop_with_occupation
+  # script.cf_troop_get_random_enemy_troop_with_occupation
   # Input: arg1 = troop_no,
   # Output: reg0 = enemy_troop_no (Can fail)
   ("cf_troop_get_random_enemy_troop_with_occupation",
@@ -18884,7 +19572,7 @@ scripts = [
   ]),
   
   
-##  # script_cf_troop_get_random_enemy_troop_as_a_town_lord
+##  # script.cf_troop_get_random_enemy_troop_as_a_town_lord
 ##  # Input: arg1 = troop_no
 ##  # Output: reg0 = enemy_troop_no (Can fail)
 ##  ("cf_troop_get_random_enemy_troop_as_a_town_lord",
@@ -18919,7 +19607,7 @@ scripts = [
 ##  ]),
   
   
-  ##  # script_cf_get_random_enemy_with_valid_slot
+  ##  # script.cf_get_random_enemy_with_valid_slot
   ##  # Input: arg1 = faction_no, arg2 = slot_no
   ##  # Output: reg0 = faction_no (Can fail)
   ##  ("cf_get_random_enemy_with_valid_slot",
@@ -18954,7 +19642,7 @@ scripts = [
   ##  ]),
   
   
-##  # script_cf_get_random_kingdom_hero
+##  # script.cf_get_random_kingdom_hero
 ##  # Input: arg1 = faction_no
 ##  # Output: reg0 = troop_no (Can fail)
 ##  ("cf_get_random_kingdom_hero",
@@ -18986,11 +19674,11 @@ scripts = [
 ##  ]),
   
   
-# script_cf_get_random_kingdom_hero_as_lover - removed
+# script.cf_get_random_kingdom_hero_as_lover - removed
 
   
   
-##  # script_cf_get_random_siege_location_with_faction
+##  # script.cf_get_random_siege_location_with_faction
 ##  # Input: arg1 = faction_no
 ##  # Output: reg0 = center_no, Can Fail!
 ##  ("cf_get_random_siege_location_with_faction",
@@ -19021,7 +19709,7 @@ scripts = [
 ##      (assign, reg0, ":result"),
 ##  ]),
   
-##  # script_cf_get_random_siege_location_with_attacker_faction
+##  # script.cf_get_random_siege_location_with_attacker_faction
 ##  # Input: arg1 = faction_no
 ##  # Output: reg0 = center_no, Can Fail!
 ##  ("cf_get_random_siege_location_with_attacker_faction",
@@ -19054,7 +19742,7 @@ scripts = [
   
   
   
-##  # script_cf_get_number_of_random_troops_from_party
+##  # script.cf_get_number_of_random_troops_from_party
 ##  # Input: arg1 = party_no, arg2 = number of troops to remove
 ##  # Output: reg0 = troop_no, Can fail if there are no slots having the required number of units!
 ##  ("cf_get_number_of_random_troops_from_party",
@@ -19097,7 +19785,7 @@ scripts = [
   
   
   
-  # script_cf_get_random_lord_in_a_center_with_faction
+  # script.cf_get_random_lord_in_a_center_with_faction
   # Input: arg1 = faction_no
   # Output: reg0 = troop_no, Can Fail!
   ("cf_get_random_lord_in_a_center_with_faction",
@@ -19138,7 +19826,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
 
-  # script_cf_get_random_lord_except_king_with_faction
+  # script.cf_get_random_lord_except_king_with_faction
   # Input: arg1 = faction_no
   # Output: reg0 = troop_no, Can Fail!
   ("cf_get_random_lord_except_king_with_faction",
@@ -19178,7 +19866,7 @@ scripts = [
   ]),
   
   
-  # script_cf_get_random_lord_from_another_faction_in_a_center
+  # script.cf_get_random_lord_from_another_faction_in_a_center
   # Input: arg1 = faction_no
   # Output: reg0 = troop_no, Can Fail!
   ("cf_get_random_lord_from_another_faction_in_a_center",
@@ -19227,7 +19915,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
   
-  # script_get_closest_walled_center
+  # script.get_closest_walled_center
   # Input: arg1 = party_no
   # Output: reg0 = center_no (closest)
   ("get_closest_walled_center",
@@ -19243,7 +19931,7 @@ scripts = [
       (try_end),
   ]),  
   
-  # script_get_closest_center
+  # script.get_closest_center
   # Input: arg1 = party_no
   # Output: reg0 = center_no (closest)
   ("get_closest_center",
@@ -19260,7 +19948,7 @@ scripts = [
   ]),
   
   
-  # script_get_closest_center_of_faction
+  # script.get_closest_center_of_faction
   # Input: arg1 = party_no, arg2 = kingdom_no
   # Output: reg0 = center_no (closest)
   ("get_closest_center_of_faction",
@@ -19280,7 +19968,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
   
-  # script_get_closest_walled_center_of_faction
+  # script.get_closest_walled_center_of_faction
   # Input: arg1 = party_no, arg2 = kingdom_no
   # Output: reg0 = center_no (closest)
   ("get_closest_walled_center_of_faction",
@@ -19301,7 +19989,7 @@ scripts = [
   ]),
   
   
-##  # script_get_closest_town_of_faction
+##  # script.get_closest_town_of_faction
 ##  # Input: arg1 = party_no, arg2 = kingdom_no
 ##  # Output: reg0 = center_no (closest)
 ##  ("get_closest_town_of_faction",
@@ -19323,7 +20011,7 @@ scripts = [
 ##  ]),
 
   
-  # script_let_nearby_parties_join_current_battle
+  # script.let_nearby_parties_join_current_battle
   # Input: arg1 = besiege_mode, arg2 = dont_add_friends_other_than_accompanying
   # Output: none
   ("let_nearby_parties_join_current_battle",
@@ -19358,14 +20046,12 @@ scripts = [
           (try_end),    
         (try_end),          
 
-		#Quest bandits do not join battle
-		(this_or_next|neg|check_quest_active, "qst_track_down_bandits"),
-			(neg|quest_slot_eq, "qst_track_down_bandits", slot_quest_target_party, ":party_no"),
-		(this_or_next|neg|check_quest_active, "qst_troublesome_bandits"),
-			(neg|quest_slot_eq, "qst_troublesome_bandits", slot_quest_target_party, ":party_no"),
-			
-			
-			
+        #Quest bandits do not join battle
+        (this_or_next|neg|check_quest_active, "qst_track_down_bandits"),
+        (neg|quest_slot_eq, "qst_track_down_bandits", slot_quest_target_party, ":party_no"),
+        (this_or_next|neg|check_quest_active, "qst_troublesome_bandits"),
+        (neg|quest_slot_eq, "qst_troublesome_bandits", slot_quest_target_party, ":party_no"),
+
         (store_distance_to_party_from_party, ":distance", ":party_no", "p_main_party"),
         (lt, ":distance", ":join_distance"),
 
@@ -19468,7 +20154,7 @@ scripts = [
       (try_end),
   ]),
     
-  # script_party_wound_all_members_aux
+  # script.party_wound_all_members_aux
   # Input: arg1 = party_no
   ("party_wound_all_members_aux",
     [
@@ -19492,7 +20178,7 @@ scripts = [
       (try_end),      
   ]),    
   
-  # script_party_wound_all_members
+  # script.party_wound_all_members
   # Input: arg1 = party_no
   ("party_wound_all_members",
     [
@@ -19503,21 +20189,21 @@ scripts = [
   
   
   
-  # script_calculate_battle_advantage
+  # script.calculate_battle_advantage
   # Output: reg0 = battle advantage
   ("calculate_battle_advantage",
     [
       (call_script, "script_party_count_fit_for_battle", "p_collective_friends"),
       (assign, ":friend_count", reg(0)),
       
-      (party_get_skill_level, ":player_party_tactics",  "p_main_party", skl_tactics),
-      (party_get_skill_level, ":ally_party_tactics",  "p_collective_friends", skl_tactics),
+      (party_get_skill_level, ":player_party_tactics",  "p_main_party", skl.tactics),
+      (party_get_skill_level, ":ally_party_tactics",  "p_collective_friends", skl.tactics),
       (val_max, ":player_party_tactics", ":ally_party_tactics"),
      
       (call_script, "script_party_count_fit_for_battle", "p_collective_enemy"),
       (assign, ":enemy_count", reg(0)),
       
-      (party_get_skill_level, ":enemy_party_tactics",  "p_collective_enemy", skl_tactics),
+      (party_get_skill_level, ":enemy_party_tactics",  "p_collective_enemy", skl.tactics),
       
       (val_add, ":friend_count", 1),
       (val_add, ":enemy_count", 1),
@@ -19546,7 +20232,7 @@ scripts = [
   ]),
   
   
-  # script_cf_check_enemies_nearby
+  # script.cf_check_enemies_nearby
   # Input: none
   # Output: none, fails when enemies are nearby
   ("cf_check_enemies_nearby",
@@ -19569,7 +20255,7 @@ scripts = [
       (eq, ":result", 0),
   ]),
   
-  # script_get_heroes_attached_to_center_aux
+  # script.get_heroes_attached_to_center_aux
   # For internal use only
   ("get_heroes_attached_to_center_aux",
     [
@@ -19588,7 +20274,7 @@ scripts = [
       (try_end),
   ]),
   
-  # script_get_heroes_attached_to_center
+  # script.get_heroes_attached_to_center
   # Input: arg1 = center_no, arg2 = party_no_to_collect_heroes
   # Output: none, adds heroes to the party_no_to_collect_heroes party
   ("get_heroes_attached_to_center",
@@ -19617,7 +20303,7 @@ scripts = [
   ]),
   
   
-  # script_get_heroes_attached_to_center_as_prisoner_aux
+  # script.get_heroes_attached_to_center_as_prisoner_aux
   # For internal use only
   ("get_heroes_attached_to_center_as_prisoner_aux",
     [
@@ -19637,7 +20323,7 @@ scripts = [
   ]),
   
   
-  # script_get_heroes_attached_to_center_as_prisoner
+  # script.get_heroes_attached_to_center_as_prisoner
   # Input: arg1 = center_no, arg2 = party_no_to_collect_heroes
   # Output: none, adds heroes to the party_no_to_collect_heroes party
   ("get_heroes_attached_to_center_as_prisoner",
@@ -19649,7 +20335,7 @@ scripts = [
   ]),
   
 ##  
-##  # script_cf_get_party_leader
+##  # script.cf_get_party_leader
 ##  # Input: arg1 = party_no
 ##  # Output: reg0 = troop_no of the leader (Can fail)
 ##  ("cf_get_party_leader",
@@ -19663,7 +20349,7 @@ scripts = [
 ##      (assign, reg0, ":stack_troop"),
 ##  ]),
   
-  # script_give_center_to_faction
+  # script.give_center_to_faction
   # Input: arg1 = center_no, arg2 = faction
   ("give_center_to_faction",
     [
@@ -19736,7 +20422,7 @@ scripts = [
       #(try_end),
     ]),
   
-  # script_give_center_to_faction_aux
+  # script.give_center_to_faction_aux
   # Input: arg1 = center_no, arg2 = faction
   ("give_center_to_faction_aux",
     [
@@ -19781,7 +20467,7 @@ scripts = [
       (try_end),
   ]),
   
-  # script_change_troop_faction
+  # script.change_troop_faction
   # Input: arg1 = troop_no, arg2 = faction
   ("change_troop_faction",
     [
@@ -20018,7 +20704,7 @@ scripts = [
       (assign, "$g_recalculate_ais", 1),
       ]),
 
-  # script_troop_set_title_according_to_faction
+  # script.troop_set_title_according_to_faction
   # Input: arg1 = troop_no, arg2 = faction_no
   ("troop_set_title_according_to_faction",
     [
@@ -20044,7 +20730,7 @@ scripts = [
       (try_end),
       ]),
 
-  # script_give_center_to_lord
+  # script.give_center_to_lord
   # Input: arg1 = center_no, arg2 = lord_troop, arg3 = add_garrison_to_center
   ("give_center_to_lord",
     [
@@ -20084,7 +20770,7 @@ scripts = [
 		
       (else_try),	
 	    (eq, ":lord_troop_id", "trp_player"),
-	    (assign, ":lord_troop_faction", "$players_kingdom"), #was changed on Apr 27 from fac_plyr_sup_fac
+	    (assign, ":lord_troop_faction", "$players_kingdom"), #was changed on Apr 27 from fac.plyr_sup_fac
 
       (else_try),	  
 		(store_troop_faction, ":lord_troop_faction", ":lord_troop_id"),
@@ -20303,7 +20989,7 @@ scripts = [
     (try_end),       
   ]),
   
-##  # script_give_town_to_besiegers
+##  # script.give_town_to_besiegers
 ##  # Input: arg1 = center_no, arg2 = besieger_party
 ##  ("give_town_to_besiegers",
 ##    [
@@ -20344,7 +21030,7 @@ scripts = [
 ##  ]),
 ##  
   
-  # script_get_number_of_hero_centers
+  # script.get_number_of_hero_centers
   # Input: arg1 = troop_no
   # Output: reg0 = number of centers that are ruled by the hero
   ("get_number_of_hero_centers",
@@ -20359,7 +21045,7 @@ scripts = [
   ]),
   
   
-  ##  # script_cf_get_new_center_leader_chance_for_troop
+  ##  # script.cf_get_new_center_leader_chance_for_troop
   ##  # Input: arg1 = troop_no
   ##  # Output: reg0 = chance of the troop to rule a new center
   ##  ("cf_get_new_center_leader_chance_for_troop",
@@ -20396,7 +21082,7 @@ scripts = [
   ##  ]),
   
   
-##  # script_select_kingdom_hero_for_new_center
+##  # script.select_kingdom_hero_for_new_center
 ##  # Input: arg1 = faction_no
 ##  # Output: reg0 = troop_no as the new leader
 ##  ("select_kingdom_hero_for_new_center",
@@ -20422,7 +21108,7 @@ scripts = [
 ##  ]),
   
   
-  # script_cf_get_random_enemy_center
+  # script.cf_get_random_enemy_center
   # Input: arg1 = party_no
   # Output: reg0 = center_no
   ("cf_get_random_enemy_center",
@@ -20456,7 +21142,7 @@ scripts = [
   ]),
   
   
-##  # script_get_random_enemy_town
+##  # script.get_random_enemy_town
 ##  # Input: arg1 = party_no
 ##  # Output: reg0 = center_no
 ##  ("get_random_enemy_town",
@@ -20494,7 +21180,7 @@ scripts = [
   
   
   
-  # script_find_travel_location
+  # script.find_travel_location
   # Input: arg1 = center_no
   # Output: reg0 = new_center_no (to travel within the same faction)
   ("find_travel_location",
@@ -20543,7 +21229,7 @@ scripts = [
   ]),
   
   
-  # script_get_relation_between_parties
+  # script.get_relation_between_parties
   # Input: arg1 = party_no_1, arg2 = party_no_2
   # Output: reg0 = relation between parties
   ("get_relation_between_parties",
@@ -20561,7 +21247,7 @@ scripts = [
         (assign, reg0, ":relation"),
       (try_end),
   ]),
-  # script_calculate_weekly_party_wage
+  # script.calculate_weekly_party_wage
   # Input: arg1 = party_no
   # Output: reg0 = weekly wage
   ("calculate_weekly_party_wage",
@@ -20581,7 +21267,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
 
-  # script_calculate_player_faction_wage
+  # script.calculate_player_faction_wage
   # Input: arg1 = party_no
   # Output: reg0 = weekly wage
   ("calculate_player_faction_wage",
@@ -20619,7 +21305,7 @@ scripts = [
      (store_add, reg0, ":nongarrison_wages", ":garrison_wages"),
     ]),
   
-  # script_calculate_hero_weekly_net_income_and_add_to_wealth
+  # script.calculate_hero_weekly_net_income_and_add_to_wealth
   # Input: arg1 = troop_no
   # Output: none
   ("calculate_hero_weekly_net_income_and_add_to_wealth",
@@ -20670,11 +21356,11 @@ scripts = [
       (troop_set_slot, ":troop_no", slot_troop_wealth, ":cur_wealth"),
   ]),
   
-  # script_cf_reinforce_party
+  # script.cf_reinforce_party
   # Input: arg1 = party_no,
   # Output: none
   # Adds reinforcement to party according to its type and faction
-  # Called from several places, simple_triggers for centers, script_hire_men_to_kingdom_hero_party for hero parties
+  # Called from several places, simple_triggers for centers, script.hire_men_to_kingdom_hero_party for hero parties
   ("cf_reinforce_party",
     [
       (store_script_param_1, ":party_no"),
@@ -20736,7 +21422,7 @@ scripts = [
       (try_end),
   ]),
   
-  # script_hire_men_to_kingdom_hero_party
+  # script.hire_men_to_kingdom_hero_party
   # Input: arg1 = troop_no (hero of the party)
   # Output: none
   ("hire_men_to_kingdom_hero_party",
@@ -20842,7 +21528,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_get_percentage_with_randomized_round
+  # script.get_percentage_with_randomized_round
   # Input: arg1 = value, arg2 = percentage
   # Output: none
   ("get_percentage_with_randomized_round",
@@ -20865,7 +21551,7 @@ scripts = [
       (assign, reg0, ":result"),
       ]),
   
-  # script_create_cattle_herd
+  # script.create_cattle_herd
   # Input: arg1 = center_no, arg2 = amount (0 = default)
   # Output: reg0 = party_no
   ("create_cattle_herd",
@@ -20897,7 +21583,7 @@ scripts = [
       (assign, reg0, ":herd_party"),
   ]),
 
-  #script_buy_cattle_from_village
+  #script.buy_cattle_from_village
   # Input: arg1 = village_no, arg2 = amount, arg3 = single_cost
   # Output: reg0 = party_no
   ("buy_cattle_from_village",
@@ -20941,9 +21627,9 @@ scripts = [
       (try_end),
   ]),
 
-  #script_kill_cattle_from_herd
+  #script.kill_cattle_from_herd
   # Input: arg1 = party_no, arg2 = amount
-  # Output: none (fills trp_temp_troop's inventory)
+  # Output: none (fills trp.temp_troop's inventory)
   ("kill_cattle_from_herd",
     [
       (store_script_param_1, ":party_no"),
@@ -20957,7 +21643,7 @@ scripts = [
       (try_for_range, ":i_slot", 0, ":inv_size"),
         (troop_get_inventory_slot, ":item_id", "trp_temp_troop", ":i_slot"),
         (eq, ":item_id", "itm_cattle_meat"),
-        (troop_set_inventory_slot_modifier, "trp_temp_troop", ":i_slot", imod_fresh),
+        (troop_set_inventory_slot_modifier, "trp_temp_troop", ":i_slot", imod.fresh),
       (try_end),
 
       (party_get_num_companions, ":num_cattle", ":party_no"),
@@ -20969,7 +21655,7 @@ scripts = [
       (try_end),
       ]),
   
-  # script_create_kingdom_hero_party
+  # script.create_kingdom_hero_party
   # Input: arg1 = troop_no, arg2 = center_no
   # Output: $pout_party = party_no
   ("create_kingdom_hero_party",
@@ -21061,7 +21747,7 @@ scripts = [
       (try_end),      
   ]),
   
-  # script_create_kingdom_party_if_below_limit
+  # script.create_kingdom_party_if_below_limit
   # Input: arg1 = faction_no, arg2 = party_type (variables beginning with spt_)
   # Output: reg0 = party_no
   ("create_kingdom_party_if_below_limit",
@@ -21115,7 +21801,7 @@ scripts = [
   ]),
   
   
-  # script_cf_create_kingdom_party
+  # script.cf_create_kingdom_party
   # Input: arg1 = faction_no, arg2 = party_type (variables beginning with spt_)
   # Output: reg0 = party_no
   ("cf_create_kingdom_party",
@@ -21249,7 +21935,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
   
-  # script_get_troop_attached_party
+  # script.get_troop_attached_party
   # Input: arg1 = troop_no
   # Output: reg0 = party_no (-1 if troop's party is not attached to a party)
   ("get_troop_attached_party",
@@ -21266,7 +21952,7 @@ scripts = [
   ]),
 
 
-  # script_center_get_food_consumption
+  # script.center_get_food_consumption
   # Input: arg1 = center_no
   # Output: reg0: food consumption (1 food item counts as 100 units)
   ("center_get_food_consumption",
@@ -21283,7 +21969,7 @@ scripts = [
       (assign, reg0, ":food_consumption"),
   ]),
   
-  # script_center_get_food_store_limit
+  # script.center_get_food_store_limit
   # Input: arg1 = center_no
   # Output: reg0: food consumption (1 food item counts as 100 units)
   ("center_get_food_store_limit",
@@ -21300,7 +21986,7 @@ scripts = [
       (assign, reg0, ":food_store_limit"),
   ]),
 
-  # script_refresh_village_merchant_inventory
+  # script.refresh_village_merchant_inventory
   # Input: arg1 = village_no
   # Output: none
   ("refresh_village_merchant_inventory",
@@ -21361,7 +22047,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_refresh_village_defenders
+  # script.refresh_village_defenders
   # Input: arg1 = village_no
   # Output: none
   ("refresh_village_defenders",
@@ -21376,7 +22062,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_village_set_state
+  # script.village_set_state
   # Input: arg1 = center_no arg2:new_state
   # Output: reg0: food consumption (1 food item counts as 100 units)
   ("village_set_state",
@@ -21436,7 +22122,7 @@ scripts = [
   ]),
 
 
-  # script_process_village_raids
+  # script.process_village_raids
   # Input: none
   # Output: none
   # called from triggers every two hours
@@ -21605,7 +22291,7 @@ scripts = [
   ]),
 
  
-  # script_process_sieges
+  # script.process_sieges
   # Input: none
   # Output: none
   #called from triggers
@@ -21705,7 +22391,7 @@ scripts = [
        (try_end),
   ]),
 
-  # script_lift_siege
+  # script.lift_siege
   # Input: arg1 = center_no, arg2 = display_message
   # Output: none
   #called from triggers
@@ -21727,7 +22413,7 @@ scripts = [
       ]),
 
 
-  # script_process_alarms
+  # script.process_alarms
   # Input: none
   # Output: none
   #called from triggers
@@ -21940,7 +22626,7 @@ scripts = [
       (try_end),
      ]),
 
-  # script_allow_vassals_to_join_indoor_battle
+  # script.allow_vassals_to_join_indoor_battle
   # Input: none
   # Output: none 
   ("allow_vassals_to_join_indoor_battle",
@@ -22036,7 +22722,7 @@ scripts = [
      (try_end),       
      ]),
   
-  # script_party_set_ai_state
+  # script.party_set_ai_state
   # Input: arg1 = party_no, arg2 = new_ai_state, arg3 = action_object (if necessary)
   # Output: none (Can fail)
   
@@ -22440,7 +23126,7 @@ scripts = [
     (try_end),	
     ]),
 
-  # script_process_kingdom_parties_ai
+  # script.process_kingdom_parties_ai
   # This is called more frequently than decide_kingdom_parties_ai
   # Input: none
   # Output: none
@@ -22456,8 +23142,8 @@ scripts = [
        (try_end),
   ]),
   
-  # script_process_hero_ai
-  # This is called more frequently than script_decide_kingdom_party_ais
+  # script.process_hero_ai
+  # This is called more frequently than script.decide_kingdom_party_ais
   #Handles sieges, raids, etc -- does not change the party's basic mission.
   # Input: none
   # Output: none
@@ -22596,7 +23282,7 @@ scripts = [
       (try_end),	
   ]),
   
-  # script_begin_assault_on_center
+  # script.begin_assault_on_center
   # Input: arg1: faction_no
   # Output: none
   #called from triggers
@@ -22825,7 +23511,7 @@ scripts = [
 	 
 	 
 
-  # script_get_center_faction_relation_including_player
+  # script.get_center_faction_relation_including_player
   # Input: arg1: center_no, arg2: target_faction_no
   # Output: reg0: relation
   #called from triggers
@@ -22842,7 +23528,7 @@ scripts = [
      (assign, reg0, ":relation"),
      ]),
    
-   #script_update_report_to_army_quest_note
+   #script.update_report_to_army_quest_note
    ("update_report_to_army_quest_note",  
    [
      (store_script_param, ":faction_no", 1),
@@ -22928,7 +23614,7 @@ scripts = [
    ]),
      
   
-  # script_decide_faction_ai
+  # script.decide_faction_ai
   # Input: arg1: faction_no
   # Output: none
   #called from triggers
@@ -23623,7 +24309,7 @@ scripts = [
     (try_end),     
   ]),
 
-  # script_check_and_finish_active_army_quests_for_faction
+  # script.check_and_finish_active_army_quests_for_faction
   # Input: faction_no
   # Output: none
   ("check_and_finish_active_army_quests_for_faction",
@@ -23661,7 +24347,7 @@ scripts = [
      (try_end),
     ]),
   
-    # script_troop_get_player_relation
+    # script.troop_get_player_relation
     # Input: arg1 = troop_no
     # Output: reg0 = effective relation (modified by troop reputation, honor, etc.)
     ("troop_get_player_relation",
@@ -23698,7 +24384,7 @@ scripts = [
         (assign, reg0, ":effective_relation"),
     ]),
   
-  # script_change_troop_renown
+  # script.change_troop_renown
   # Input: arg1 = troop_no, arg2 = relation difference
   # Output: none
   ("change_troop_renown",
@@ -23756,7 +24442,7 @@ scripts = [
   ]),
   
   
-  # script_change_player_relation_with_troop
+  # script.change_player_relation_with_troop
   # Input: arg1 = troop_no, arg2 = relation difference
   # Output: none
   ("change_player_relation_with_troop",
@@ -23805,7 +24491,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_change_player_relation_with_center
+  # script.change_player_relation_with_center
   # Input: arg1 = party_no, arg2 = relation difference
   # Output: none
   ("change_player_relation_with_center",
@@ -23848,7 +24534,7 @@ scripts = [
   ]),
   
   
-  # script_change_player_relation_with_faction
+  # script.change_player_relation_with_faction
   # Input: arg1 = faction_no, arg2 = relation difference
   # Output: none
   ("change_player_relation_with_faction",
@@ -23880,7 +24566,7 @@ scripts = [
       (call_script, "script_update_all_notes"),
       ]),
 
-  # script_set_player_relation_with_faction
+  # script.set_player_relation_with_faction
   # Input: arg1 = faction_no, arg2 = relation
   # Output: none
   ("set_player_relation_with_faction",
@@ -23895,7 +24581,7 @@ scripts = [
 
   
   
-  # script_change_player_relation_with_faction_ex
+  # script.change_player_relation_with_faction_ex
   # changes relations with other factions also (according to their relations between each other)
   # Input: arg1 = faction_no, arg2 = relation difference
   # Output: none
@@ -23940,7 +24626,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_cf_get_random_active_faction_except_player_faction_and_faction
+  # script.cf_get_random_active_faction_except_player_faction_and_faction
   # Input: arg1 = except_faction_no
   # Output: reg0 = random_faction
   ("cf_get_random_active_faction_except_player_faction_and_faction",
@@ -23968,7 +24654,7 @@ scripts = [
       (assign, reg0, ":selected_faction"),
   ]),
 
-  # script_make_kingdom_hostile_to_player
+  # script.make_kingdom_hostile_to_player
   # Input: arg1 = faction_no, arg2 = relation difference
   # Output: none
   ("make_kingdom_hostile_to_player",
@@ -23985,7 +24671,7 @@ scripts = [
       (try_end),
   ]),
   
-  # script_change_player_honor
+  # script.change_player_honor
   # Input: arg1 = honor difference
   # Output: none
   ("change_player_honor",
@@ -24027,7 +24713,7 @@ scripts = [
 ##      (val_add, "$player_honor", ":honor_dif"),
   ]),
 
-  # script_change_player_party_morale
+  # script.change_player_party_morale
   # Input: arg1 = morale difference
   # Output: none
   ("change_player_party_morale",
@@ -24051,7 +24737,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_cf_player_has_item_without_modifier
+  # script.cf_player_has_item_without_modifier
   # Input: arg1 = item_id, arg2 = modifier
   # Output: none (can_fail)
   ("cf_player_has_item_without_modifier",
@@ -24073,7 +24759,7 @@ scripts = [
       (eq, ":has_without_modifier", 1),
   ]),
 
-  # script_get_player_party_morale_values
+  # script.get_player_party_morale_values
   # Output: reg0 = player_party_morale_target
   ("get_player_party_morale_values",
     [
@@ -24109,7 +24795,7 @@ scripts = [
       
       (assign, "$g_player_party_morale_modifier_food", 0),
       (try_for_range, ":cur_edible", food_begin, food_end),      
-        (call_script, "script_cf_player_has_item_without_modifier", ":cur_edible", imod_rotten),
+        (call_script, "script_cf_player_has_item_without_modifier", ":cur_edible", imod.rotten),
         (item_get_slot, ":food_bonus", ":cur_edible", slot_item_food_bonus),
         
         (val_mul, ":food_bonus", 3),
@@ -24143,7 +24829,7 @@ scripts = [
       (assign, reg0, ":new_morale"),
       ]),
   
-  # script_diplomacy_start_war_between_kingdoms
+  # script.diplomacy_start_war_between_kingdoms
   # Input: arg1 = kingdom_1, arg2 = kingdom_2, arg3 = initializing_war_peace_cond
   # Output: none
   ("diplomacy_start_war_between_kingdoms", #sets relations between two kingdoms and their vassals.
@@ -24358,7 +25044,7 @@ scripts = [
 	  (try_end),	  
 	]),
 	
-  # script_party_calculate_and_set_nearby_friend_enemy_follower_strengths
+  # script.party_calculate_and_set_nearby_friend_enemy_follower_strengths
   # Input: party_no
   # Output: none
   ("party_calculate_and_set_nearby_friend_enemy_follower_strengths",
@@ -24435,7 +25121,7 @@ scripts = [
       (party_set_slot, ":party_no", slot_party_nearby_enemy_strength, ":enemy_strength"),
       ]),
   
-  # script_init_ai_calculation
+  # script.init_ai_calculation
   # Input: none
   # Output: none
   ("init_ai_calculation",
@@ -24465,7 +25151,7 @@ scripts = [
       ]),
 
 
-  # script_recalculate_ais
+  # script.recalculate_ais
   # Input: none
   # Output: none
   
@@ -24492,7 +25178,7 @@ scripts = [
       (try_end),	  
     ]),
 
-  # script_calculate_troop_ai
+  # script.calculate_troop_ai
   # Input: troop_no
   # Output: none
   #Now called directly from scripts
@@ -24512,7 +25198,7 @@ scripts = [
       (try_end),			
     ]),
   
-  # script_diplomacy_start_peace_between_kingdoms
+  # script.diplomacy_start_peace_between_kingdoms
   # Input: arg1 = kingdom_1, arg2 = kingdom_2, arg3 = initializing_war_peace_cond
   # Output: none
   ("diplomacy_start_peace_between_kingdoms", #sets relations between two kingdoms
@@ -24671,7 +25357,7 @@ scripts = [
 	  
   ]),
 
-  # script_randomly_start_war_peace
+  # script.randomly_start_war_peace
   # Input: arg1 = initializing_war_peace_cond (1 = true, 0 = false)
   # Output: none
   
@@ -24794,7 +25480,7 @@ scripts = [
      ]),
 	 
 	 
-  # script_randomly_start_war_peace
+  # script.randomly_start_war_peace
   # Input: arg1 = initializing_war_peace_cond (1 = true, 0 = false)
   # Output: none
 #  ("randomly_start_war_peace",
@@ -24979,7 +25665,7 @@ scripts = [
 
 	 
 	 
-# script_exchange_prisoners_between_factions
+# script.exchange_prisoners_between_factions
 # Input: arg1 = faction_no_1, arg2 = faction_no_2
   ("exchange_prisoners_between_factions",
    [
@@ -25033,7 +25719,7 @@ scripts = [
 	   
     ]),
 
-  # script_add_notification_menu
+  # script.add_notification_menu
   # Input: arg1 = menu_no, arg2 = menu_var_1, arg3 = menu_var_2
   # Output: none
   ("add_notification_menu",
@@ -25057,7 +25743,7 @@ scripts = [
       (try_end),
       ]),
   
-  # script_finish_quest
+  # script.finish_quest
   # Input: arg1 = quest_no, arg2 = finish_percentage
   # Output: none
   ("finish_quest",
@@ -25094,7 +25780,7 @@ scripts = [
   ]),
   
   
-  # script_get_information_about_troops_position
+  # script.get_information_about_troops_position
   # Input: arg1 = troop_no, arg2 = time (0 if present tense, 1 if past tense)
   # Output: s1 = String, reg0 = knows-or-not
   ("get_information_about_troops_position",
@@ -25161,7 +25847,7 @@ scripts = [
       (assign, reg0, ":found"),
   ]),
 
-  # script_recruit_troop_as_companion
+  # script.recruit_troop_as_companion
   # Input: arg1 = troop_no,
   # Output: none
   ("recruit_troop_as_companion",
@@ -25196,7 +25882,7 @@ scripts = [
   ]),
   
 
-  # script_setup_random_scene
+  # script.setup_random_scene
   # Input: arg1 = center_no, arg2 = mission_template_no
   # Output: none
   ("setup_random_scene",
@@ -25237,7 +25923,7 @@ scripts = [
       (jump_to_scene,":scene_to_use"),
   ]),
 
-  # script_enter_dungeon
+  # script.enter_dungeon
   # Input: arg1 = center_no, arg2 = mission_template_no
   # Output: none
   ("enter_dungeon",
@@ -25297,7 +25983,7 @@ scripts = [
       (change_screen_mission),
   ]),
   
-  # script_enter_court
+  # script.enter_court
   # Input: arg1 = center_no
   # Output: none
   #other search term: setup_court
@@ -25512,7 +26198,7 @@ scripts = [
       (change_screen_mission),	  
 	]),  
   
-  # script_find_high_ground_around_pos1
+  # script.find_high_ground_around_pos1
   # Input: pos1 should hold center_position_no
   #        arg1: team_no
   #        arg2: search_radius (in meters)
@@ -25574,7 +26260,7 @@ scripts = [
       (try_end),
   ]),
   
-  # script_select_battle_tactic
+  # script.select_battle_tactic
   # Input: none
   # Output: none
   ("select_battle_tactic",
@@ -25614,7 +26300,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_select_battle_tactic_aux
+  # script.select_battle_tactic_aux
   # Input: team_no
   # Output: battle_tactic
   ("select_battle_tactic_aux",
@@ -25668,7 +26354,7 @@ scripts = [
       (assign, reg0, ":battle_tactic"),
   ]),
   
-  # script_battle_calculate_initial_powers
+  # script.battle_calculate_initial_powers
   # Input: none
   # Output: none
   #("battle_calculate_initial_powers",
@@ -25685,7 +26371,7 @@ scripts = [
   #    (try_end),
   #]),
 
-  # script_battle_tactic_init
+  # script.battle_tactic_init
   # Input: none
   # Output: none
   ("battle_tactic_init",
@@ -25701,7 +26387,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_battle_tactic_init_aux
+  # script.battle_tactic_init_aux
   # Input: team_no, battle_tactic
   # Output: none
   ("battle_tactic_init_aux",
@@ -25732,7 +26418,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_calculate_team_powers
+  # script.calculate_team_powers
   # Input: none
   # Output: ally_power, enemy_power
   ("calculate_team_powers",
@@ -25778,7 +26464,7 @@ scripts = [
        (assign, reg1, ":enemy_power"),         
   ]), #ozan
 
-  # script_apply_effect_of_other_people_on_courage_scores
+  # script.apply_effect_of_other_people_on_courage_scores
   # Input: none
   # Output: none
   ("apply_effect_of_other_people_on_courage_scores",
@@ -25985,7 +26671,7 @@ scripts = [
   ]), #ozan
 
   
-  # script_apply_death_effect_on_courage_scores
+  # script.apply_death_effect_on_courage_scores
   # Input: dead agent id, killer agent id
   # Output: none
   ("apply_death_effect_on_courage_scores",
@@ -26144,7 +26830,7 @@ scripts = [
       (try_end),
       ]), #ozan
 
-  # script_decide_run_away_or_not
+  # script.decide_run_away_or_not
   # Input: none
   # Output: none
   ("decide_run_away_or_not",
@@ -26205,7 +26891,7 @@ scripts = [
       (try_end),      
   ]), #ozan
 
-  # script_battle_tactic_apply
+  # script.battle_tactic_apply
   # Input: none
   # Output: none
   ("battle_tactic_apply",
@@ -26219,7 +26905,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_battle_tactic_apply_aux
+  # script.battle_tactic_apply_aux
   # Input: team_no, battle_tactic
   # Output: battle_tactic
   ("battle_tactic_apply_aux",
@@ -26291,7 +26977,7 @@ scripts = [
   ]),
 
   
-##  # script_siege_defender_tactic_apply
+##  # script.siege_defender_tactic_apply
 ##  # Input: none
 ##  # Output: none
 ##  ("siege_defender_tactic_apply",
@@ -26331,7 +27017,7 @@ scripts = [
 ##  ]),
   
   
-  # script_team_get_class_percentages
+  # script.team_get_class_percentages
   # Input: arg1: team_no, arg2: try for team's enemies
   # Output: reg0: percentage infantry, reg1: percentage archers, reg2: percentage cavalry
   ("team_get_class_percentages",
@@ -26384,7 +27070,7 @@ scripts = [
       (assign, reg2, ":perc_cavalry"),
   ]),
   
-  # script_get_closest3_distance_of_enemies_at_pos1
+  # script.get_closest3_distance_of_enemies_at_pos1
   # Input: arg1: team_no, pos1
   # Output: reg0: distance in cms.
   ("get_closest3_distance_of_enemies_at_pos1",
@@ -26445,7 +27131,7 @@ scripts = [
       (assign, reg3, ":min_distance_3"),
   ]),
 
-  # script_team_get_average_position_of_enemies
+  # script.team_get_average_position_of_enemies
   # Input: arg1: team_no, 
   # Output: pos0: average position.
   ("team_get_average_position_of_enemies",
@@ -26491,7 +27177,7 @@ scripts = [
   ]),
   
   
-  # script_search_troop_prisoner_of_party
+  # script.search_troop_prisoner_of_party
   # Input: arg1 = troop_no
   # Output: reg0 = party_no (-1 if troop is not a prisoner.)
   ("search_troop_prisoner_of_party",
@@ -26510,7 +27196,7 @@ scripts = [
   ]),
   
   
-##  # script_clear_last_quest
+##  # script.clear_last_quest
 ##  # Input: arg1 = troop_no
 ##  # Output: none
 ##  ("clear_last_quest",
@@ -26523,7 +27209,7 @@ scripts = [
   
   
   
-  # script_change_debt_to_troop
+  # script.change_debt_to_troop
   # Input: arg1 = troop_no, arg2 = new debt amount
   # Output: none
   ("change_debt_to_troop",
@@ -26543,7 +27229,7 @@ scripts = [
   
   
   
-  # script_abort_quest
+  # script.abort_quest
   # Input: arg1 = quest_no, arg2 = apply relation penalty
   # Output: none
   ("abort_quest",
@@ -26689,12 +27375,12 @@ scripts = [
         (assign, ":quest_return_penalty", -2),
         (assign, ":quest_expire_penalty", -3),
         (try_begin),
-          (party_is_active, "$qst_follow_spy_spy_party"),
-          (remove_party, "$qst_follow_spy_spy_party"),
+          (party_is_active, "$qst.follow_spy_spy_party"),
+          (remove_party, "$qst.follow_spy_spy_party"),
         (try_end),
         (try_begin),
-          (party_is_active, "$qst_follow_spy_spy_partners_party"),
-          (remove_party, "$qst_follow_spy_spy_partners_party"),
+          (party_is_active, "$qst.follow_spy_spy_partners_party"),
+          (remove_party, "$qst.follow_spy_spy_partners_party"),
         (try_end),
       (else_try),
         (eq, ":quest_no", "qst_capture_enemy_hero"),
@@ -26778,7 +27464,7 @@ scripts = [
         (eq, ":quest_no", "qst_deliver_wine"),
         (assign, ":quest_return_penalty", -1),
         (assign, ":quest_expire_penalty", -3),
-        (val_add, "$debt_to_merchants_guild", "$qst_deliver_wine_debt"),
+        (val_add, "$debt_to_merchants_guild", "$qst.deliver_wine_debt"),
       (else_try),
         (eq, ":quest_no", "qst_move_cattle_herd"),
         (assign, ":quest_return_penalty", -1),
@@ -26892,7 +27578,7 @@ scripts = [
   ]),
   
   
-##  # script_event_center_captured
+##  # script.event_center_captured
 ##  # Input: arg1 = center_no, arg2 = old_faction_no
 ##  # Output: none
 ##  ("event_center_captured",
@@ -26998,7 +27684,7 @@ scripts = [
 ##      (try_end),
 ##  ]),
 
-  # script_cf_is_quest_troop
+  # script.cf_is_quest_troop
   # Input: arg1 = troop_no
   # Output: none (can fail)
   ("cf_is_quest_troop",
@@ -27019,7 +27705,7 @@ scripts = [
   ]),
 
   
-##  # script_calculate_team_strength
+##  # script.calculate_team_strength
 ##  # Input: arg1 = team_no
 ##  # Output: strength
 ##  ("calculate_team_strength",
@@ -27044,7 +27730,7 @@ scripts = [
 ##      (assign, reg0, ":total_strength"),
 ##  ]),
 
-  # script_check_friendly_kills
+  # script.check_friendly_kills
   # Input: none
   # Output: none (changes the morale of the player's party)
   ("check_friendly_kills",
@@ -27058,7 +27744,7 @@ scripts = [
      (try_end),
    ]),
 
-  # script_simulate_retreat
+  # script.simulate_retreat
   # Input: arg1 = players_side_damage, arg2 = enemy_side_damage, arg3 = continue_battle s5 = title_string
   # Output: none
   ("simulate_retreat",
@@ -27175,7 +27861,7 @@ scripts = [
 
   
   
-  # script_simulate_battle_with_agents_aux
+  # script.simulate_battle_with_agents_aux
   # For internal use only
   # Input: arg1 = attacker_side (0 = ally, 1 = enemy), arg2 = damage amount
   # Output: none
@@ -27292,7 +27978,7 @@ scripts = [
   ]),
   
   
-  # script_map_get_random_position_around_position_within_range
+  # script.map_get_random_position_around_position_within_range
   # Input: arg1 = minimum_distance in km, arg2 = maximum_distance in km, pos1 = origin position
   # Output: pos2 = result position
   ("map_get_random_position_around_position_within_range",
@@ -27311,7 +27997,7 @@ scripts = [
   ]),
   
   
-  # script_get_number_of_unclaimed_centers_by_player
+  # script.get_number_of_unclaimed_centers_by_player
   # Input: none
   # Output: reg0 = number of unclaimed centers, reg1 = last unclaimed center_no
   ("get_number_of_unclaimed_centers_by_player",
@@ -27330,7 +28016,7 @@ scripts = [
       (assign, reg0, ":unclaimed_centers"),
   ]),
   
-  # script_troop_count_number_of_enemy_troops
+  # script.troop_count_number_of_enemy_troops
   # Input: arg1 = troop_no
   # Output: reg0 = number_of_enemy_troops
 #  ("troop_count_number_of_enemy_troops",
@@ -27345,7 +28031,7 @@ scripts = [
 #  ]),
   
   
-  # script_cf_troop_check_troop_is_enemy
+  # script.cf_troop_check_troop_is_enemy
   # Input: arg1 = troop_no, arg2 = checked_troop_no
   # Output: none (Can fail)
   ("cf_troop_check_troop_is_enemy",
@@ -27357,7 +28043,7 @@ scripts = [
  ]),
   
   
-  # script_troop_get_leaded_center_with_index
+  # script.troop_get_leaded_center_with_index
   # Input: arg1 = troop_no, arg2 = center index within range between zero and the number of centers that troop owns
   # Output: reg0 = center_no
   ("troop_get_leaded_center_with_index",
@@ -27376,7 +28062,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
   
-  # script_cf_troop_get_random_leaded_walled_center_with_less_strength_priority
+  # script.cf_troop_get_random_leaded_walled_center_with_less_strength_priority
   # Input: arg1 = troop_no, arg2 = preferred_center_no
   # Output: reg0 = center_no (Can fail)
   ("cf_troop_get_random_leaded_walled_center_with_less_strength_priority",
@@ -27426,7 +28112,7 @@ scripts = [
       (assign, reg0, ":result"),
   ]),
 
-  # script_cf_troop_get_random_leaded_town_or_village_except_center
+  # script.cf_troop_get_random_leaded_town_or_village_except_center
   # Input: arg1 = troop_no, arg2 = except_center_no
   # Output: reg0 = center_no (Can fail)
   ("cf_troop_get_random_leaded_town_or_village_except_center",
@@ -27457,7 +28143,7 @@ scripts = [
       (assign, reg0, ":target_center"),
   ]),
 
-  # script_troop_write_owned_centers_to_s2
+  # script.troop_write_owned_centers_to_s2
   # Input: arg1 = troop_no
   # Output: none
   ("troop_write_owned_centers_to_s2",
@@ -27503,7 +28189,7 @@ scripts = [
 	
 ]),
 
-   # script_write_family_relation_as_s3s_s2_to_s4
+   # script.write_family_relation_as_s3s_s2_to_s4
 
   # Inputs: arg1 = troop_no, arg2 = family_no (valid slot no after slot_troop_family_begin)
   # Outputs: s11 = what troop_1 is to troop_2, reg0 = strength of relationship. Normally, "$g_talk_troop" should be troop_2
@@ -27715,14 +28401,14 @@ scripts = [
 	]),
   
   
-  # script_complete_family_relations
+  # script.complete_family_relations
   # Inputs: none
   # Outputs: none
   
   #complete family relations removed
   
-  # script_collect_friendly_parties
-  # Fills the party p_collective_friends with the members of parties attached to main_party and ally_party_no
+  # script.collect_friendly_parties
+  # Fills the party p.collective_friends with the members of parties attached to main_party and ally_party_no
   ("collect_friendly_parties",
     [
       (party_collect_attachments_to_party, "p_main_party", "p_collective_friends"),
@@ -27734,7 +28420,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_encounter_calculate_fit
+  # script.encounter_calculate_fit
   # Input: arg1 = troop_no
   # Output: none
   ("encounter_calculate_fit",
@@ -27768,7 +28454,7 @@ scripts = [
       (assign, reg10, "$g_friend_fit_for_battle"),
   ]),
   
-  # script_encounter_init_variables
+  # script.encounter_init_variables
   # Input: arg1 = troop_no
   # Output: none
   ("encounter_init_variables",
@@ -27838,7 +28524,7 @@ scripts = [
         (try_end),
       (try_end),  
 
-      (try_for_range, ":cur_faction", "fac_kingdom_1", "fac_kingdoms_end"),
+      (try_for_range, ":cur_faction", fac.kingdom_1, fac.kingdoms_end),
         (faction_set_slot, ":cur_faction", slot_faction_num_routed_agents, 0),
       (try_end),
       
@@ -27856,7 +28542,7 @@ scripts = [
 #      (try_end),
   ]),
   
-  # script_calculate_renown_value
+  # script.calculate_renown_value
   # Input: arg1 = troop_no
   # Output: fills $battle_renown_value
   ("calculate_renown_value",
@@ -27889,7 +28575,7 @@ scripts = [
   ]),
        
   
-  ##  # script_calculate_weekly_wage_for_player
+  ##  # script.calculate_weekly_wage_for_player
   ##  # Input: none
   ##  # Output: none
   ##  ("calculate_weekly_wage_for_player",
@@ -27906,7 +28592,7 @@ scripts = [
   ##  ]),
   
   
-  # script_get_first_agent_with_troop_id
+  # script.get_first_agent_with_troop_id
   # Input: arg1 = troop_no
   # Output: agent_id
   ("cf_get_first_agent_with_troop_id",
@@ -27930,7 +28616,7 @@ scripts = [
   ]),
   
   
-  # script_cf_team_get_average_position_of_agents_with_type_to_pos1
+  # script.cf_team_get_average_position_of_agents_with_type_to_pos1
   # Input: arg1 = team_no, arg2 = class_no (grc_everyone, grc_infantry, grc_cavalry, grc_archers, grc_heroes)
   # Output: none, pos1 = average_position (0,0,0 if there are no matching agents)
   ("cf_team_get_average_position_of_agents_with_type_to_pos1",
@@ -27969,7 +28655,7 @@ scripts = [
       (position_move_z, pos1, ":total_pos_z"),
   ]),
   
-  # script_cf_turn_windmill_fans
+  # script.cf_turn_windmill_fans
   # Input: arg1 = instance_no (none = 0)
   # Output: none
   ("cf_turn_windmill_fans",
@@ -27983,7 +28669,7 @@ scripts = [
       (call_script, "script_cf_turn_windmill_fans", ":instance_no"),
   ]),
   
-  # script_print_party_members
+  # script.print_party_members
   # Input: arg1 = party_no
   # Output: s51 = output string. "noone" if the party is empty
   ("print_party_members",
@@ -28013,7 +28699,7 @@ scripts = [
       (try_end),
   ]),
 
-  # script_round_value
+  # script.round_value
   # Input: arg1 = value
   # Output: reg0 = rounded_value
   ("round_value",
@@ -28043,7 +28729,7 @@ scripts = [
   ]),
   
     
-  # script_change_banners_and_chest
+  # script.change_banners_and_chest
   # Input: none
   # Output: none
   ("change_banners_and_chest",
@@ -28064,7 +28750,7 @@ scripts = [
      ]),
 
 
-  # script_remove_siege_objects
+  # script.remove_siege_objects
   # Input: none
   # Output: none
   ("remove_siege_objects",
@@ -28094,7 +28780,7 @@ scripts = [
       (replace_scene_props, "spr_Village_fire_big", "spr_empty"),
       ]),
 
-  # script_describe_relation_to_s63
+  # script.describe_relation_to_s63
   # Input: arg1 = relation (-100 .. 100)
   # Output: none
   ("describe_relation_to_s63",
@@ -28107,7 +28793,7 @@ scripts = [
       (str_store_string, s63, ":str_id"),
   ]),
   
-  # script_describe_center_relation_to_s3
+  # script.describe_center_relation_to_s3
   # Input: arg1 = relation (-100 .. 100)
   # Output: none
   ("describe_center_relation_to_s3",
@@ -28121,7 +28807,7 @@ scripts = [
   ]),
 
 
-  # script_center_ambiance_sounds
+  # script.center_ambiance_sounds
   # Input: none
   # Output: none
   # to be called every two seconds
@@ -28179,7 +28865,7 @@ scripts = [
         (try_end),
   ]),
 
-  # script_center_set_walker_to_type
+  # script.center_set_walker_to_type
   # Input: arg1 = center_no, arg2 = walker_no, arg3 = walker_type, 
   # Output: none
   ("center_set_walker_to_type",
@@ -28250,7 +28936,7 @@ scripts = [
      ]),
 
 
-  # script_cf_center_get_free_walker
+  # script.cf_center_get_free_walker
   # Input: arg1 = center_no
   # Output: reg0 = walker no (can fail)
   ("cf_center_get_free_walker",
@@ -28274,7 +28960,7 @@ scripts = [
        (try_end),
      ]),
     
-  # script_center_remove_walker_type_from_walkers
+  # script.center_remove_walker_type_from_walkers
   # Input: arg1 = center_no, arg2 = walker_type, 
   # Output: reg0 = 1 if comment found, 0 otherwise; s61 will contain comment string if found
   ("center_remove_walker_type_from_walkers",
@@ -28289,7 +28975,7 @@ scripts = [
      ]),
   
           
-  # script_init_town_walkers
+  # script.init_town_walkers
   # Input: none
   # Output: none
   ("init_town_walkers",
@@ -28307,7 +28993,7 @@ scripts = [
   ]),
 
 
-  # script_cf_enter_center_location_bandit_check
+  # script.cf_enter_center_location_bandit_check
   # Input: none
   # Output: none
   ("cf_enter_center_location_bandit_check",
@@ -28385,7 +29071,7 @@ scripts = [
       (change_screen_mission),
       ]),
   
-  # script_init_town_agent
+  # script.init_town_agent
   # Input: none
   # Output: none
   ("init_town_agent",
@@ -28423,7 +29109,7 @@ scripts = [
       (try_end),
       ]),
 
-  # script_init_town_walker_agents
+  # script.init_town_walker_agents
   # Input: none
   # Output: none
   ("init_town_walker_agents",
@@ -28443,7 +29129,7 @@ scripts = [
      (try_end),
   ]),
 
-  # script_agent_get_town_walker_details
+  # script.agent_get_town_walker_details
   # This script assumes this is one of town walkers. 
   # Input: agent_id
   # Output: reg0: town_walker_type, reg1: town_walker_dna
@@ -28695,7 +29381,7 @@ scripts = [
 
 
   
-  # script_tick_town_walkers
+  # script.tick_town_walkers
   # Input: none
   # Output: none
   ("tick_town_walkers",
@@ -28724,7 +29410,7 @@ scripts = [
   ]),
 
 
-  # script_set_town_walker_destination
+  # script.set_town_walker_destination
   # Input: arg1 = agent_no
   # Output: none
   ("set_town_walker_destination",
@@ -28802,7 +29488,7 @@ scripts = [
      (try_end),
   ]),
 
-  # script_town_init_doors
+  # script.town_init_doors
   # Input: door_state (-1 = closed, 1 = open, 0 = use $town_nighttime)
   # Output: none (required for siege mission templates)
   ("town_init_doors",
@@ -28857,7 +29543,7 @@ scripts = [
     (try_end),
   ]),
 
-  # script_siege_init_ai_and_belfry
+  # script.siege_init_ai_and_belfry
   # Input: none
   # Output: none (required for siege mission templates)
   ("siege_init_ai_and_belfry",
@@ -28924,7 +29610,7 @@ scripts = [
     (set_show_messages, 1),
   ]),
 
-  # script_cf_siege_move_belfry
+  # script.cf_siege_move_belfry
   # Input: none
   # Output: none (required for siege mission templates)
   ("cf_siege_move_belfry",
@@ -29002,7 +29688,7 @@ scripts = [
     (assign, "$belfry_positioned", 1),
   ]),
 
-  # script_cf_siege_rotate_belfry_platform
+  # script.cf_siege_rotate_belfry_platform
   # Input: none
   # Output: none (required for siege mission templates)
   ("cf_siege_rotate_belfry_platform",
@@ -29014,7 +29700,7 @@ scripts = [
     (assign, "$belfry_positioned", 2),
   ]),
 
-  # script_cf_siege_assign_men_to_belfry
+  # script.cf_siege_assign_men_to_belfry
   # Input: none
   # Output: none (required for siege mission templates)
   ("cf_siege_assign_men_to_belfry",
@@ -29222,7 +29908,7 @@ scripts = [
     (eq, ":end_trigger", 1),
   ]),
 
-  # script_siege_move_archers_to_archer_positions
+  # script.siege_move_archers_to_archer_positions
   # Input: none
   # Output: none
   ("siege_move_archers_to_archer_positions",
@@ -29278,7 +29964,7 @@ scripts = [
      ]),
 
 
-  # script_store_movement_order_name_to_s1
+  # script.store_movement_order_name_to_s1
   # Input: arg1 = team_no, arg2 = class_no
   # Output: s1 = order_name
   ("store_movement_order_name_to_s1",
@@ -29314,7 +30000,7 @@ scripts = [
     (try_end),
   ]),
 
-  # script_store_riding_order_name_to_s1
+  # script.store_riding_order_name_to_s1
   # Input: arg1 = team_no, arg2 = class_no
   # Output: s1 = order_name
   ("store_riding_order_name_to_s1",
@@ -29335,7 +30021,7 @@ scripts = [
     (try_end),
   ]),
 
-  # script_store_weapon_usage_order_name_to_s1
+  # script.store_weapon_usage_order_name_to_s1
   # Input: arg1 = team_no, arg2 = class_no
   # Output: s1 = order_name
   ("store_weapon_usage_order_name_to_s1",
@@ -29364,7 +30050,7 @@ scripts = [
     (try_end),
   ]),
 
-  # script_team_give_order_from_order_panel
+  # script.team_give_order_from_order_panel
   # Input: arg1 = leader_agent_no, arg2 = class_no
   # Output: none
   ("team_give_order_from_order_panel",
@@ -29453,7 +30139,7 @@ scripts = [
   ]),  
 
 
-  # script_update_order_panel
+  # script.update_order_panel
   # Input: arg1 = team_no
   # Output: none
   ("update_order_panel",
@@ -29646,7 +30332,7 @@ scripts = [
     (try_end),
   ]),
 
-  # script_update_agent_position_on_map
+  # script.update_agent_position_on_map
   # Input: arg1 = agent_no, pos2 = map_size_pos
   # Output: none
   ("update_agent_position_on_map",
@@ -29731,7 +30417,7 @@ scripts = [
     (overlay_set_position, ":agent_overlay", pos0),
   ]),
 
-  # script_convert_3d_pos_to_map_pos
+  # script.convert_3d_pos_to_map_pos
   # Input: pos1 = 3d_pos, pos2 = map_size_pos
   # Output: pos0 = map_pos
   ("convert_3d_pos_to_map_pos",
@@ -29750,7 +30436,7 @@ scripts = [
     (position_set_y, pos0, ":agent_y_pos"),
   ]),
 
-  # script_update_order_flags_on_map
+  # script.update_order_flags_on_map
   # Input: none
   # Output: none
   ("update_order_flags_on_map",
@@ -29792,7 +30478,7 @@ scripts = [
     (try_end),
   ]),
 
-  # script_update_order_panel_checked_classes
+  # script.update_order_panel_checked_classes
   # Input: none   
   # Output: none
   ("update_order_panel_checked_classes",
@@ -29909,7 +30595,7 @@ scripts = [
     (try_end),
   ]),
 
-  # script_update_order_panel_statistics_and_map
+  # script.update_order_panel_statistics_and_map
   # Input: none
   # Output: none
   ("update_order_panel_statistics_and_map", #TODO: Call this in every battle mission template, once per second
@@ -30161,7 +30847,7 @@ scripts = [
     (call_script, "script_update_order_flags_on_map"),
   ]),
 
- # script_set_town_picture
+ # script.set_town_picture
   # Input: none
   # Output: none
   ("set_town_picture",
@@ -30200,7 +30886,7 @@ scripts = [
     ]),
 
 
-  # script_consume_food
+  # script.consume_food
   # Input: arg1: order of the food to be consumed
   # Output: none
   ("consume_food",
@@ -30210,7 +30896,7 @@ scripts = [
       (troop_get_inventory_slot, ":cur_item", "trp_player", ":cur_slot"),
       (is_between, ":cur_item", food_begin, food_end),
       (troop_get_inventory_slot_modifier, ":item_modifier", "trp_player", ":cur_slot"),
-      (neq, ":item_modifier", imod_rotten),
+      (neq, ":item_modifier", imod.rotten),
       (item_slot_eq, ":cur_item", slot_item_is_checked, 0),
       (item_set_slot, ":cur_item", slot_item_is_checked, 1),
       (val_sub, ":selected_food", 1),
@@ -30224,7 +30910,7 @@ scripts = [
 
 	
 	
-  # script_calculate_troop_score_for_center
+  # script.calculate_troop_score_for_center
   # Input: arg1 = troop_no, arg2 = center_no
   # Output: reg0 = score
   ("calculate_troop_score_for_center",
@@ -30273,7 +30959,7 @@ scripts = [
     ]),
   
 
-  # script_assign_lords_to_empty_centers
+  # script.assign_lords_to_empty_centers
   # Input: none
   # Output: none
   #Now ONLY called from the start
@@ -30461,7 +31147,7 @@ scripts = [
     ]),
 
 
-  # script_create_village_farmer_party
+  # script.create_village_farmer_party
   # Input: arg1 = village_no
   # Output: reg0 = party_no
   ("create_village_farmer_party",
@@ -30514,7 +31200,7 @@ scripts = [
 	
     ]),
 
-  #script_do_party_center_trade
+  #script.do_party_center_trade
   # INPUT: arg1 = party_no, arg2 = center_no, arg3 = percentage_change_in_center
   # OUTPUT: reg0 = total_change
   ("do_party_center_trade",
@@ -30574,7 +31260,7 @@ scripts = [
       (assign, reg0, ":total_change"),
   ]),
 
-  #script_player_join_faction
+  #script.player_join_faction
   # INPUT: arg1 = faction_no
   # OUTPUT: none
   ("player_join_faction",
@@ -30696,7 +31382,7 @@ scripts = [
       (assign, "$g_recalculate_ais", 1),
       ]),
 
-  #script_player_leave_faction
+  #script.player_leave_faction
   # INPUT: arg1 = give_back_fiefs
   # OUTPUT: none
   ("player_leave_faction",
@@ -30808,7 +31494,7 @@ scripts = [
     ]),
 
 	
-  #script_activate_player_faction
+  #script.activate_player_faction
   # INPUT: arg1 = last_interaction_with_faction
   # OUTPUT: none
   
@@ -30821,7 +31507,7 @@ scripts = [
     [
     (store_script_param, ":liege", 1),
 
-	#This moved to top, so that mnu_notification does not occur twice
+	#This moved to top, so that mnu.notification does not occur twice
 	(try_begin),
 		(faction_slot_eq, "fac_player_supporters_faction", slot_faction_state, sfs_inactive),
 		(neg|is_between, ":liege", pretenders_begin, pretenders_end),
@@ -30905,7 +31591,7 @@ scripts = [
 
 
 
-  #script_agent_reassign_team
+  #script.agent_reassign_team
   # INPUT: arg1 = agent_no
   # OUTPUT: none
   ("agent_reassign_team",
@@ -30937,7 +31623,7 @@ scripts = [
       (try_end),
       ]),
 
-  #script_start_quest
+  #script.start_quest
   # INPUT: arg1 = quest_no, arg2 = giver_troop_no, s2 = description_text
   # OUTPUT: none
   ("start_quest",
@@ -30988,7 +31674,7 @@ scripts = [
      (display_message, "str_quest_log_updated"),
    ]),
 
-  #script_conclude_quest
+  #script.conclude_quest
   # INPUT: arg1 = quest_no
   # OUTPUT: none
   ("conclude_quest",
@@ -31000,7 +31686,7 @@ scripts = [
       (add_quest_note_from_sreg, ":quest_no", 7, "@This quest has been concluded. Talk to {s59} to finish it.", 0),
     ]),
 
-  #script_succeed_quest
+  #script.succeed_quest
   # INPUT: arg1 = quest_no
   # OUTPUT: none
   ("succeed_quest",
@@ -31012,7 +31698,7 @@ scripts = [
       (add_quest_note_from_sreg, ":quest_no", 7, "@This quest has been successfully completed. Talk to {s59} to claim your reward.", 0),
     ]),
 
-  #script_fail_quest
+  #script.fail_quest
   # INPUT: arg1 = quest_no
   # OUTPUT: none
   ("fail_quest",
@@ -31024,7 +31710,7 @@ scripts = [
       (add_quest_note_from_sreg, ":quest_no", 7, "@This quest has failed. Talk to {s59} to explain the situation.", 0),
     ]),
 
-  #script_report_quest_troop_positions
+  #script.report_quest_troop_positions
   # INPUT: arg1 = quest_no, arg2 = troop_no, arg3 = note_index
   # OUTPUT: none
   ("report_quest_troop_positions",
@@ -31038,7 +31724,7 @@ scripts = [
       (call_script, "script_update_troop_location_notes", ":troop_no", 1),
     ]),
    
-  #script_end_quest
+  #script.end_quest
   # INPUT: arg1 = quest_no
   # OUTPUT: none
   ("end_quest",
@@ -31069,7 +31755,7 @@ scripts = [
       (try_end),
     ]),
 
-  #script_cancel_quest
+  #script.cancel_quest
   # INPUT: arg1 = quest_no
   # OUTPUT: none
   ("cancel_quest",
@@ -31091,7 +31777,7 @@ scripts = [
      (try_end),
      ]),
 
-##  #script_get_available_mercenary_troop_and_amount_of_center
+##  #script.get_available_mercenary_troop_and_amount_of_center
 ##  # INPUT: arg1 = center_no
 ##  # OUTPUT: reg0 = mercenary_troop_type, reg1 = amount
 ##  ("get_available_mercenary_troop_and_amount_of_center",
@@ -31113,7 +31799,7 @@ scripts = [
 ##     ]),
 ##
 
-  #script_update_village_market_towns
+  #script.update_village_market_towns
   # INPUT: none
   # OUTPUT: none
   ("update_village_market_towns",
@@ -31153,7 +31839,7 @@ scripts = [
 
       
 
-  #script_update_mercenary_units_of_towns
+  #script.update_mercenary_units_of_towns
   # INPUT: none
   # OUTPUT: none
   ("update_mercenary_units_of_towns",
@@ -31165,7 +31851,7 @@ scripts = [
     (try_end),
      ]),
      
-  #script_update_volunteer_troops_in_village
+  #script.update_volunteer_troops_in_village
   # INPUT: arg1 = center_no
   # OUTPUT: none
   ("update_volunteer_troops_in_village",
@@ -31219,7 +31905,7 @@ scripts = [
        (party_set_slot, ":center_no", slot_center_volunteer_troop_amount, ":amount"),
      ]),
 
-  #script_update_npc_volunteer_troops_in_village
+  #script.update_npc_volunteer_troops_in_village
   # INPUT: arg1 = center_no
   # OUTPUT: none
   ("update_npc_volunteer_troops_in_village",
@@ -31252,7 +31938,7 @@ scripts = [
        (party_set_slot, ":center_no", slot_center_npc_volunteer_troop_amount, ":amount"),
      ]),
 
-  #script_update_companion_candidates_in_taverns
+  #script.update_companion_candidates_in_taverns
   # INPUT: none
   # OUTPUT: none
   ("update_companion_candidates_in_taverns",
@@ -31284,7 +31970,7 @@ scripts = [
       (try_end),
      ]),
 
-  #script_update_ransom_brokers
+  #script.update_ransom_brokers
   # INPUT: none
   # OUTPUT: none
   ("update_ransom_brokers",
@@ -31300,7 +31986,7 @@ scripts = [
      (party_set_slot,"p_town_2",slot_center_ransom_broker,"trp_ramun_the_slave_trader"),
      ]),
 
-  #script_update_tavern_travellers
+  #script.update_tavern_travellers
   # INPUT: none
   # OUTPUT: none
   ("update_tavern_travellers",
@@ -31325,74 +32011,74 @@ scripts = [
 	 (troop_set_slot, "trp_belligerent_drunk", slot_troop_cur_center, "p_town_1"),
      ]),
 
-  #script_update_villages_infested_by_bandits
+  # script_update_villages_infested_by_bandits
   # INPUT: none
   # OUTPUT: none
   ("update_villages_infested_by_bandits",
     [(try_for_range, ":village_no", villages_begin, villages_end),
-       (try_begin),
-         (check_quest_active, "qst_eliminate_bandits_infesting_village"),
-         (quest_slot_eq, "qst_eliminate_bandits_infesting_village", slot_quest_target_center, ":village_no"),
-         (quest_get_slot, ":cur_state", "qst_eliminate_bandits_infesting_village", slot_quest_current_state),
-         (val_add, ":cur_state", 1),
-         (try_begin),
-           (lt, ":cur_state", 3),
-           (quest_set_slot, "qst_eliminate_bandits_infesting_village", slot_quest_current_state, ":cur_state"),
-         (else_try),
-           (party_set_slot, ":village_no", slot_village_infested_by_bandits, 0),
-           (call_script, "script_abort_quest", "qst_eliminate_bandits_infesting_village", 2),
-         (try_end),
-       (else_try),
-         (check_quest_active, "qst_deal_with_bandits_at_lords_village"),
-         (quest_slot_eq, "qst_deal_with_bandits_at_lords_village", slot_quest_target_center, ":village_no"),
-         (quest_get_slot, ":cur_state", "qst_deal_with_bandits_at_lords_village", slot_quest_current_state),
-         (val_add, ":cur_state", 1),
-         (try_begin),
-           (lt, ":cur_state", 3),
-           (quest_set_slot, "qst_deal_with_bandits_at_lords_village", slot_quest_current_state, ":cur_state"),
-         (else_try),
-           (party_set_slot, ":village_no", slot_village_infested_by_bandits, 0),
-           (call_script, "script_abort_quest", "qst_deal_with_bandits_at_lords_village", 2),
-         (try_end),
-       (else_try),
-         (party_set_slot, ":village_no", slot_village_infested_by_bandits, 0),
-         (store_random_in_range, ":random_no", 0, 100),
-         (assign, ":continue", 1),
-         (try_begin),
-           (check_quest_active, "qst_collect_taxes"),
-           (quest_slot_eq, "qst_collect_taxes", slot_quest_target_center, ":village_no"),
-           (assign, ":continue", 0),
-         (else_try),
-           (check_quest_active, "qst_train_peasants_against_bandits"),
-           (quest_slot_eq, "qst_train_peasants_against_bandits", slot_quest_target_center, ":village_no"),
-           (assign, ":continue", 0),
-         (try_end),
-         (eq, ":continue", 1),
-         (lt, ":random_no", 3),
-         (store_random_in_range, ":random_no", 0, 3),
-         (try_begin),
-           (eq, ":random_no", 0),
-           (assign, ":bandit_troop", "trp_bandit"),
-         (else_try),
-           (eq, ":random_no", 1),
-           (assign, ":bandit_troop", "trp_mountain_bandit"),
-         (else_try),
-           (assign, ":bandit_troop", "trp_forest_bandit"),
-         (try_end),
-         (party_set_slot, ":village_no", slot_village_infested_by_bandits, ":bandit_troop"),
-         #Reduce prosperity of the village by 3: reduce to -1
-         (call_script, "script_change_center_prosperity", ":village_no", -1),
-		 (val_add, "$newglob_total_prosperity_from_bandits", -1),
-         (try_begin),
-           (eq, "$cheat_mode", 2),
-           (str_store_party_name, s1, ":village_no"),
-           (display_message, "@{!}DEBUG --{s1} is infested by bandits."),
-         (try_end),
-       (try_end),
-     (try_end),
+      (try_begin),
+        (check_quest_active, "qst_eliminate_bandits_infesting_village"),
+        (quest_slot_eq, "qst_eliminate_bandits_infesting_village", slot_quest_target_center, ":village_no"),
+        (quest_get_slot, ":cur_state", "qst_eliminate_bandits_infesting_village", slot_quest_current_state),
+        (val_add, ":cur_state", 1),
+        (try_begin),
+          (lt, ":cur_state", 3),
+          (quest_set_slot, "qst_eliminate_bandits_infesting_village", slot_quest_current_state, ":cur_state"),
+        (else_try),
+          (party_set_slot, ":village_no", slot_village_infested_by_bandits, 0),
+          (call_script, "script_abort_quest", "qst_eliminate_bandits_infesting_village", 2),
+        (try_end),
+      (else_try),
+        (check_quest_active, "qst_deal_with_bandits_at_lords_village"),
+        (quest_slot_eq, "qst_deal_with_bandits_at_lords_village", slot_quest_target_center, ":village_no"),
+        (quest_get_slot, ":cur_state", "qst_deal_with_bandits_at_lords_village", slot_quest_current_state),
+        (val_add, ":cur_state", 1),
+        (try_begin),
+          (lt, ":cur_state", 3),
+          (quest_set_slot, "qst_deal_with_bandits_at_lords_village", slot_quest_current_state, ":cur_state"),
+        (else_try),
+          (party_set_slot, ":village_no", slot_village_infested_by_bandits, 0),
+          (call_script, "script_abort_quest", "qst_deal_with_bandits_at_lords_village", 2),
+        (try_end),
+      (else_try),
+        (party_set_slot, ":village_no", slot_village_infested_by_bandits, 0),
+        (store_random_in_range, ":random_no", 0, 100),
+        (assign, ":continue", 1),
+        (try_begin),
+          (check_quest_active, "qst_collect_taxes"),
+          (quest_slot_eq, "qst_collect_taxes", slot_quest_target_center, ":village_no"),
+          (assign, ":continue", 0),
+        (else_try),
+          (check_quest_active, "qst_train_peasants_against_bandits"),
+          (quest_slot_eq, "qst_train_peasants_against_bandits", slot_quest_target_center, ":village_no"),
+          (assign, ":continue", 0),
+        (try_end),
+        (eq, ":continue", 1),
+        (lt, ":random_no", 3),
+        (store_random_in_range, ":random_no", 0, 3),
+        (try_begin),
+          (eq, ":random_no", 0),
+          (assign, ":bandit_troop", "trp_bandit"),
+        (else_try),
+          (eq, ":random_no", 1),
+          (assign, ":bandit_troop", "trp_mountain_bandit"),
+        (else_try),
+          (assign, ":bandit_troop", "trp_forest_bandit"),
+          (try_end),
+            (party_set_slot, ":village_no", slot_village_infested_by_bandits, ":bandit_troop"),
+            #Reduce prosperity of the village by 3: reduce to -1
+            (call_script, "script_change_center_prosperity", ":village_no", -1),
+		        (val_add, "$newglob_total_prosperity_from_bandits", -1),
+            (try_begin),
+              (eq, "$cheat_mode", 2),
+              (str_store_party_name, s1, ":village_no"),
+              (display_message, "@{!}DEBUG --{s1} is infested by bandits."),
+            (try_end),
+          (try_end),
+        (try_end),
      ]),
 
-  #script_update_booksellers
+  #script.update_booksellers
   # INPUT: none
   # OUTPUT: none
   ("update_booksellers",
@@ -31409,7 +32095,7 @@ scripts = [
 	 
      ]),
      
-  #script_update_tavern_minstels
+  #script.update_tavern_minstels
   # INPUT: none
   # OUTPUT: none
   ("update_tavern_minstrels",
@@ -31442,7 +32128,7 @@ scripts = [
 	]), 
 	
  
-  #script_update_faction_notes
+  #script.update_faction_notes
   # INPUT: faction_no
   # OUTPUT: none
   ("update_faction_notes",
@@ -31650,7 +32336,7 @@ scripts = [
 	 
 	 
 	 
-  #script_update_faction_traveler_notes
+  #script.update_faction_traveler_notes
   # INPUT: faction_no
   # OUTPUT: none
   ("update_faction_traveler_notes",
@@ -31668,7 +32354,7 @@ scripts = [
      ]),
 
 
-  #script_update_troop_notes
+  #script.update_troop_notes
   # INPUT: troop_no
   # OUTPUT: none
   ("update_troop_notes",
@@ -31805,7 +32491,7 @@ scripts = [
 ##     (try_end),
      ]),
 
-  #script_update_troop_location_notes
+  #script.update_troop_location_notes
   # INPUT: troop_no
   # OUTPUT: none
   ("update_troop_location_notes",
@@ -31829,7 +32515,7 @@ scripts = [
       (try_end),
      ]),
 
-  #script_update_troop_location_notes_prisoned
+  #script.update_troop_location_notes_prisoned
   # INPUT: troop_no
   # OUTPUT: none
   ("update_troop_location_notes_prisoned",
@@ -31959,7 +32645,7 @@ scripts = [
 		(try_end),	 
     ]),	 
 	 
-  #script_update_center_notes
+  #script.update_center_notes
   # INPUT: center_no
   # OUTPUT: none
   ("update_center_notes",
@@ -32027,7 +32713,7 @@ scripts = [
      ]),
       
 
-  #script_update_center_recon_notes
+  #script.update_center_recon_notes
   # INPUT: center_no
   # OUTPUT: none
   ("update_center_recon_notes",
@@ -32045,7 +32731,7 @@ scripts = [
      (try_end),
      ]),
   
-  #script_update_all_notes
+  #script.update_all_notes
   # INPUT: none
   # OUTPUT: none
   ("update_all_notes",
@@ -32065,7 +32751,7 @@ scripts = [
       (try_end),
     ]),
 
-  #script_agent_troop_get_banner_mesh
+  #script.agent_troop_get_banner_mesh
   # INPUT: agent_no, troop_no
   # OUTPUT: banner_mesh
   ("agent_troop_get_banner_mesh",
@@ -32115,13 +32801,36 @@ scripts = [
              (faction_slot_eq, ":cur_faction", slot_faction_banner, ":banner_mesh"),
              (assign, ":already_used", 1),
            (try_end),
+           (try_begin),
+             (neg|is_between, ":banner_mesh", arms_meshes_begin, arms_meshes_end_minus_one),
+             (assign, ":already_used", 1),
+           (try_end),
            (eq, ":already_used", 0), #otherwise use the default banner mesh
          (else_try),
+        # #INVASION MODE START
+        # (assign, ":personal_banners", 0),
+        # (try_begin),
+        #   (ge, ":agent_no", 0),
+        #   (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+        #   (agent_get_team, ":agent_team", ":agent_no"),
+        #   (team_get_faction, ":team_faction_no", ":agent_team"),
+        #   (this_or_next|eq, ":team_faction_no", "fac_outlaws"),
+        #   (eq, ":team_faction_no", "fac_ccoop_all_stars"),
+        #   (assign, ":personal_banners", 1),
+        # (try_end),
+        # (this_or_next|eq, ":personal_banners", 1),
+        # #INVASION MODE END
            (agent_get_team, ":agent_team", ":agent_no"),
            (team_get_faction, ":team_faction_no", ":agent_team"),
 
            (try_begin),
              (agent_is_human, ":agent_no"),
+             (try_begin),
+               (this_or_next|eq, ":team_faction_no", "fac_outlaws"),
+               (eq, ":team_faction_no", "fac_ccoop_all_stars"),
+               (agent_get_troop_id, ":troop_no", ":agent_no"),
+               (store_troop_faction, ":team_faction_no", ":troop_no"),
+             (try_end),
              (faction_get_slot, ":banner_mesh", ":team_faction_no", slot_faction_banner),
            (else_try),
              (agent_get_rider, ":rider_agent_no", ":agent_no"),
@@ -32208,7 +32917,7 @@ scripts = [
        (try_end),
        (assign, reg0, ":banner_mesh"),
      ]),
-  #script_shield_item_set_banner
+  #script.shield_item_set_banner
   # INPUT: agent_no
   # OUTPUT: none
   ("shield_item_set_banner",
@@ -32221,7 +32930,7 @@ scripts = [
      ]),
 
   
-  #script_troop_agent_set_banner
+  #script.troop_agent_set_banner
   # INPUT: agent_no
   # OUTPUT: none
   ("troop_agent_set_banner",
@@ -32233,7 +32942,7 @@ scripts = [
        (cur_agent_set_banner_tableau_material, ":tableau_no", reg0),
      ]),
 
-##  #script_shield_item_set_banner
+##  #script.shield_item_set_banner
 ##  # INPUT: agent_no
 ##  # OUTPUT: none
 ##  ("shield_item_set_banner",
@@ -32296,7 +33005,7 @@ scripts = [
 ##       (cur_item_set_tableau_material, ":tableau_no", ":banner_troop"),
 ##     ]),
 
-  #script_add_troop_to_cur_tableau
+  #script.add_troop_to_cur_tableau
   # INPUT: troop_no
   # OUTPUT: none
   ("add_troop_to_cur_tableau",
@@ -32379,7 +33088,7 @@ scripts = [
        (cur_tableau_add_sun_light, pos8, 175,150,125),
      ]),
 
-  #script_add_troop_to_cur_tableau_for_character
+  #script.add_troop_to_cur_tableau_for_character
   # INPUT: troop_no
   # OUTPUT: none
   ("add_troop_to_cur_tableau_for_character",
@@ -32433,7 +33142,7 @@ scripts = [
        (cur_tableau_add_sun_light, pos8, 175,150,125),
      ]),
 
-  #script_add_troop_to_cur_tableau_for_inventory
+  #script.add_troop_to_cur_tableau_for_inventory
   # INPUT: troop_no
   # OUTPUT: none
   ("add_troop_to_cur_tableau_for_inventory",
@@ -32489,7 +33198,7 @@ scripts = [
        (cur_tableau_add_sun_light, pos8, 175,150,125),
      ]),
 
-  #script_add_troop_to_cur_tableau_for_profile
+  #script.add_troop_to_cur_tableau_for_profile
   # INPUT: troop_no
   # OUTPUT: none
   ("add_troop_to_cur_tableau_for_profile",
@@ -32554,7 +33263,7 @@ scripts = [
        (cur_tableau_add_sun_light, pos8, 175,150,125),
      ]),
 
-  #script_add_troop_to_cur_tableau_for_retirement
+  #script.add_troop_to_cur_tableau_for_retirement
   # INPUT: type
   # OUTPUT: none
   ("add_troop_to_cur_tableau_for_retirement", [
@@ -32666,7 +33375,7 @@ scripts = [
     (cur_tableau_add_sun_light, pos8, 175,150,125),
     ]),
   
-  #script_add_troop_to_cur_tableau_for_party
+  #script.add_troop_to_cur_tableau_for_party
   # INPUT: troop_no
   # OUTPUT: none
   ("add_troop_to_cur_tableau_for_party",
@@ -32734,7 +33443,7 @@ scripts = [
        (cur_tableau_add_sun_light, pos8, 175,150,125),
      ]),
 
-  #script_get_prosperity_text_to_s50
+  #script.get_prosperity_text_to_s50
   # INPUT: center_no
   # OUTPUT: none
   ("get_prosperity_text_to_s50",
@@ -32758,7 +33467,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_spawn_bandits
+  #script.spawn_bandits
   # INPUT: none
   # OUTPUT: none
   ("spawn_bandits",
@@ -32972,7 +33681,7 @@ scripts = [
 	(try_end),
      ]),
 
-  #script_count_mission_casualties_from_agents
+  #script.count_mission_casualties_from_agents
   # INPUT: none
   # OUTPUT: none
   ("count_mission_casualties_from_agents",
@@ -33076,7 +33785,7 @@ scripts = [
      (try_end),
      ]),
 
-  #script_get_max_skill_of_player_party
+  #script.get_max_skill_of_player_party
   # INPUT: arg1 = skill_no
   # OUTPUT: reg0 = max_skill, reg1 = skill_owner_troop_no
   ("get_max_skill_of_player_party",
@@ -33098,7 +33807,7 @@ scripts = [
      (assign, reg1, ":skill_owner"),
      ]),
 
-  #script_upgrade_hero_party
+  #script.upgrade_hero_party
   # INPUT: arg1 = party_id, arg2 = xp_amount
   ("upgrade_hero_party",
     [
@@ -33107,7 +33816,7 @@ scripts = [
       (party_upgrade_with_xp, ":party_no", ":xp_amount", 0),
     ]),
 
-  #script_get_improvement_details
+  #script.get_improvement_details
   # INPUT: arg1 = improvement
   # OUTPUT: reg0 = base_cost
   ("get_improvement_details",
@@ -33145,7 +33854,7 @@ scripts = [
      (try_end),
      ]),
   
-  #script_cf_troop_agent_is_alive
+  #script.cf_troop_agent_is_alive
   # INPUT: arg1 = troop_id
   ("cf_troop_agent_is_alive",
     [(store_script_param, ":troop_no", 1),
@@ -33159,7 +33868,7 @@ scripts = [
      (gt, ":alive_count", 0),
      ]),
 
-  #script_cf_village_recruit_volunteers_cond
+  #script.cf_village_recruit_volunteers_cond
   # INPUT: none
   # OUTPUT: none
   ("cf_village_recruit_volunteers_cond",
@@ -33218,7 +33927,7 @@ scripts = [
 	 
      ]),
 
-  #script_village_recruit_volunteers_recruit
+  #script.village_recruit_volunteers_recruit
   # INPUT: none
   # OUTPUT: none
   ("village_recruit_volunteers_recruit",
@@ -33235,7 +33944,7 @@ scripts = [
      (troop_remove_gold, "trp_player", ":cost"),
      ]),
 
-  #script_get_troop_item_amount
+  #script.get_troop_item_amount
   # INPUT: arg1 = troop_no, arg2 = item_no
   # OUTPUT: reg0 = item_amount
   ("get_troop_item_amount",
@@ -33251,7 +33960,7 @@ scripts = [
      (assign, reg0, ":count"),
      ]),
 
-  #script_get_name_from_dna_to_s50
+  #script.get_name_from_dna_to_s50
   # INPUT: arg1 = dna
   # OUTPUT: s50 = name
   ("get_name_from_dna_to_s50",
@@ -33269,7 +33978,7 @@ scripts = [
      (str_store_string, s50, ":selected_surname"),
      ]),
      
-  #script_change_center_prosperity
+  #script.change_center_prosperity
   # INPUT: arg1 = center_no, arg2 = difference
   # OUTPUT: none
   ("change_center_prosperity",
@@ -33337,7 +34046,7 @@ scripts = [
 	 
      ]),
 
-  #script_get_center_ideal_prosperity
+  #script.get_center_ideal_prosperity
   # INPUT: arg1 = center_no
   # OUTPUT: reg0 = ideal_prosperity
   ("get_center_ideal_prosperity",
@@ -33417,7 +34126,7 @@ scripts = [
 
 
 	
-  #script_get_poorest_village_of_faction
+  #script.get_poorest_village_of_faction
   # INPUT: arg1 = center_no
   # OUTPUT: reg0 = ideal_prosperity
   ("get_poorest_village_of_faction",
@@ -33435,7 +34144,7 @@ scripts = [
      (assign, reg0, ":min_prosperity_village"),
      ]),
 
-  #script_troop_add_gold
+  #script.troop_add_gold
   # INPUT: arg1 = troop_no, arg2 = amount
   # OUTPUT: none
   ("troop_add_gold",
@@ -33916,7 +34625,7 @@ scripts = [
 			(try_end),
      ]),
 
-  #script_event_player_defeated_enemy_party
+  #script.event_player_defeated_enemy_party
   # INPUT: none
   # OUTPUT: none
   ("event_player_defeated_enemy_party",
@@ -33942,7 +34651,7 @@ scripts = [
 
      ]),
 
-  #script_event_player_captured_as_prisoner
+  #script.event_player_captured_as_prisoner
   # INPUT: none
   # OUTPUT: none
   ("event_player_captured_as_prisoner",
@@ -34075,8 +34784,8 @@ scripts = [
 
 #NPC companion changes end
 
-  #script_reduce_companion_morale_for_clash
-  #script_calculate_ransom_amount_for_troop
+  #script.reduce_companion_morale_for_clash
+  #script.calculate_ransom_amount_for_troop
   # INPUT: arg1 = troop_no for companion1 arg2 = troop_no for companion2 arg3 = slot_for_clash_state
   # slot_for_clash_state means: 1=give full penalty to companion1; 2=give full penalty to companion2; 3=give penalty equally
   ("reduce_companion_morale_for_clash",
@@ -34105,7 +34814,7 @@ scripts = [
 
 #Hunting scripts end
 
-  #script_calculate_ransom_amount_for_troop
+  #script.calculate_ransom_amount_for_troop
   # INPUT: arg1 = troop_no
   # OUTPUT: reg0 = ransom_amount
   ("calculate_ransom_amount_for_troop",
@@ -34151,7 +34860,7 @@ scripts = [
      (assign, reg0, ":random_ransom_amount"),
      ]),  
 
-  #script_offer_ransom_amount_to_player_for_prisoners_in_party
+  #script.offer_ransom_amount_to_player_for_prisoners_in_party
   # INPUT: arg1 = party_no
   # OUTPUT: reg0 = result (1 = offered, 0 = not offered)
   ("offer_ransom_amount_to_player_for_prisoners_in_party",
@@ -34180,7 +34889,7 @@ scripts = [
      (assign, reg0, ":result"),
      ]),
 
-  # script_event_hero_taken_prisoner_by_player
+  # script.event_hero_taken_prisoner_by_player
   # Input: arg1 = troop_no
   # Output: none
   ("event_hero_taken_prisoner_by_player",
@@ -34207,7 +34916,7 @@ scripts = [
       (call_script, "script_update_troop_location_notes", ":troop_no", 0),
   ]),
 
-  # script_cf_check_hero_can_escape_from_player
+  # script.cf_check_hero_can_escape_from_player
   # Input: arg1 = troop_no
   # Output: none (can fail)
   ("cf_check_hero_can_escape_from_player",
@@ -34244,7 +34953,7 @@ scripts = [
       (eq, ":continue", 1),
   ]),
 
-  # script_cf_party_remove_random_regular_troop
+  # script.cf_party_remove_random_regular_troop
   # Input: arg1 = party_no
   # Output: troop_id that has been removed (can fail)
   ("cf_party_remove_random_regular_troop",
@@ -34272,7 +34981,7 @@ scripts = [
      (try_end),
      ]),
 
-  # script_place_player_banner_near_inventory
+  # script.place_player_banner_near_inventory
   # Input: none
   # Output: none
   ("place_player_banner_near_inventory",
@@ -34322,7 +35031,7 @@ scripts = [
      (try_end),
      ]),
 
-  # script_place_player_banner_near_inventory_bms
+  # script.place_player_banner_near_inventory_bms
   # Input: none
   # Output: none
   ("place_player_banner_near_inventory_bms",
@@ -34342,7 +35051,7 @@ scripts = [
      (try_end),
      ]),
   
-  # script_stay_captive_for_hours
+  # script.stay_captive_for_hours
   # Input: arg1 = num_hours
   # Output: none
   ("stay_captive_for_hours",
@@ -34355,7 +35064,7 @@ scripts = [
       (rest_for_hours, ":num_hours", 0, 0),
     ]),
 
-  # script_set_parties_around_player_ignore_player
+  # script.set_parties_around_player_ignore_player
   # Input: arg1 = ignore_range, arg2 = num_hours_to_ignore
   # Output: none
   ("set_parties_around_player_ignore_player",
@@ -34369,7 +35078,7 @@ scripts = [
      (try_end),
      ]),
 
-  # script_randomly_make_prisoner_heroes_escape_from_party
+  # script.randomly_make_prisoner_heroes_escape_from_party
   # Input: arg1 = party_no, arg2 = escape_chance_mul_1000
   # Output: none
   ("randomly_make_prisoner_heroes_escape_from_party",
@@ -34416,9 +35125,9 @@ scripts = [
      ]),
 
 
-  # script_fill_tournament_participants_troop
+  # script.fill_tournament_participants_troop
   # Input: arg1 = center_no, arg2 = player_at_center
-  # Output: none (fills trp_tournament_participants)
+  # Output: none (fills trp.tournament_participants)
   ("fill_tournament_participants_troop",
     [(store_script_param, ":center_no", 1),
      (store_script_param, ":player_at_center", 2),
@@ -34488,7 +35197,7 @@ scripts = [
      (try_end),
      ]),
   
-  # script_get_num_tournament_participants
+  # script.get_num_tournament_participants
   # Input: none
   # Output: reg0 = num_participants
   ("get_num_tournament_participants",
@@ -34500,7 +35209,7 @@ scripts = [
      (assign, reg0, ":num_participants"),
      ]),
 
-  # script_get_random_tournament_participant
+  # script.get_random_tournament_participant
   # Input: none
   # Output: reg0 = troop_no
   ("get_random_tournament_participant",
@@ -34520,7 +35229,7 @@ scripts = [
      (assign, reg0, ":troop_no"),
      ]),
 
-  # script_add_tournament_participant
+  # script.add_tournament_participant
   # Input: arg1 = troop_no
   # Output: none
   ("add_tournament_participant",
@@ -34534,7 +35243,7 @@ scripts = [
      (try_end),
      ]),
 
-  # script_get_random_tournament_team_amount_and_size
+  # script.get_random_tournament_team_amount_and_size
   # Input: none
   # Output: reg0 = number_of_teams, reg1 = team_size
   ("get_random_tournament_team_amount_and_size",
@@ -34574,7 +35283,7 @@ scripts = [
         (assign, reg1, ":random_size"),
      ]),
 
-  # script_get_troop_priority_point_for_tournament
+  # script.get_troop_priority_point_for_tournament
   # Input: arg1 = troop_no
   # Output: reg0 = troop_point
   ("get_troop_priority_point_for_tournament",
@@ -34607,9 +35316,9 @@ scripts = [
      (assign, reg0, ":troop_point"),
      ]),
 
-  # script_sort_tournament_participant_troops
+  # script.sort_tournament_participant_troops
   # Input: none
-  # Output: none (sorts trp_tournament_participants)
+  # Output: none (sorts trp.tournament_participants)
   ("sort_tournament_participant_troops",
     [(try_for_range, ":cur_slot", 0, 63),
        (store_add, ":cur_slot_2_begin", ":cur_slot", 1),
@@ -34627,7 +35336,7 @@ scripts = [
      (try_end),
      ]),
 
-  # script_remove_tournament_participants_randomly
+  # script.remove_tournament_participants_randomly
   # Input: arg1 = number_to_be_removed
   # Output: none
   ("remove_tournament_participants_randomly",
@@ -34659,7 +35368,7 @@ scripts = [
      (try_end),
      ]),
   
-  # script_end_tournament_fight
+  # script.end_tournament_fight
   # Input: arg1 = player_team_won (1 or 0)
   # Output: none
   ("end_tournament_fight",
@@ -34726,7 +35435,7 @@ scripts = [
      ]),
 
 
-  # script_get_win_amount_for_tournament_bet
+  # script.get_win_amount_for_tournament_bet
   # Input: none
   # Output: reg0 = win_amount_with_100_denars
   ("get_win_amount_for_tournament_bet",
@@ -34756,7 +35465,7 @@ scripts = [
         (assign, reg0, ":win_amount"),
      ]),
 
-  # script_tournament_place_bet
+  # script.tournament_place_bet
   # Input: arg1 = bet_amount
   # Output: none
   ("tournament_place_bet",
@@ -34773,7 +35482,7 @@ scripts = [
         (assign, "$g_tournament_last_bet_tier", "$g_tournament_cur_tier"),
      ]),
 
-  # script_calculate_amount_of_cattle_can_be_stolen
+  # script.calculate_amount_of_cattle_can_be_stolen
   # Input: arg1 = village_no
   # Output: reg0 = max_amount
   ("calculate_amount_of_cattle_can_be_stolen",
@@ -34792,7 +35501,7 @@ scripts = [
      ]),
 
 
-  # script_draw_banner_to_region
+  # script.draw_banner_to_region
   # Input: arg1 = troop_no, arg2 = center_pos_x, arg3 = center_pos_y, arg4 = width, arg5 = height, arg6 = stretch_width, arg7 = stretch_height, arg8 = default_scale, arg9 = max_charge_scale, arg10 = drawn_item_type
   # drawn_item_type is 0 for banners, 1 for shields, 2 for heater shield, 3 for armor
   # arguments will be used as fixed point values
@@ -35034,7 +35743,7 @@ scripts = [
       (try_end),
      ]),
 
-  # script_get_troop_custom_banner_num_positionings
+  # script.get_troop_custom_banner_num_positionings
   # Input: arg1 = troop_no
   # Output: reg0 = num_positionings
   ("get_troop_custom_banner_num_positionings",
@@ -35056,7 +35765,7 @@ scripts = [
       (assign, reg0, ":num_positionings"),
      ]),
 
-  # script_get_custom_banner_charge_type_position_scale_color
+  # script.get_custom_banner_charge_type_position_scale_color
   # Input: arg1 = troop_no, arg2 = positioning_index
   # Output: reg0 = type_1
   #         reg1 = scale_1
@@ -35213,7 +35922,7 @@ scripts = [
       (try_end),
      ]),
 
-  # script_get_random_custom_banner
+  # script.get_random_custom_banner
   # Input: arg1 = troop_no
   # Output: none
   ("get_random_custom_banner",
@@ -35267,7 +35976,7 @@ scripts = [
       (troop_set_slot, ":troop_no", slot_troop_custom_banner_positioning, ":random_positioning"),
      ]),
 
-  # script_get_custom_banner_color_from_index
+  # script.get_custom_banner_color_from_index
   # Input: arg1 = color_index
   # Output: reg0 = color
   ("get_custom_banner_color_from_index",
@@ -35323,7 +36032,7 @@ scripts = [
       (assign, reg0, ":cur_color"),
      ]),
 
-  # script_cf_check_color_visibility
+  # script.cf_check_color_visibility
   # Input: arg1 = color_1, arg2 = color_2
   # Output: none
   ("cf_check_color_visibility",
@@ -35353,7 +36062,7 @@ scripts = [
       (ge, ":max_dif", 64),
      ]),
   
-  # script_get_next_active_kingdom
+  # script.get_next_active_kingdom
   # Input: arg1 = faction_no
   # Output: reg0 = faction_no (does not choose player faction)
   ("get_next_active_kingdom",
@@ -35373,7 +36082,7 @@ scripts = [
       (assign, reg0, ":faction_no"),
      ]),
 
-#  # script_store_average_center_value_per_faction
+#  # script.store_average_center_value_per_faction
 #  # Input: none
 #  # Output: none (sets $g_average_center_value_per_faction)
 #  ("store_average_center_value_per_faction",
@@ -35392,7 +36101,7 @@ scripts = [
 #      (val_div, "$g_average_center_value_per_faction", ":num_factions"),
 #     ]),
 
-  # script_remove_cattles_if_herd_is_close_to_party
+  # script.remove_cattles_if_herd_is_close_to_party
   # Input: arg1 = party_no, arg2 = maximum_number_of_cattles_required
   # Output: reg0 = number_of_cattles_removed
   ("remove_cattles_if_herd_is_close_to_party",
@@ -35447,7 +36156,7 @@ scripts = [
       (store_sub, reg0, ":max_req", ":cur_req"),
      ]),  
 
-  # script_get_rumor_to_s61
+  # script.get_rumor_to_s61
   # Input: rumor_id
   # Output: reg0 = 1 if rumor found, 0 otherwise; s61 will contain rumor string if found
   ("get_rumor_to_s61",
@@ -35585,7 +36294,7 @@ scripts = [
   
 #Troop Commentaries begin
   
-  # script_add_log_entry
+  # script.add_log_entry
   # Input: arg1 = entry_type, arg2 = event_actor, arg3 = center_object, arg4 = troop_object, arg5 = faction_object
   # Output: none
   ("add_log_entry",
@@ -35685,7 +36394,7 @@ scripts = [
      ]),
 
   
-  # script_get_relevant_comment_for_log_entry
+  # script.get_relevant_comment_for_log_entry
   # Input: arg1 = log_entry_no, 
   # Output: reg0 = comment_id; reg1 = relevance
   # Notes: 50 is the default relevance.
@@ -37079,7 +37788,7 @@ scripts = [
      (assign, reg3, ":rejoinder"),
 	]),
 
-  # script_get_relevant_comment_to_s42
+  # script.get_relevant_comment_to_s42
   # Input: none
   # Output: reg0 = 1 if comment found, 0 otherwise; s61 will contain comment string if found
   ("get_relevant_comment_to_s42",
@@ -37898,7 +38607,7 @@ scripts = [
 
 #Rebellion changes end
 
-  # script_get_culture_with_party_faction_for_music
+  # script.get_culture_with_party_faction_for_music
   # Input: arg1 = party_no
   # Output: reg0 = culture
   ("get_culture_with_party_faction_for_music",
@@ -37919,7 +38628,7 @@ scripts = [
       (call_script, "script_get_culture_with_faction_for_music", ":faction_no"),
      ]),
 
-  # script_get_culture_with_faction_for_music
+  # script.get_culture_with_faction_for_music
   # Input: arg1 = party_no
   # Output: reg0 = culture
   ("get_culture_with_faction_for_music",
@@ -37956,7 +38665,7 @@ scripts = [
       (assign, reg0, ":result"),
      ]),
 
-  # script_music_set_situation_with_culture
+  # script.music_set_situation_with_culture
   # Input: arg1 = music_situation
   # Output: none
   ("music_set_situation_with_culture",
@@ -38016,7 +38725,7 @@ scripts = [
      ]),
 
   
-  # script_combat_music_set_situation_with_culture
+  # script.combat_music_set_situation_with_culture
   # Input: none
   # Output: none
   ("combat_music_set_situation_with_culture",
@@ -38047,7 +38756,7 @@ scripts = [
       (call_script, "script_music_set_situation_with_culture", ":situation"),
      ]),
 
-  # script_play_victorious_sound
+  # script.play_victorious_sound
   # Input: none
   # Output: none
   ("play_victorious_sound",
@@ -38057,9 +38766,9 @@ scripts = [
 #      (play_track, "track_victorious_neutral_1", 1),
      ]),
   
-  # script_set_items_for_tournament
+  # script.set_items_for_tournament
   # Input: arg1 = horse_chance, arg2 = lance_chance (with horse only), arg3 = sword_chance, arg4 = axe_chance, arg5 = bow_chance (without horse only), arg6 = javelin_chance (with horse only), arg7 = mounted_bow_chance (with horse only), arg8 = crossbow_sword_chance, arg9 = armor_item_begin, arg10 = helm_item_begin
-  # Output: none (sets mt_arena_melee_fight items)
+  # Output: none (sets mt.arena_melee_fight items)
   ("set_items_for_tournament",
     [
       (store_script_param, ":horse_chance", 1),
@@ -38161,7 +38870,7 @@ scripts = [
      ]),
 
   
-  # script_custom_battle_end
+  # script.custom_battle_end
   # Input: none
   # Output: none
   ("custom_battle_end",
@@ -38183,7 +38892,7 @@ scripts = [
       (try_end),
       ]),  
 
-  # script_remove_troop_from_prison
+  # script.remove_troop_from_prison
   # Input: troop_no
   # Output: none
   #Other search terms: release, peace
@@ -38211,13 +38920,13 @@ scripts = [
       (try_end),
       ]),
 
-  # script_debug_variables
+  # script.debug_variables
   # Input: two variables which will be examined by coder, this script is only for debugging.
   # Output: none
   ("debug_variables",
     [
-      #(store_script_param, ":unused", 1),
-      #(store_script_param, ":unused_2", 2),
+      (store_script_param, ":unused", 1),
+      (store_script_param, ":unused_2", 2),
     ]),        
         
 #lord recruitment scripts begin	  
@@ -40225,8 +40934,8 @@ scripts = [
 	(troop_equip_items, ":lady_no"),
 
 	#also available:
-	#itm_blue_dress
-	#itm_court_dress	
+	#itm.blue_dress
+	#itm.court_dress	
 	
 	#to add for khergits -- salwar/shalvar?
 	#western tang costume (p105, china's golden age)
@@ -40945,7 +41654,7 @@ scripts = [
 	]),
 
 
-    #script_npc_decision_checklist_party_ai   
+    #script.npc_decision_checklist_party_ai   
 	# DECISION CHECKLISTS (OCT 14)
 	# I was thinking of trying to convert as much AI decision-making as possible to the checklist format
 	# While outcomes are not as nuanced and varied as a random decision using weighted chances for each outcoms, 
@@ -40957,7 +41666,7 @@ scripts = [
 	("npc_decision_checklist_party_ai", 
 	[
 	#this script can replace decide_kingdom_hero_ai and decide_kingdom_hero_ai_follow_or_not
-	#However, it does not contain script_party_set_ai_state
+	#However, it does not contain script.party_set_ai_state
 	
 	(store_script_param, ":troop_no", 1),
 	
@@ -42373,7 +43082,7 @@ scripts = [
 	(assign, reg1, ":object"),  	
 	]),
 	
-	#script_npc_decision_checklist_troop_follow_or_not
+	#script.npc_decision_checklist_troop_follow_or_not
     # INPUT: troop_no
     # OUTPUT: reg0
 	(
@@ -42733,7 +43442,7 @@ scripts = [
 	(assign, reg0, ":result"),	
 	]),
 	
-	#script_find_total_prosperity_score
+	#script.find_total_prosperity_score
     # INPUT: center_no
     # OUTPUT: reg0 = total_prosperity_score
 	(
@@ -42777,7 +43486,7 @@ scripts = [
       (assign, reg0, ":total_prosperity_score"),
 	]),
 		
-    #script_calculate_center_assailability_score
+    #script.calculate_center_assailability_score
     # INPUT: faction_no
     # param1: faction_no 
     # param2: all_vassals_included, (becomes 1 if we want to find attackable center if we collected 20% of vassals during gathering army phase)
@@ -43232,7 +43941,7 @@ scripts = [
       (assign, reg3, ":total_prosperity_score"),
     ]),
 		
-    #script_find_center_to_defend
+    #script.find_center_to_defend
     # INPUT: 
     # param1: faction_no 
     # OUTPUT: 
@@ -43444,7 +44153,7 @@ scripts = [
     ]),
     	
 				
-	#script_npc_decision_checklist_peace_or_war
+	#script.npc_decision_checklist_peace_or_war
 	(
 	"npc_decision_checklist_peace_or_war", 
 	#this script is used to add a bit more color to diplomacy, particularly with regards to the player
@@ -45123,7 +45832,7 @@ scripts = [
 		(try_begin),
 		  (eq, ":faction_no", "$players_kingdom"),
 		  (val_sub, ":faction_score", 100),
-		  (val_add, "$player_right_to_rule"),
+		  (val_add, ":faction_score", "$player_right_to_rule"),
 		(try_end),
 
 		(gt, ":faction_score", ":score_to_beat"),
@@ -45624,15 +46333,16 @@ scripts = [
 	    (val_add, ":cur_good_price_slot", slot_town_trade_good_prices_begin),
 	    (party_get_slot, ":cur_price_modifier", ":center", ":cur_good_price_slot"),
 
-	    #(try_begin),
-	    #  (lt, ":number_of_inputs_required", 0),
-	    #  (store_div, ":final_price_for_secondary_input", ":final_price_for_secondary_input", 2),
-	    #(else_try),
-	    #  (store_mul, ":final_price_for_secondary_input", ":final_price_for_secondary_input", ":number_of_inputs_required"),
-	    #(try_end),
-
-	    (store_mul, ":final_price_for_secondary_input", ":base_price", ":cur_price_modifier"),
-	    (val_div, ":final_price_for_secondary_input", 1000),
+      (store_mul, ":final_price_for_secondary_input", ":base_price", ":cur_price_modifier"),
+      (val_div, ":final_price_for_secondary_input", 1000),
+      
+	    (try_begin),
+	      (lt, ":number_of_inputs_required", 0),
+	      (store_div, ":final_price_for_secondary_input", ":final_price_for_secondary_input", 2),
+	    (else_try),
+	      (store_mul, ":final_price_for_secondary_input", ":final_price_for_secondary_input", ":number_of_inputs_required"),
+	    (try_end),
+	    
 	  (else_try),
 	    (assign, ":final_price_for_secondary_input", 0), 
 	  (try_end),
@@ -45650,7 +46360,7 @@ scripts = [
 	  (assign, reg10, ":final_price_for_secondary_input"),
 	]),
 
-  # script_replace_scene_items_with_spawn_items_before_ms
+  # script.replace_scene_items_with_spawn_items_before_ms
   # Input: none
   # Output: none
   ("replace_scene_items_with_spawn_items_before_ms",
@@ -45672,7 +46382,7 @@ scripts = [
       (try_end),
      ]),
 
-  # script_replace_scene_items_with_spawn_items_after_ms
+  # script.replace_scene_items_with_spawn_items_after_ms
   # Input: none
   # Output: none
   ("replace_scene_items_with_spawn_items_after_ms",
@@ -45688,7 +46398,7 @@ scripts = [
       (try_end),
      ]),
 
-  # script_cf_is_melee_weapon_for_tutorial
+  # script.cf_is_melee_weapon_for_tutorial
   # Input: arg1 = item_no
   # Output: none (can fail)
   ("cf_is_melee_weapon_for_tutorial",
@@ -45703,7 +46413,7 @@ scripts = [
       (eq, ":result", 1),
      ]),
 
-  # script_iterate_pointer_arrow
+  # script.iterate_pointer_arrow
   # Input: none
   # Output: none
   ("iterate_pointer_arrow",
@@ -46007,7 +46717,7 @@ scripts = [
       #DECISION TO ATTACK IS HERE
       #(else_try),
         #To Steve - I removed below lines, as here decided. We will use pre-function to evaluate assailability scores for centers rather than below lines to make AI 
-        #selecting better targets. If you want to make some marshals to select not-best options I can add that option into script_calculate_center_assailability_score, 
+        #selecting better targets. If you want to make some marshals to select not-best options I can add that option into script.calculate_center_assailability_score, 
         #for that we can need seed values for each center and for each lord, so we can add these seed values to create variability, clever marshals have seeds with less 
         #standard deviation and less values and less-clever marshals have bigger seeds. Then probability of some lords to disagree marshal increases because their seed 
         #values will be different from marshal's. If Steve wants it from me to implement I can add this.
@@ -47070,7 +47780,7 @@ scripts = [
 		(assign, reg0, ":estimate"),		
 	]),
 
-   #script_calculate_castle_prosperities_by_using_its_villages
+   #script.calculate_castle_prosperities_by_using_its_villages
  	(
 	"calculate_castle_prosperities_by_using_its_villages", #This is called from within decide_faction_ai, or from 
 	[	  	
@@ -47098,7 +47808,7 @@ scripts = [
 	  (try_end),
 	]),
       
-   #script_initialize_tavern_variables
+   #script.initialize_tavern_variables
    (
    "initialize_tavern_variables",
    [
@@ -47109,7 +47819,7 @@ scripts = [
      (assign, "$g_belligerent_drunk_leaving", 0),   
    ]),
    
-   #script_prepare_alley_to_fight
+   #script.prepare_alley_to_fight
    (
    "prepare_alley_to_fight",
    [
@@ -47151,7 +47861,7 @@ scripts = [
      (change_screen_mission),         
    ]),
 
-   #script_prepare_town_to_fight
+   #script.prepare_town_to_fight
    (
    "prepare_town_to_fight",
    [
@@ -47364,7 +48074,7 @@ scripts = [
    ]),
 
 
-  # script_give_center_to_faction_aux
+  # script.give_center_to_faction_aux
   # Input: arg1 = center_no, arg2 = faction
   ("give_center_to_faction_while_maintaining_lord",
     [
@@ -47392,7 +48102,7 @@ scripts = [
       (try_end),
   ]),   
 
-  # script_check_concilio_calradi_achievement  
+  # script.check_concilio_calradi_achievement  
   ("check_concilio_calradi_achievement",
   [
    (try_begin),
@@ -47411,7 +48121,7 @@ scripts = [
    (try_end),  
   ]),
   
-  # script_refresh_center_inventories
+  # script.refresh_center_inventories
   ("refresh_center_inventories",
   [   	
     (set_merchandise_modifier_quality,150),
@@ -47495,7 +48205,7 @@ scripts = [
     (try_end), 	
   ]), 
 
-  # script_refresh_center_armories
+  # script.refresh_center_armories
   ("refresh_center_armories",
   [
     (reset_item_probabilities, 100),
@@ -47518,7 +48228,7 @@ scripts = [
     (end_try),
   ]),
 
-  # script_refresh_center_weaponsmiths
+  # script.refresh_center_weaponsmiths
   ("refresh_center_weaponsmiths",
   [
     (reset_item_probabilities, 100),
@@ -47546,7 +48256,7 @@ scripts = [
     (try_end),
   ]),
 
-  # script_refresh_center_stables
+  # script.refresh_center_stables
   ("refresh_center_stables",
   [
     (reset_item_probabilities, 100),
@@ -47634,5 +48344,2422 @@ scripts = [
       (assign, reg0, ":total_equipment_cost"),
      ]),
      ###
+    #INVASION MODE START
+	# script.multiplayer_ccoop_prepare_spawn_wave
+	# Input: none
+	# Output: none
+	("multiplayer_ccoop_prepare_spawn_wave",
+	[
+		(try_begin),
+			(multiplayer_is_server),
+			(set_fixed_point_multiplier, 100),
+			
+			#generate next wave spawn points
+			(store_random_in_range, ":spawn_point1", 80, 88),
+			(store_random_in_range, ":spawn_point2", 80, 88),
+			(try_begin),
+				(eq, ":spawn_point1", ":spawn_point2"),
+				(assign, ":spawn_point2", -1),
+			(end_try),
+            
+            #(assign, reg0, ":spawn_point1"),
+            #(assign, reg1, ":spawn_point2"),
+            #(display_message, "@spawn points generated as 1: {reg0} 2: {reg1}"),
+			
+			#(store_mod, ":wave_no_mod", "$g_multiplayer_ccoop_wave_no", 10),
+            (store_sub, ":wave_no_mod", "$g_multiplayer_ccoop_wave_no", "$g_mp_coop_last_king_wave"),
+            
+            #Now the script makes a calculation to decide how many enemies to spawn.
 
+			(assign, ":num_troops_for_wave", 4),
+			(assign, ":number_of_players_at_team_1", 0),
+			(get_max_players, ":num_players"),
+			(try_for_range, ":cur_player", 0, ":num_players"),
+				(player_is_active, ":cur_player"),
+				(player_get_team_no, ":player_team", ":cur_player"),
+				(eq, ":player_team", 0),
+				(val_add, ":number_of_players_at_team_1", 1),
+			(try_end),
+
+			
+			(assign, reg0, ":number_of_players_at_team_1"), #debug, delete
+			
+			(val_sub, ":number_of_players_at_team_1", 1), # for simplifying the formula
+			(try_for_range, ":cur_multiplier", 1, 4),
+				(gt, ":number_of_players_at_team_1", 0),
+				(store_mul, ":used_multiplier", ":cur_multiplier", 2),
+				(val_min, ":used_multiplier", ":number_of_players_at_team_1"),
+				(val_sub, ":number_of_players_at_team_1", ":used_multiplier"),
+				(store_sub, ":used_multiplier_2", 5, ":cur_multiplier"),
+				(store_mul, ":added_num_troops", ":used_multiplier_2", ":used_multiplier"),
+				(val_add, ":num_troops_for_wave", ":added_num_troops"),
+			(try_end),
+						
+			(try_begin),
+				(le, "$g_multiplayer_ccoop_wave_no", 3),
+				(assign, ":spawn_point2", -1), # for the first 3 waves, spawn from only 1 point
+			(try_end),
+			
+            #Clear all enemy wave data slots
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 1, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 2, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 3, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 4, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 5, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 6, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 7, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 8, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 9, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 10, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 11, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 12, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 13, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 14, 0),
+		    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 15, 0),
+
+			
+			(store_mul, ":wave_effect_on_troops", 20, ":wave_no_mod"),
+			(val_add, ":wave_effect_on_troops", 80), # it will be 100, 120, 140, 160, ... beginning from wave 1.
+
+			(val_mul, ":num_troops_for_wave", ":wave_effect_on_troops"),
+			(val_div, ":num_troops_for_wave", 100),
+
+			(try_begin),
+				(ge, "$g_mp_coop_king_waves", 1), # wave++
+				(val_mul, ":num_troops_for_wave", 130),
+				(val_div, ":num_troops_for_wave", 100),
+			(try_end),
+            
+            #Used to reset max enemy level counter for endless mode
+            (store_sub, ":since_last_boss", "$g_multiplayer_ccoop_wave_no", "$g_mp_coop_last_king_wave"),
+            
+            #Restrict the level of wave troops
+            (try_begin),
+              (ge, ":since_last_boss", 10),
+              (assign, ":max_level", 30),
+            (else_try),
+              (ge, ":since_last_boss", 8),
+              (assign, ":max_level", 24),
+            (else_try),
+              (ge, ":since_last_boss", 6),
+              (assign, ":max_level", 20),
+            (else_try),
+              (ge, ":since_last_boss", 4),
+              (assign, ":max_level", 15),
+            (else_try),
+              (ge, ":since_last_boss", 2),
+              (assign, ":max_level", 10),
+            (else_try),
+              (ge, ":since_last_boss", 1),
+              (assign, ":max_level", 6),
+            (try_end),
+            
+			(assign, ":spawn_lord", 0),
+            
+            (assign, "$g_ccoop_king_troop", -1),
+            
+            (try_begin),
+              (ge, ":since_last_boss", 3),
+              (store_random_in_range, ":spawn_lord_check", 0, 2),  #after wave 3, 50% chance for a lord wave
+              (this_or_next|ge, ":spawn_lord_check", 1),
+              (this_or_next|eq, ":since_last_boss", 3),  #always spawn a lord on wave 3
+              (eq, ":since_last_boss", 10), #king always spawns on wave 10
+              (val_add, "$g_mp_coop_lord_waves", 1),
+              (try_begin),
+                (store_mod, ":spawn_king", "$g_mp_coop_lord_waves", 5), #If 5th lord wave occurs before wave 10, it become the king wave
+                (this_or_next|eq, ":spawn_king", 0),
+                (eq, ":since_last_boss", 10),
+                (gt, "$g_mp_coop_lord_waves", 0), #prevents first lord wave from being a king wave
+                (gt, ":since_last_boss", 1), #not necessary
+
+                (try_begin),
+                  (eq, "$g_multiplayer_team_2_faction", "fac_ccoop_all_stars"),
+                  (store_random_in_range, ":used_troop_no", kings_begin, kings_end), #all stars faction uses a random king!
+                (else_try),
+                  (eq, "$g_multiplayer_team_2_faction", "fac_outlaws"),
+                  (assign, ":reusing_quick_battle_king", 1),
+                  (try_for_range, ":unused", 0, 10),
+                    (eq, ":reusing_quick_battle_king", 1),
+                    (store_random_in_range, ":used_troop_no" ,quick_battle_troops_begin, quick_battle_troops_end), #outlaws wave uses a quick battle troop for a king
+                    (neg|troop_slot_eq, ":used_troop_no", slot_troop_coop_lord_spawned, 2), #it tries 10 times not to use one of the lords but if it fails, gives up eventually, and raises one from the dead
+                    (assign, ":reusing_quick_battle_king", 0),
+                  (try_end),
+                (else_try),
+                  (try_for_range, ":cur_troop", kings_begin, kings_end), #selects the right king for the faction
+                      (store_troop_faction, ":troop_faction", ":cur_troop"),
+                      (eq, ":troop_faction", "$g_multiplayer_team_2_faction"),
+                      (assign, ":used_troop_no", ":cur_troop"),
+                  (try_end),
+                (try_end),
+                #(assign, ":cur_max_level", 0),
+                (assign, ":spawn_lord", 1),
+                (assign, "$g_ccoop_king_troop", ":used_troop_no"),
+                 
+                 
+                #Reset all spawn trackers to allow any lords to spawn again for each elite tier in endless mode
+                (try_for_range, ":cur_troop", lords_begin, lords_end),
+                  (troop_set_slot, ":cur_troop", slot_troop_coop_lord_spawned, 0),
+                (try_end),
+                (try_for_range, ":cur_troop", quick_battle_troops_begin, quick_battle_troops_end),
+                  (troop_set_slot, ":cur_troop", slot_troop_coop_lord_spawned, 0),
+                (try_end),
+              (else_try),
+                (assign, ":spawn_lord", 1), #variable is used to keep slots safe while generating the rest of the wave
+                
+                #reset data for all possible lord troops before generating a lord
+                
+                (try_for_range, ":cur_troop", lords_begin, lords_end),
+                  (neg|troop_slot_eq, ":cur_troop", slot_troop_coop_lord_spawned, 2), #if slot_troop_coop_lord_spawned = 2, lord has already spawned - do not reset data
+                  (troop_set_slot, ":cur_troop", slot_troop_coop_lord_spawned, 0),
+                (try_end),
+                
+                (try_for_range, ":cur_troop", quick_battle_troops_begin, quick_battle_troops_end),
+                  (neg|troop_slot_eq, ":cur_troop", slot_troop_coop_lord_spawned, 2),
+                  (troop_set_slot, ":cur_troop", slot_troop_coop_lord_spawned, 0),
+                (try_end),
+                
+                (assign, ":eligible_troop_count", 0),
+                
+                #Find troops that are eligible
+                (try_for_range, ":cur_troop", lords_begin, lords_end),
+                    (store_troop_faction, ":troop_faction", ":cur_troop"),
+                    (this_or_next|eq, ":troop_faction", "$g_multiplayer_team_2_faction"),
+                    (eq, "$g_multiplayer_team_2_faction", "fac_ccoop_all_stars"), #all lords are eligible in all stars
+                    (neg|troop_slot_eq, ":cur_troop", slot_troop_coop_lord_spawned, 2), #don't resurrect lords (until a king wave)
+                    (troop_set_slot, ":cur_troop", slot_troop_coop_lord_spawned, 1), #set eligible to be checked the second time around
+                    (val_add, ":eligible_troop_count", 1), #increase the upper limit for the random generator
+                (try_end),
+                
+                (try_for_range, ":cur_troop", quick_battle_troops_begin, quick_battle_troops_end),
+                    (store_troop_faction, ":troop_faction", ":cur_troop"),
+                    (this_or_next|eq, "$g_multiplayer_team_2_faction", "fac_outlaws"),
+                    (eq, "$g_multiplayer_team_2_faction", "fac_ccoop_all_stars"), #all quick battle troops are eligible in all stars
+                    (neg|troop_slot_eq, ":cur_troop", slot_troop_coop_lord_spawned, 2), #don't resurrect quick battle troops (until a king wave)
+                    (troop_set_slot, ":cur_troop", slot_troop_coop_lord_spawned, 1),
+                    (val_add, ":eligible_troop_count", 1),
+                (try_end),
+                
+                
+                (store_random_in_range, ":randomiser", 0, ":eligible_troop_count"), #randomise a lord from the eligible troops
+                (assign, ":random_checker", 0),
+                
+                
+                (try_for_range, ":cur_troop", lords_begin, lords_end),
+                  (troop_slot_eq, ":cur_troop", slot_troop_coop_lord_spawned, 1), #use this to check the troops we marked as eligible lords
+                  
+                  (assign, reg0, ":cur_troop"), # debug
+                  
+                  (try_begin),
+                    (eq, ":random_checker", ":randomiser"), #found her/him!
+                    (assign, ":used_troop_no", ":cur_troop"),
+                    (troop_set_slot, ":cur_troop", slot_troop_coop_lord_spawned, 2), #prevent our lord from spawning again
+                  (try_end),
+                  (val_add, ":random_checker", 1),
+                    
+                (try_end),
+                
+                #continue checking all possible troops
+                (try_for_range, ":cur_troop", quick_battle_troops_begin, quick_battle_troops_end),
+                  (troop_slot_eq, ":cur_troop", slot_troop_coop_lord_spawned, 1),
+                  
+                  (assign, reg0, ":cur_troop"), # debug
+                  
+                  (try_begin),
+                    (eq, ":random_checker", ":randomiser"),
+                    (assign, ":used_troop_no", ":cur_troop"),
+                    (troop_set_slot, ":cur_troop", slot_troop_coop_lord_spawned, 2),
+                  (try_end),
+                  (val_add, ":random_checker", 1),
+                    
+                (try_end),
+              (try_end),
+              #set the wave spawn data for our leader
+              (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 1, ":used_troop_no"),
+              (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 2, 1), #only one leader
+              (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 3, ":spawn_point1"), #always use spawn_point1 for simplicity
+              (troop_get_slot, ":num_bot_types", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin),
+              (val_add, ":num_bot_types", 2), #adding two bot types because we're about to add the guards anyway
+              (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin, ":num_bot_types"),
+              (assign, ":cur_max_level", -1),
+              (store_troop_faction, ":used_troop_faction_no", ":used_troop_no"), #use guards from the same faction as the wave leader (used mainly for all stars wave)
+              (try_begin),
+                (eq, "$g_multiplayer_team_2_faction", "fac_outlaws"),
+                (assign, ":guard_troop_no", "trp_sea_raider_leader"), #outlaws always use sea raider captains as guards
+              (else_try),
+                (try_for_range, ":cur_troop", soldiers_begin, soldiers_end), #check all soldiers to find a suitable guard troop
+                  (store_troop_faction, ":troop_faction", ":cur_troop"),
+                  (eq, ":troop_faction", ":used_troop_faction_no"), #same faction as the leader?
+                  (store_character_level, ":cur_level", ":cur_troop"),
+                  (gt, ":cur_level", ":cur_max_level"), #higher than previous soldiers found from our required faction?
+                  (assign, ":cur_max_level", ":cur_level"), 
+                  (assign, ":guard_troop_no", ":cur_troop"),
+                (try_end),
+              (try_end),
+              (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 4, ":guard_troop_no"), #set the troop id in the correct wave data slot
+              (try_begin),
+                (eq, ":spawn_king", 0), #double guards for the king! simple but creates a nice final challenge
+                (gt, "$g_mp_coop_lord_waves", 0),
+                (gt, ":since_last_boss", 1),
+                (assign, ":guard_count", 2),
+              (else_try),
+                (assign, ":guard_count", 1),
+              (try_end),
+              (get_max_players, ":num_players"), 
+              (assign, ":total_players", 0),
+              (try_for_range, ":cur_player", 0, ":num_players"), #find out how many players are on the defenders
+                (player_is_active, ":cur_player"),
+                (player_get_team_no, ":cur_team", ":cur_player"),
+                (multiplayer_send_int_to_player, ":cur_player", multiplayer_event_ccoop_return_of_the_king, "$g_ccoop_king_troop"),
+                (eq, ":cur_team", 0),
+                (val_add, ":total_players", 1), 
+              (try_end),
+              (val_mul, ":guard_count", ":total_players"), #1 guard per player for lord waves; 2 for the king
+              (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 5, ":guard_count"), #set the number 
+              (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 6, ":spawn_point1"), #spawn guards with the wave leader 
+              (val_add, ":spawn_lord", 1), #used in code below to avoid "boosting" guards when data slots are full... also prevents us legitimately "boosting" generated troops that match the guard troop, which is a shame but not critical
+            (try_end),
+            
+            
+            (assign, ":eligible_troop_count", 0), #reset this and start looking for eligible troops to fill the wave
+            
+            (try_for_range, ":cur_troop", soldiers_begin, soldiers_end),
+              (troop_set_slot, ":cur_troop", slot_troop_mp_squad_type, 0), #we use this slot to check if they are eligible - was previously used for something else in WFaS. should have been renamed really...
+            (try_end),
+            
+            (try_for_range, ":cur_troop", soldiers_begin, soldiers_end),
+                (neq, ":cur_troop", "trp_mercenaries_end"),
+                
+                (store_troop_faction, ":troop_faction", ":cur_troop"), 
+                (this_or_next|eq, ":troop_faction", "$g_multiplayer_team_2_faction"), #right faction?
+                (eq, "$g_multiplayer_team_2_faction", "fac_ccoop_all_stars"), #... or all stars?
+                (store_character_level, ":troop_level", ":cur_troop"),
+                (le, ":troop_level", ":max_level"), #doesn't exceed our level cap for the current wave?
+                (troop_set_slot, ":cur_troop", slot_troop_mp_squad_type, 1), #eligible!
+                (val_add, ":eligible_troop_count", 1), #add the count to be used by the randomiser
+                (assign, reg0, ":used_troop_no"), # debug
+                (display_debug_message, "@{!}used troop no is {reg0}"), # debug
+            (try_end),
+            
+			(try_for_range, ":cur_bot_readying", 0, ":num_troops_for_wave"), #run this individually for every single wave bot we want to generate - not very efficient! Causes a momentary spike with a lot of players
+              (assign, reg0, ":cur_bot_readying"),
+              (try_begin),
+                (neg|troop_slot_eq, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 13, 0), #if all data is filled (this slot is the last used for wave bot ids)
+                (store_random_in_range, ":booster_slot", ":spawn_lord", 5), #pick an existing troop to "boost" - don't "boost" the wave leader or guards
+                
+                (val_mul, ":booster_slot", 3), #get to the right data slot
+                (val_add, ":booster_slot", multi_data_ccoop_wave_spawn_data_begin + 1), # used troop no
+                
+                (val_add, ":booster_slot", 1), # used troop count
+                (troop_get_slot, ":used_troop_count", "trp_multiplayer_data", ":booster_slot"), #get the current number spawning
+                (val_add, ":used_troop_count", 1), #boost!
+                (troop_set_slot, "trp_multiplayer_data", ":booster_slot", ":used_troop_count"), #rewrite the slot with the new number of that troop
+              (else_try),
+                #if there are still slots available (there are 5 total), we look for a troop again
+
+              
+                (store_random_in_range, ":randomiser", 0, ":eligible_troop_count"), #pick a number...
+                (assign, ":random_checker", 0), 
+                
+                
+                (try_for_range, ":cur_troop", soldiers_begin, soldiers_end), #this covers all troops for factions, outlaws and all stars
+                  (troop_slot_eq, ":cur_troop", slot_troop_mp_squad_type, 1),
+                  
+                  
+                  (try_begin),
+                    (eq, ":random_checker", ":randomiser"),
+                    (assign, ":used_troop_no", ":cur_troop"), #found our troop!
+                  (try_end),
+                  (val_add, ":random_checker", 1),
+                    
+                (try_end),
+                
+                (try_begin),
+                  (assign, ":troop_already_spawning", 0), #found our troop! But is that troop already spawning?
+                  (try_for_range, ":cur_slot", 0, 5), #check our existing data slots
+                    (val_mul, ":cur_slot", 3),
+                    (val_add, ":cur_slot", multi_data_ccoop_wave_spawn_data_begin + 1), #... the ones that hold our troop ids
+                    (troop_get_slot, ":cur_slot_troop_no", "trp_multiplayer_data", ":cur_slot"),
+                    (eq, ":cur_slot_troop_no", ":used_troop_no"), #is there a match?
+                    
+                    (val_add, ":cur_slot", 1), # move our slot to the one which holds the number of that troop type which will spawn
+                    (troop_get_slot, ":used_troop_count", "trp_multiplayer_data", ":cur_slot"),
+                    (val_add, ":used_troop_count", 1), #and add one more
+                    (troop_set_slot, "trp_multiplayer_data", ":cur_slot", ":used_troop_count"),
+                    #(assign, ":used_slot", ":cur_slot"),
+                    (assign, ":troop_already_spawning", 1),
+                    #(display_message, "@troop already spawning!"),
+                  (try_end),
+                  (eq, ":troop_already_spawning", 1), #don't try else if that troop type was already spawning
+                (else_try),
+                  (assign, ":found_empty_slot", 0), #but if the troop wasn't already spawning..
+                  (try_for_range, ":cur_slot", ":spawn_lord", 5),
+                    (neq, ":found_empty_slot", 1), #find the next empty slot
+                    (val_mul, ":cur_slot", 3),
+                    (val_add, ":cur_slot", multi_data_ccoop_wave_spawn_data_begin + 1), 
+
+                    (troop_get_slot, ":cur_slot_troop_no", "trp_multiplayer_data", ":cur_slot"),
+                    (eq, ":cur_slot_troop_no", 0), #is it empty?
+                    
+                    
+                    (troop_set_slot, "trp_multiplayer_data", ":cur_slot", ":used_troop_no"), #not anymore!
+                    
+                    
+                    (val_add, ":cur_slot", 1), 
+                    (troop_get_slot, ":used_troop_count", "trp_multiplayer_data", ":cur_slot"),
+                    (val_add, ":used_troop_count", 1), #should be one anyway, since this is the first troop of that type
+                    (troop_set_slot, "trp_multiplayer_data", ":cur_slot", ":used_troop_count"),
+                    
+                    (troop_get_slot, ":num_bot_types", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin),
+                    (val_add, ":num_bot_types", 1), #increase the number of bot types, which is sent along with the other data - used by the spawning script
+                    (troop_set_slot, "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin, ":num_bot_types"),
+                    
+                    (assign, ":used_slot", ":cur_slot"),
+                    (assign, ":found_empty_slot", 1),
+                    (store_random_in_range, ":used_entry_point", 0, 2), #randomise the entry point
+                    (try_begin),
+                      (this_or_next|eq, ":used_entry_point", 0),
+                      (le, ":spawn_point2", 0), #and always user spawn_point1 if spawn_point2 isn't active for this wave
+                      (assign, ":used_entry_point", ":spawn_point1"),
+                    (else_try),
+                      (assign, ":used_entry_point", ":spawn_point2"),
+                    (try_end),
+                    (val_add, ":used_slot", 1), 
+                    (troop_set_slot, "trp_multiplayer_data", ":used_slot", ":used_entry_point"),
+                  (try_end),
+                (try_end),
+              (try_end),
+                  
+			(try_end),
+
+			(get_max_players, ":max_players"), #send data to clients so they can see what troops are spawning next
+			(try_for_range, ":cur_player", 1, ":max_players"),
+				(player_is_active, ":cur_player"),
+				(call_script, "script_multiplayer_ccoop_send_troop_data_to_client", ":cur_player"),
+			(try_end),
+
+		(try_end),
+	]),
+	
+	
+	# script.multiplayer_ccoop_calculate_round_duration
+	# Input: none
+	# Output: none
+	("multiplayer_ccoop_calculate_round_duration",
+	[
+		(try_begin),
+			(multiplayer_is_server),
+			(assign, "$g_multiplayer_ccoop_enemy_respawn_secs", 300),  #5min
+			
+			(store_sub, ":wave_no", "$g_multiplayer_ccoop_wave_no", 1),
+			(val_max, ":wave_no", 0),
+			(store_mod, ":mod", ":wave_no", 10),		
+			(val_mul, ":mod", 30),
+			(val_add, "$g_multiplayer_ccoop_enemy_respawn_secs", ":mod"),
+			
+			(try_begin),
+				(gt, "$g_multiplayer_ccoop_wave_no", 20),									
+				(val_mul, "$g_multiplayer_ccoop_enemy_respawn_secs", 2), 
+			(else_try),
+				(gt, "$g_multiplayer_ccoop_wave_no", 10),				
+				(val_mul, "$g_multiplayer_ccoop_enemy_respawn_secs", 3),
+				(val_div, "$g_multiplayer_ccoop_enemy_respawn_secs", 2),				
+			(try_end),
+						
+			(get_max_players, ":num_players"),
+			(try_for_range, ":cur_player", 1, ":num_players"),
+				(player_is_active, ":cur_player"),
+				(assign, reg0, ":cur_player"),
+				(display_debug_message, "@{!}sending message to {reg0} multiplayer_event_other_event_ccoop_count_down_invisible"),
+				(multiplayer_send_3_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_ccoop_count_down_invisible, "$g_multiplayer_ccoop_enemy_respawn_secs", "$g_multiplayer_ccoop_wave_no"),
+			(try_end),
+		(try_end),
+	]),
+	
+	
+	# script.multiplayer_ccoop_send_troop_data_to_client
+	# Input: client number
+	# Output: none
+	("multiplayer_ccoop_send_troop_data_to_client",
+	[		
+		(try_begin),
+			(store_script_param, ":cur_player", 1),	
+			
+			(troop_get_slot, ":data_1", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin),
+			(troop_get_slot, ":data_2", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 1),
+			(troop_get_slot, ":data_3", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 2),
+			(multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_ccoop_update_spawn_data_1, ":data_1", ":data_2", ":data_3"),
+			(troop_get_slot, ":data_1", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 3),
+			(troop_get_slot, ":data_2", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 4),
+			(troop_get_slot, ":data_3", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 5),
+			(multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_ccoop_update_spawn_data_2, ":data_1", ":data_2", ":data_3"),
+			(troop_get_slot, ":data_1", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 6),
+			(troop_get_slot, ":data_2", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 7),
+			(troop_get_slot, ":data_3", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 8),
+			(multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_ccoop_update_spawn_data_3, ":data_1", ":data_2", ":data_3"),
+			(troop_get_slot, ":data_1", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 9),
+			(troop_get_slot, ":data_2", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 10),
+			(troop_get_slot, ":data_3", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 11),
+			(multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_ccoop_update_spawn_data_4, ":data_1", ":data_2", ":data_3"),
+			(troop_get_slot, ":data_1", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 12),
+			(troop_get_slot, ":data_2", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 13),
+			(troop_get_slot, ":data_3", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 14),
+			(multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_ccoop_update_spawn_data_5, ":data_1", ":data_2", ":data_3"),
+			(troop_get_slot, ":data_1", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 15),
+			(multiplayer_send_2_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_ccoop_update_spawn_data_6, ":data_1"),				
+		(try_end),
+	]),
+	
+	# script.multiplayer_ccoop_spawn_wave
+	# Input: spawn_required -> how many bots are needed 
+	# Output: none
+	("multiplayer_ccoop_spawn_wave",
+	  [
+		(try_begin),
+			(multiplayer_is_server),
+			(set_fixed_point_multiplier, 100),
+			
+			(store_script_param, ":spawn_required", 1),
+			
+			(assign, reg0, ":spawn_required"), # debug
+			(display_debug_message, "@{!}spawn required is: {reg0}"),
+			
+			(assign, ":num_troops_for_wave", 0),
+			
+			#(troop_get_slot, ":num_bot_types", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin),
+			(try_for_range, ":cur_bot_type", 0, 5),
+				(store_mul, ":cur_slot", ":cur_bot_type", 3),
+				(val_add, ":cur_slot", multi_data_ccoop_wave_spawn_data_begin + 2),
+				(troop_get_slot, ":cur_bot_count", "trp_multiplayer_data", ":cur_slot"),
+				(val_add, ":num_troops_for_wave", ":cur_bot_count"),
+			(try_end),
+
+			(assign, reg0, ":num_troops_for_wave"), # debug
+			(display_debug_message, "@{!}num_troops_for_wave is {reg0}"),
+			
+			(assign, ":reduced_spawn_amount", 0),
+			(assign, ":reduced_spawn_amount_mod", 0),
+			(try_begin),
+				(gt, ":num_troops_for_wave", ":spawn_required"),
+				(store_sub, ":reduced_spawn_amount", ":num_troops_for_wave", ":spawn_required"),
+				#(store_mod, ":reduced_spawn_amount_mod", ":reduced_spawn_amount", ":num_bot_types"),
+				#(val_div, ":reduced_spawn_amount", ":num_bot_types"),
+				
+				(assign, reg0, ":reduced_spawn_amount"), # debug
+				(assign, reg1, ":reduced_spawn_amount_mod"), # debug
+				(display_debug_message, "@{!}num_troops_for_wave is gt spawn_required. reduced_spawn_amount is {reg0}, reduced_spawn_amount_mod is {reg1}"),
+			(try_end),
+			
+			(store_current_scene, ":cur_scene"),
+			(modify_visitors_at_site, ":cur_scene"),
+			(assign, ":num_troops_spawned", 0),
+
+	        #(troop_get_slot, ":leader_no", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 1),
+	        #(troop_get_slot, ":point_no", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin + 3),
+	        #(entry_point_get_position, pos60, ":point_no"),
+            
+
+            
+			(try_for_range, ":cur_bot_spawning", 0, 5),
+				(store_mul, ":cur_slot", ":cur_bot_spawning", 3),
+				(val_add, ":cur_slot", multi_data_ccoop_wave_spawn_data_begin + 1),
+				(troop_get_slot, ":spawned_troop_no", "trp_multiplayer_data", ":cur_slot"),
+				(gt, ":spawned_troop_no", 0),
+				(val_add, ":cur_slot", 1),
+				(troop_get_slot, ":spawned_troop_count", "trp_multiplayer_data", ":cur_slot"),
+				(assign, ":original_spawned_troop_count", ":spawned_troop_count"),
+				
+				(assign, reg0, ":original_spawned_troop_count"), # debug
+				(display_debug_message, "@{!}original_spawned_troop_count is {reg0}"),
+				
+				(val_add, ":cur_slot", 1),
+				(troop_get_slot, ":spawned_troop_entry_point", "trp_multiplayer_data", ":cur_slot"),
+
+                
+				(val_sub, ":spawned_troop_count", ":reduced_spawn_amount"),
+				(try_begin),
+					(lt, ":cur_bot_spawning", ":reduced_spawn_amount_mod"),
+					(val_sub, ":spawned_troop_count", 1),
+					
+					(assign, reg0, ":cur_bot_spawning"), # debug
+					(assign, reg1, ":reduced_spawn_amount_mod"), # debug
+					(display_debug_message, "@{!}reducing spawn amount by one"),
+				(try_end),
+				
+				(assign, reg0, ":cur_bot_spawning"), # debug
+				(assign, reg1, ":spawned_troop_entry_point"), # debug
+				(str_store_troop_name, s0, ":spawned_troop_no"), # debug
+				(assign, reg2, ":spawned_troop_count"), # debug
+				(display_debug_message, "@{!}spawning bot group {reg0}: {reg2} {s0} from entry point {reg1}"),
+                
+				(add_visitors_to_current_scene, ":spawned_troop_entry_point", ":spawned_troop_no", ":spawned_troop_count", 1, -1),
+
+				(val_add, ":num_troops_spawned", ":spawned_troop_count"),
+				(val_sub, ":original_spawned_troop_count", ":spawned_troop_count"),
+				(store_mul, ":cur_slot", ":cur_bot_spawning", 3),
+				(val_add, ":cur_slot", multi_data_ccoop_wave_spawn_data_begin + 2),
+				(troop_set_slot, "trp_multiplayer_data", ":cur_slot", ":original_spawned_troop_count"),
+			(try_end),
+			
+			# sync clients 
+			(get_max_players, ":num_players"),
+			(try_for_range, ":cur_player", 1, ":num_players"),
+				(player_is_active, ":cur_player"),
+				(call_script, "script_multiplayer_ccoop_send_troop_data_to_client", ":cur_player"),
+			(try_end),			
+		(try_end),
+	]),
+	
+	# script.multiplayer_ccoop_check_reinforcement
+	# Input: arg1 = team 1 initial count, arg2 = team 2 initial count
+	# Output: reg0 = number of players to be moved from team1 to team2 (can be negative).
+	("multiplayer_ccoop_check_reinforcement",
+	[
+		(try_begin),
+			(multiplayer_is_server),
+			
+			(call_script, "script_multiplayer_ccoop_get_alive_enemy_count"),
+			(store_sub, ":free_enemy_slots", 100, reg0), #enemy required 
+			
+			(try_begin),
+				(ge, ":free_enemy_slots", 50),  # if 50 or more enemy reinforcement needed
+				
+				(call_script, "script_multiplayer_ccoop_spawn_wave", ":free_enemy_slots"),
+			(else_try),
+				#(lt, ":free_enemy_slots", 50),
+				(assign, ":num_troops_for_wave", 0),
+				(troop_get_slot, ":num_bot_types", "trp_multiplayer_data", multi_data_ccoop_wave_spawn_data_begin),
+				(try_for_range, ":cur_bot_type", 0, ":num_bot_types"),
+					(store_mul, ":cur_slot", ":cur_bot_type", 3),
+					(val_add, ":cur_slot", multi_data_ccoop_wave_spawn_data_begin + 2),
+					(troop_get_slot, ":cur_bot_count", "trp_multiplayer_data", ":cur_slot"),
+					(val_add, ":num_troops_for_wave", ":cur_bot_count"),
+				(try_end),
+			
+				(ge, ":free_enemy_slots", ":num_troops_for_wave"),
+				(call_script, "script_multiplayer_ccoop_spawn_wave", ":free_enemy_slots"),
+			(try_end),
+		(try_end),
+	]),
+	
+	# script.multiplayer_get_balance_dif
+	# Input: arg1 = team 1 initial count, arg2 = team 2 initial count
+	# Output: reg0 = number of players to be moved from team1 to team2 (can be negative).
+	("multiplayer_get_balance_dif",
+	  [
+	    (store_script_param, ":number_of_players_at_team_1", 1),
+		(store_script_param, ":number_of_players_at_team_2", 2),
+        (get_max_players, ":num_players"),
+        (try_for_range, ":cur_player", 0, ":num_players"),
+          (player_is_active, ":cur_player"),
+          (player_get_team_no, ":player_team", ":cur_player"),
+          (try_begin),
+            (eq, ":player_team", 0),
+            (val_add, ":number_of_players_at_team_1", 1),
+          (else_try),
+            (eq, ":player_team", 1),
+            (val_add, ":number_of_players_at_team_2", 1),
+          (try_end),
+        (try_end),
+		(assign, ":single_player_move_effect", 2),
+
+		(store_sub, ":difference_of_number_of_players", ":number_of_players_at_team_1", ":number_of_players_at_team_2"),
+		(assign, ":number_of_players_will_be_moved", 0),
+        (try_begin),
+          (store_mul, ":checked_value", "$g_multiplayer_auto_team_balance_limit", -1),
+          (le, ":difference_of_number_of_players", ":checked_value"),
+          (store_div, ":number_of_players_will_be_moved", ":difference_of_number_of_players", ":single_player_move_effect"),
+        (else_try),
+          (ge, ":difference_of_number_of_players", "$g_multiplayer_auto_team_balance_limit"),
+          (store_div, ":number_of_players_will_be_moved", ":difference_of_number_of_players", ":single_player_move_effect"),
+        (try_end),
+		(assign, reg0, ":number_of_players_will_be_moved"),
+	  ]
+	),
+	
+ 
+  # script.multiplayer_server_play_sound_at_position
+  # Input: arg1 = sound_id
+  # Input: pos60 = position
+  # Output: none
+  ("multiplayer_server_play_sound_at_position",
+   [
+     (store_script_param, ":sound_id", 1),
+     
+     (try_begin),
+       (this_or_next|multiplayer_is_server),
+       (neg|game_in_multiplayer_mode),
+       
+       (is_between, ":sound_id", 0, "snd_sounds_end"), # Valid sound
+       
+       (try_begin),
+         (neg|multiplayer_is_dedicated_server), # If a client and not a dedicated server that calls then play locally.
+         (play_sound_at_position, ":sound_id", pos60),
+       (try_end),
+       
+       (try_begin),
+         (multiplayer_is_server), # If this is a server broadcast the sound to all players
+         
+         (set_fixed_point_multiplier, 100),
+         (position_get_x,":xvalue", pos60),
+         (position_get_y,":yvalue", pos60),
+         (position_get_z,":zvalue", pos60),
+         
+         (get_max_players, ":num_players"),
+         (try_for_range, ":cur_player", 1, ":num_players"),
+           (player_is_active,":cur_player"),
+
+           (multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_return_sound_at_pos,":xvalue",":yvalue",":zvalue",":sound_id"),
+         (try_end),
+       (try_end),
+     (try_end),
+   ]),
+   
+    
+    # script.mp_set_coop_companions
+	("mp_set_coop_companions",
+	[
+		(store_script_param, ":player_id", 1), 
+        (assign, ":slot_id", slot_player_companion_ids_begin),
+        (player_set_slot, ":player_id", ":slot_id", "$g_presentation_obj_coop_companion_0"),
+        #(str_store_troop_name, s0, "$g_presentation_obj_coop_companion_0"),
+        #(troop_set_class, "$g_presentation_obj_coop_companion_0", 0),
+        #(class_set_name, 0, s0),
+        (val_add, ":slot_id", 1),
+        (player_set_slot, ":player_id", ":slot_id", "$g_presentation_obj_coop_companion_1"),
+        #(str_store_troop_name, s0, "$g_presentation_obj_coop_companion_1"),
+        #(troop_set_class, "$g_presentation_obj_coop_companion_0", 1),
+        #(class_set_name, 1, s0),
+        (val_add, ":slot_id", 1),
+        (player_set_slot, ":player_id", ":slot_id", "$g_presentation_obj_coop_companion_class_0"),
+        (assign, reg0, "$g_presentation_obj_coop_companion_class_0"),
+        #(display_message, "@setting companion class on client: {reg0}"),
+        (val_add, ":slot_id", 1),
+        (player_set_slot, ":player_id", ":slot_id", "$g_presentation_obj_coop_companion_class_1"),
+	]),
+	
+	
+#	# script.mp_ccoop_change_map
+#	#MCA: change map
+#	("mp_ccoop_change_map",
+#	[
+#		(try_begin),			
+#			(multiplayer_is_dedicated_server), 
+#
+#			# random scene
+#			(store_random_in_range, ":scene_no", multiplayer_scenes_begin, multiplayer_scenes_end),      
+#
+#			(assign, "$g_multiplayer_selected_map", ":scene_no"),
+#			(team_set_faction, 0, "$g_multiplayer_next_team_1_faction"),
+#			(team_set_faction, 1, "$g_multiplayer_next_team_2_faction"),
+#			(call_script, "script_game_multiplayer_get_game_type_mission_template", "$g_multiplayer_game_type"),
+#			(start_multiplayer_mission, reg0, "$g_multiplayer_selected_map", 1),
+#		(else_try),
+#			(multiplayer_is_server),
+#			(call_script, "script_game_multiplayer_get_game_type_mission_template", "$g_multiplayer_game_type"),
+#			(start_multiplayer_mission, reg0, "$g_multiplayer_selected_map", 1),
+#		(try_end),
+#	]	
+#	),
+	
+
+	
+	# script.mp_get_player_alive_troop_count
+	# MCA
+	# returns alive bot count for player team on reg0
+	("mp_get_player_alive_troop_count",   # parameters: 1. player_id   2. troop_id
+	[
+		(store_script_param, ":player_id", 1),
+		(store_script_param, ":troop_id", 2),
+		
+		(player_get_team_no, ":player_team", ":player_id"),
+		
+		(assign, ":troop_count", 0),
+	
+		(try_for_agents, ":cur_agent"),
+			(agent_is_human, ":cur_agent"),
+			(agent_is_alive, ":cur_agent"),
+			(agent_is_non_player, ":cur_agent"),
+			(agent_get_team, ":cur_agent_team", ":cur_agent"),
+           
+			(try_begin),
+				(eq, ":player_team", ":cur_agent_team"),
+				(agent_get_troop_id, ":agent_troop_id", ":cur_agent"),
+				(eq, ":troop_id", ":agent_troop_id"),
+				
+				# if agent belongs to the player
+				(agent_get_group, ":agent_group", ":cur_agent"),
+				(eq, ":agent_group", ":player_id"),
+				
+				(val_add, ":troop_count", 1),
+			(try_end),
+		(try_end),
+		
+		(assign, reg0, ":troop_count"),
+		
+		#MCA
+	#	(assign, reg1, ":troop_id"),
+	#	(assign, reg2, ":player_id"),
+	#	(display_debug_message, "@{!}alive troop ({reg1}) count: {reg0} for player {reg2}"),
+	]),
+	
+	# script.mp_get_player_total_alive_troop_count
+	# MCA
+	# returns total alive bot count for player team on reg0
+	("mp_get_player_total_alive_troop_count",   # parameters: 1. player_id 
+	[
+		(store_script_param, ":player_id", 1),
+		
+		(player_get_team_no, ":player_team", ":player_id"),
+		
+		(assign, ":troop_count", 0),
+	
+		(try_for_agents, ":cur_agent"),
+			(agent_is_human, ":cur_agent"),
+			(agent_is_alive, ":cur_agent"),
+			(agent_is_non_player, ":cur_agent"),
+			(agent_get_team, ":cur_agent_team", ":cur_agent"),
+			
+			# if agent belongs to the player
+			(agent_get_group, ":agent_group", ":cur_agent"),
+			(eq, ":agent_group", ":player_id"),
+           
+			(try_begin),
+				(eq, ":player_team", ":cur_agent_team"),				
+				(val_add, ":troop_count", 1),
+			(try_end),
+		(try_end),
+		
+		(assign, reg0, ":troop_count"),
+		
+		#MCA
+	#	(assign, reg2, ":player_id"),
+	#	(display_debug_message, "@{!}total alive troop count: {reg0} for player {reg2}"),
+	]),
+	
+	# script.multiplayer_spawn_player_bot_squad_at_point
+	("multiplayer_spawn_player_bot_squad_at_point", 
+	[
+		(store_script_param, ":player_no", 1),
+		(store_script_param, ":player_team", 2),
+		(store_script_param, ":point_no", 3),
+		
+		(try_begin),
+			
+			(call_script, "script_multiplayer_get_bots_count", ":player_no"),
+			(assign, ":player_bot_count", reg0),
+			
+            
+			(try_for_range, ":slot_id", slot_player_companion_ids_begin, slot_player_companion_ids_end),
+                (lt, ":player_bot_count", 2),
+
+                (player_get_slot, ":companion_id", ":player_no", ":slot_id"),
+				(call_script, "script_mp_get_player_alive_troop_count", ":player_no", ":companion_id"),
+				(eq, reg0, 0),
+                #(try_begin),
+                #  (try_for_range, ":cur_slot", slot_player_companion_ids_begin, slot_player_companion_classes_end),
+                #    (assign, reg1, ":cur_slot"),
+                #    (player_get_slot, reg2, ":player_no", ":cur_slot"),
+                #    (multiplayer_send_string_to_player, ":player_no", multiplayer_event_show_server_message, "@{!}spawning companion slot: {reg1}   value {reg2}"),
+				#  (try_end),	  
+				#(try_end),	  
+
+                (call_script, "script_mp_spawn_coop_companion", ":player_no", ":companion_id", ":slot_id", ":player_team", ":point_no"),
+                #(try_begin),
+                #  (try_for_range, ":cur_slot", slot_player_companion_ids_begin, slot_player_companion_classes_end),
+                #    (assign, reg1, ":cur_slot"),
+                #    (player_get_slot, reg2, ":player_no", ":cur_slot"),
+                #    (multiplayer_send_string_to_player, ":player_no", multiplayer_event_show_server_message, "@{!}after spawning slot: {reg1}   value {reg2}"),
+				#  (try_end),	  
+				#(try_end),	  
+
+				
+				(val_add, ":player_bot_count", 1),
+			(try_end),
+			
+		(try_end),
+	]),
+	
+	("multiplayer_get_spawn_point_close_to_bots",
+	[
+       (store_script_param, ":player_no", 1), 
+	   (player_get_team_no, ":player_team", ":player_no"), 
+	   (assign, ":x_pos", 0), 
+	   (assign, ":y_pos", 0), 
+	   (assign, ":num_living_players", 0),
+	   (try_for_agents, ":agent_no"),
+         (agent_is_human, ":agent_no"),
+         (agent_is_alive, ":agent_no"),
+		 (agent_is_non_player, ":agent_no"),           
+		 (agent_get_group, ":agent_group", ":agent_no"),
+		 (agent_get_team, ":agent_team", ":agent_no"),
+		 (try_begin),
+			(eq, ":agent_group", ":player_no"), 
+			(eq, ":agent_team", ":player_team"), 
+			(agent_get_position, pos2, ":agent_no"), 
+			(position_get_x, ":x1", pos2), 
+			(position_get_y, ":y1", pos2), 
+			(val_add, ":x_pos", ":x1"), 
+			(val_add, ":y_pos", ":y1"), 
+			(val_add, ":num_living_players", 1),
+		 (try_end), 
+       (try_end),
+	   (try_begin),
+	     (gt, ":num_living_players", 0),
+	     (val_div, ":x_pos", ":num_living_players"), 
+	     (val_div, ":y_pos", ":num_living_players"), 
+	   (try_end),
+	   (position_set_x, pos0, ":x_pos"), 
+	   (position_set_y, pos0, ":y_pos"), 
+	   (position_set_z, pos0, 0), 
+	   (assign, ":best_score", 0), 
+	   (assign, ":best_point", 0), 
+	   (try_for_range, ":i_point", 0, multi_num_valid_entry_points),
+		(entry_point_get_position, pos1, ":i_point"), 
+		(position_set_z, pos1, 0), 
+		(get_sq_distance_between_positions_in_meters, ":dist", pos0, pos1), 
+		(try_begin),	
+			(le, ":dist", multi_distance_to_captain_spaw_point), 
+			(val_max, ":dist", 1), 
+			(store_mul, ":score", multi_distance_to_captain_spaw_point, 1000), 
+			(val_div, ":score", ":dist"), 
+			(try_begin), 	
+				(gt, ":score", ":best_score"), 
+				(assign, ":best_point", ":i_point"), 
+				(assign, ":best_score", ":score"), 
+			(try_end), 
+		(try_end), 
+   	   (try_end),
+	   (assign, reg0, ":best_point"), 
+	]), 
+	
+	# script.multiplayer_get_spawn_point_close_to_player
+	# input: arg1 = player_no
+	# output: reg0 = best_spawn_point
+	("multiplayer_get_spawn_point_close_to_player",
+	[
+       (store_script_param, ":player_no", 1), 
+	   (player_get_agent_id, ":player_agent", ":player_no"),
+	   (position_set_x, pos0, 0), 
+	   (position_set_y, pos0, 0), 
+	   (try_begin),
+         (agent_is_alive, ":player_agent"),          
+		 (agent_get_position, pos0, ":player_agent"), 
+       (try_end),
+	   
+	   (position_set_z, pos0, 0), 
+	   (assign, ":best_score", 0), 
+	   (assign, ":best_point", 0), 
+	   (try_for_range, ":i_point", 0, multi_num_valid_entry_points),
+		(entry_point_get_position, pos1, ":i_point"), 
+		(position_set_z, pos1, 0), 
+		(get_sq_distance_between_positions_in_meters, ":dist", pos0, pos1), 
+		(try_begin),	
+			(le, ":dist", multi_distance_to_captain_spaw_point), 
+			(val_max, ":dist", 1), 
+			(store_mul, ":score", multi_distance_to_captain_spaw_point, 1000), 
+			(val_div, ":score", ":dist"), 
+			(try_begin), 	
+				(gt, ":score", ":best_score"), 
+				(assign, ":best_point", ":i_point"), 
+				(assign, ":best_score", ":score"), 
+			(try_end), 
+		(try_end), 
+   	   (try_end),
+	   (assign, reg0, ":best_point"), 
+	]),
+	
+	("multiplayer_get_bots_count",
+	[
+       (store_script_param, ":player_no", 1), 
+	   (player_get_team_no, ":player_team", ":player_no"), 
+	   (assign, ":num_living_players", 0),
+	   (try_for_agents, ":agent_no"),
+         (agent_is_human, ":agent_no"),
+         (agent_is_alive, ":agent_no"),
+		 (agent_is_non_player, ":agent_no"),           
+		 (agent_get_group, ":agent_group", ":agent_no"),
+		 (agent_get_team, ":agent_team", ":agent_no"),
+		 (try_begin),
+			(eq, ":agent_group", ":player_no"), 
+			(eq, ":agent_team", ":player_team"), 
+			(val_add, ":num_living_players", 1),
+		 (try_end), 
+       (try_end),
+	   (assign, reg0, ":num_living_players"),
+	]), 
+	
+	("multiplayer_get_selected_squad_slot_id", 
+	[
+		(store_script_param, ":player_no", 1), 
+		(assign, ":cur_troop_no", slot_player_bot_type_1_wanted), 
+		(try_for_range, ":slot_no", slot_player_bot_type_1_wanted, slot_player_bot_type_4_wanted+1), 	
+			(player_get_slot, ":value",  ":player_no", ":slot_no"),
+			(try_begin), 
+				(eq, ":value", 1), 
+				(assign, ":cur_troop_no", ":slot_no"), 
+			(try_end), 
+		(try_end),		
+		(assign, reg0, ":cur_troop_no"), 
+	]), 
+	
+	
+	# script.cf_multiplayer_event_team_change
+	("cf_multiplayer_event_team_change", 
+	[
+		(store_script_param, ":player_no", 1), 
+		(try_begin), 	
+			(eq, "$g_multiplayer_is_game_type_captain", 1),
+			(player_get_team_no, ":player_team", ":player_no"),
+			#(player_get_agent_id, ":player_agent", ":player_no"),
+			(try_for_agents, ":agent_no"),
+				(agent_is_human, ":agent_no"),
+				(agent_is_alive, ":agent_no"),
+				(agent_is_non_player, ":agent_no"),           
+				(agent_get_group, ":agent_group", ":agent_no"),
+				(agent_get_team, ":agent_team", ":agent_no"),
+				(try_begin),
+					(eq, ":agent_group", ":player_no"), 
+					(eq, ":agent_team", ":player_team"), 
+					
+					## increase player's kill count by 2 since death of each squad member will cause -2 score on team change
+					#(player_get_kill_count, ":player_kill_count", ":player_no"),
+					#(val_add, ":player_kill_count", 2),
+					#(player_set_kill_count, ":player_no", ":player_kill_count"),
+					## also decrease death by 2 for the same reason
+					#(player_get_death_count, ":player_death_count", ":player_no"),
+					#(val_sub, ":player_death_count", 2),
+					#(player_set_death_count, ":player_no", ":player_death_count"),
+					
+					#(call_script, "script_add_kill_death_counts", ":player_agent", ":agent_no"),
+					(remove_agent, ":agent_no"),
+				(try_end), 
+			(try_end), 	
+		(try_end), 
+	]), 
+	
+
+     
+     
+  # script.team_get_attack_readying_ranged_agent_percentage
+  # Input: arg1: team_no, arg2: try for team's enemies
+  # Output: reg0: percentage attack readying ranged agent,
+  ("team_get_attack_readying_ranged_agent_percentage",
+	[
+      (store_script_param, ":team_no", 1),
+      (store_script_param, ":negate", 2),
+	  (assign, ":num_ranged_agents", 0),
+      (assign, ":num_readying_attack", 0),
+      (try_for_agents,":cur_agent"),
+        (agent_is_alive, ":cur_agent"),
+        (agent_is_human, ":cur_agent"),
+        (agent_get_team, ":agent_team", ":cur_agent"),
+        (assign, ":continue", 0),
+        (try_begin),
+          (eq, ":negate", 1),
+          (teams_are_enemies, ":agent_team", ":team_no"),
+          (assign, ":continue", 1),
+        (else_try),
+          (eq, ":agent_team", ":team_no"),
+          (assign, ":continue", 1),
+        (try_end),
+        (eq, ":continue", 1),
+		(agent_get_combat_state, ":agent_cs", ":cur_agent"),
+		(agent_get_wielded_item, ":agent_wi0", ":cur_agent", 0),
+		(try_begin),
+		  (is_between,":agent_wi0",ranged_weapons_begin,ranged_weapons_end),
+		  (val_add,  ":num_ranged_agents", 1),
+		  (try_begin),
+		    (eq, ":agent_cs", 1),#atkcs_readying_attack
+		    (val_add, ":num_readying_attack", 1),
+		  (try_end),
+		(try_end),
+      (try_end),
+	  
+      (try_begin),
+        (eq,  ":num_ranged_agents", 0),
+        (assign,  ":num_ranged_agents", 1),
+      (try_end),
+	  (store_mul, ":perc_readying_attack_over_rangeds", ":num_readying_attack", 100),
+      (val_div, ":perc_readying_attack_over_rangeds", ":num_ranged_agents"),
+	  (assign, reg0, ":perc_readying_attack_over_rangeds"),
+  ]),
+     
+  # script.multiplayer_get_requested_squad_count
+  # Input: none
+  # Output: reg0 = requested squad count
+  ("multiplayer_get_requested_squad_count",
+   [
+		(store_script_param, ":player_id", 1),
+		(assign, ":total_troop_count", 0),
+		(try_for_range, ":slot_id", slot_player_companion_ids_begin, slot_player_companion_ids_end),
+			(player_get_slot, ":troop_count", ":player_id", ":slot_id"),
+			(val_add, ":total_troop_count", ":troop_count"),
+		(try_end),
+		
+		(assign, reg0, ":total_troop_count"),
+   ]),
+   
+
+	 
+	 
+  # script.multiplayer_update_cost_labels
+  # Input: none
+  # Output: none 
+  ("multiplayer_update_cost_labels",
+    [ 
+	  (multiplayer_get_my_player, ":my_player_no"),
+      (player_get_gold, ":player_gold", ":my_player_no"),
+      (call_script, "script_multiplayer_calculate_cur_selected_items_cost", ":my_player_no", 1),
+
+	  (overlay_set_text, "$g_presentation_obj_item_select_12", "str_total_item_cost_reg0"),
+	  (try_begin),
+	 	 (ge, ":player_gold", reg0),
+	 	 (overlay_set_color, "$g_presentation_obj_item_select_12", 0xFFFFFF),
+	  (else_try),
+	 	 (overlay_set_color, "$g_presentation_obj_item_select_12", 0xFF0000),
+	  (try_end),	 
+  ]),     
+
+	# script.multiplayer_ccoop_give_round_bonus_gold
+	# Input: none
+	# Output: none
+	("multiplayer_ccoop_give_round_bonus_gold",
+	[
+		(try_begin),
+			(gt, "$g_multiplayer_ccoop_wave_no", 0),
+			(store_mul, ":bonus_gold", "$g_multiplayer_ccoop_wave_no", 100),
+			(val_add, ":bonus_gold", 400),
+		
+			(get_max_players, ":num_players"),
+			(try_for_range, ":cur_player", 0, ":num_players"),
+				(player_is_active, ":cur_player"),
+				(player_get_gold, ":player_gold", ":cur_player"),
+				(val_add, ":player_gold", ":bonus_gold"),
+				(player_set_gold, ":cur_player", ":player_gold", multi_max_gold_that_can_be_stored),
+			(try_end),
+		(try_end),
+	]),
+	
+	# script.multiplayer_ccoop_destroy_prison_cart
+	# Input: none
+	# Output: none
+	("multiplayer_ccoop_destroy_prison_cart",
+	[
+		(try_begin),
+			(multiplayer_is_server),
+			
+			(try_begin),
+				(multiplayer_is_dedicated_server),
+				
+				(assign, "$g_prison_cart_previous_point", "$g_prison_cart_point"),
+				(assign, "$g_prison_cart_point", 0),
+								
+				(scene_prop_get_instance, ":prison_cart", "spr_prison_cart", 0),
+				(scene_prop_get_instance, ":prison_cart_door_left", "spr_prison_cart_door_left", 0),
+				(scene_prop_get_instance, ":prison_cart_door_right", "spr_prison_cart_door_right", 0),
+				
+				(set_fixed_point_multiplier, 100), 
+				
+				(prop_instance_get_position, pos1, ":prison_cart"),
+				(position_set_z, pos1, -4000), #40m down
+				(prop_instance_set_position, ":prison_cart", pos1),						
+				(prop_instance_set_position, ":prison_cart_door_left", pos1),						
+				(prop_instance_set_position, ":prison_cart_door_right", pos1),			
+			(try_end),
+			
+			(display_debug_message, "@{!}destroy prison cart"),
+			
+			# send destroy prison cart event to clients
+			(get_max_players, ":max_players"),
+			(try_for_range, ":cur_player", 0, ":max_players"),
+				(player_is_active, ":cur_player"),	
+				(multiplayer_send_int_to_player, ":cur_player", multiplayer_event_other_events, 
+					multiplayer_event_other_destroy_prison_cart),
+			(try_end),
+			
+		(try_end),
+	]),
+	
+	# script.multiplayer_ccoop_spawn_prison_cart
+	# INPUT: none
+	# OUTPUT: none
+	("multiplayer_ccoop_spawn_prison_cart",
+	[
+		(try_begin),
+			(multiplayer_is_server),
+			
+			# get prison cart random spawn point
+			(store_random_in_range, "$g_prison_cart_point", 70, 75),
+			
+			#
+			(assign, reg0, "$g_prison_cart_point"),
+			(display_debug_message, "@{!}spawning prison cart at point {reg0}"),
+			#
+			
+			# set prison cart position
+			(set_fixed_point_multiplier, 100),
+			(scene_prop_get_instance, ":prison_cart", "spr_prison_cart", 0),			
+			(entry_point_get_position, pos1, "$g_prison_cart_point"),
+			(position_move_y, pos1, -400), #4m back
+			(position_set_z_to_ground_level, pos1),
+			(prop_instance_set_position, ":prison_cart", pos1),
+		
+			# place left door
+			(scene_prop_get_instance, ":prison_cart_door_left", "spr_prison_cart_door_left", 0),
+			(init_position, pos2),		
+			(position_set_x, pos2, 84, 0),
+			(position_set_y, pos2, -314, 0), 
+			(position_set_z, pos2, 121, 0), 
+			(position_transform_position_to_parent, pos3, pos1, pos2),
+			(prop_instance_set_position, ":prison_cart_door_left", pos3),
+			(scene_prop_set_hit_points, ":prison_cart_door_left", 300),
+			
+			# place right door
+			(scene_prop_get_instance, ":prison_cart_door_right", "spr_prison_cart_door_right", 0),			
+			(init_position, pos2),
+			(position_set_x, pos2, -84, 0), 
+			(position_set_y, pos2, -315, 0), 
+			(position_set_z, pos2, 123, 0),
+			(position_transform_position_to_parent, pos3, pos1, pos2),
+			(prop_instance_set_position, ":prison_cart_door_right", pos3),
+			(scene_prop_set_hit_points, ":prison_cart_door_right", 300),					
+			
+			(try_begin),
+				#(neg|multiplayer_is_dedicated_server),
+				(call_script, "script_multiplayer_ccoop_set_prison_cart_visibility", 1),
+				
+				# display prison cart hint message to alive players				
+				(get_player_agent_no, ":player_agent"),
+				(ge, ":player_agent", 0),
+				(display_message, "str_prison_cart_hint"),	
+				
+				(start_presentation, "prsnt_multiplayer_ccoop_next_wave_time_counter"), # to display ask for help to respawn hint
+			(try_end),
+					
+			# send destroy prison cart event to clients
+			(get_max_players, ":max_players"),
+			(try_for_range, ":cur_player", 1, ":max_players"),
+				(try_begin),
+					(player_is_active, ":cur_player"),	
+					(multiplayer_send_3_int_to_player, ":cur_player", multiplayer_event_other_events, 
+						multiplayer_event_other_spawn_prison_cart, "$g_prison_cart_point", 300),
+				(try_end),
+			(try_end),
+		(try_end),
+	]),
+
+	# script.multiplayer_ccoop_get_alive_enemy_count
+	# Input: none
+	# Output: reg0 = alive_enemy_count
+	("multiplayer_ccoop_get_alive_enemy_count",
+	[
+		(assign, ":alive_enemy_count", 0),
+		(try_for_agents, ":cur_agent"),
+			(try_begin),
+				(agent_is_active, ":cur_agent"),
+				(agent_is_human, ":cur_agent"),
+				(agent_is_alive, ":cur_agent"),
+				(agent_get_team, ":cur_agent_team", ":cur_agent"),
+				(eq, ":cur_agent_team", 1),
+				(val_add, ":alive_enemy_count", 1),
+			(try_end),
+		(try_end),
+		(assign, reg0, ":alive_enemy_count"),
+	]),
+
+
+#berk	
+#script.add_troop_to_cur_tableau_for_multiplayer
+  # INPUT: troop_no
+  # OUTPUT: none
+  ("add_troop_to_cur_tableau_for_multiplayer",
+    [
+       (store_script_param, ":troop_no",1),
+
+       (set_fixed_point_multiplier, 100),
+
+       (cur_tableau_clear_override_items),
+       (cur_tableau_set_override_flags, af_override_fullhelm),
+##       (cur_tableau_set_override_flags, af_override_head|af_override_weapons),
+       
+       (init_position, pos2),
+       (cur_tableau_set_camera_parameters, 1, 8, 8, 10, 10000),
+
+       (init_position, pos5),
+       (assign, ":cam_height", 300),
+#       (val_mod, ":camera_distance", 5),
+       (assign, ":camera_distance", 1000),
+       (assign, ":camera_yaw", -15),
+       (assign, ":camera_pitch", -18),
+       (assign, ":animation", anim.stand_man),
+	   
+	   (troop_get_inventory_slot, ":horse_item", ":troop_no", ek_horse),
+       (try_begin),
+         (gt, ":horse_item", 0),
+         (cur_tableau_add_horse, ":horse_item", pos2, "anim_horse_stand", 0),
+         (assign, ":animation", "anim_ride_0"),
+         (assign, ":camera_pitch", -20),
+		 (assign, ":camera_yaw", -25),
+         (assign, ":cam_height", 500),
+         (assign, ":camera_distance", 1400),
+		 (position_move_x, pos5, 50, 0),
+       (try_end),
+       (position_set_z, pos5, ":cam_height"),
+
+       # camera looks towards -z axis
+       (position_rotate_x, pos5, -90),
+       (position_rotate_z, pos5, 180),
+
+       # now apply yaw and pitch
+       (position_rotate_y, pos5, ":camera_yaw"),
+       (position_rotate_x, pos5, ":camera_pitch"),
+       (position_move_z, pos5, ":camera_distance", 0),
+       (position_move_x, pos5, -120, 0),
+	   (position_move_y, pos5, 130, 0),
+
+       (try_begin),
+         (troop_is_hero, ":troop_no"),
+         (cur_tableau_add_troop, ":troop_no", pos2, ":animation", -1),
+       (else_try),
+         (store_mul, ":random_seed", ":troop_no", 126233),
+         (val_mod, ":random_seed", 1000),
+         (val_add, ":random_seed", 1),
+         (cur_tableau_add_troop, ":troop_no", pos2, ":animation", ":random_seed"),
+       (try_end),
+       (cur_tableau_set_camera_position, pos5),
+
+       (copy_position, pos8, pos5),
+       (position_rotate_x, pos8, -90), #y axis aligned with camera now. z is up
+       (position_rotate_z, pos8, 30), 
+       (position_rotate_x, pos8, -60), 
+       (cur_tableau_add_sun_light, pos8, 175,150,125),
+     ]),	 
+
+  # script.mp_set_player_troop_id
+  # Input: arg1 = player_no, arg2 = troop_id, arg3 = sync with server
+  # Output: none
+  ("mp_set_player_troop_id",
+    [ 
+	  (store_script_param, ":player_no", 1),
+	  (store_script_param, ":troop_id", 2),
+	  (store_script_param, ":do_sync", 3),
+	  (player_set_troop_id, ":player_no", ":troop_id"),
+	  (try_begin),
+	    (eq, ":troop_id", -1),
+		(call_script, "script_multiplayer_clear_player_selected_items", ":player_no"), # just to make sure
+	  (else_try),
+		(call_script, "script_multiplayer_set_default_item_selections_for_troop", ":player_no", ":troop_id"),
+	  (try_end),
+	  # server will do the same, so no need to send the new selections
+	  (try_begin),
+		(neq, ":do_sync", 0),
+		(multiplayer_send_int_to_server, multiplayer_event_change_troop_id, ":troop_id"),
+	  (try_end),
+  ]),
+
+  # script.mp_set_player_team_no
+  # Input: arg1 = player_no, arg2 = team_no, arg3 = sync with server
+  # Output: none 
+  ("mp_set_player_team_no",
+    [
+	  (store_script_param, ":player_no", 1),
+	  (store_script_param, ":team_no", 2),
+	  (store_script_param, ":do_sync", 3),
+	  (player_set_team_no, ":player_no", ":team_no"),
+	  (try_begin),
+		(neq, ":do_sync", 0),
+		
+		#(assign, reg0, ":team_no"),
+		#(display_debug_message, "@{!}multiplayer_event_change_team_no is sent with team_no: {reg0}"),
+		
+	    (multiplayer_send_int_to_server, multiplayer_event_change_team_no, ":team_no"),
+	  (try_end),
+	  (call_script, "script_mp_set_player_troop_id", ":player_no", -1, 0),
+	  #(call_script, "script_multiplayer_reset_squad_on_team_change_for_captain_game_types", ":player_no"),
+	  # server will do the same, so no need to send the new selections
+  ]),
+  
+
+	
+	
+	# script.multiplayer_ccoop_set_prison_cart_visibility
+	# Input: arg1 = visible
+	# Output: none
+	("multiplayer_ccoop_set_prison_cart_visibility",	
+	[
+		(store_script_param, ":visibility", 1),	
+		
+		(set_fixed_point_multiplier, 100), 
+		
+		(try_begin),
+			(scene_prop_get_instance, ":prison_cart", "spr_prison_cart", 0),
+			(scene_prop_get_instance, ":prison_cart_door_left", "spr_prison_cart_door_left", 0),
+			(scene_prop_get_instance, ":prison_cart_door_right", "spr_prison_cart_door_right", 0),
+			
+			(try_begin),				
+				(eq, ":visibility", 0), # if make invisible
+				
+				(scene_prop_fade_out, ":prison_cart", 400),
+				(scene_prop_fade_out, ":prison_cart_door_left", 400),
+				(scene_prop_fade_out, ":prison_cart_door_right", 400),
+				
+				(prop_instance_enable_physics, ":prison_cart", 0),
+				(prop_instance_enable_physics, ":prison_cart_door_left", 0),
+				(prop_instance_enable_physics, ":prison_cart_door_right", 0),
+				
+				(store_mission_timer_a, "$g_multiplayer_ccoop_move_prison_cart"),
+				(val_add, "$g_multiplayer_ccoop_move_prison_cart", 5), # after 5secs (related to 400)
+				
+				(assign, "$g_prison_cart_previous_point", "$g_prison_cart_point"),
+				(assign, "$g_prison_cart_point", 0),
+			(else_try),
+				(gt, ":visibility", 0), # if make visible
+			
+				(scene_prop_fade_in, ":prison_cart", 300),
+				(scene_prop_fade_in, ":prison_cart_door_left", 300),
+				(scene_prop_fade_in, ":prison_cart_door_right", 300),
+				
+				(prop_instance_enable_physics, ":prison_cart", 1),
+				(prop_instance_enable_physics, ":prison_cart_door_left", 1),
+				(prop_instance_enable_physics, ":prison_cart_door_right", 1),
+			(try_end),
+		(try_end),
+	]),
+  
+  	# script.multiplayer_ccoop_spawn_player_and_bots
+	# INPUT: 1. player_no
+	# OUTPUT: 0 if player not spawned, 1 if player spawned on reg0
+	("multiplayer_ccoop_spawn_player_and_bots",
+	[	
+		(store_script_param, ":player_no", 1),
+				
+		(try_begin),
+			(neg|player_is_busy_with_menus, ":player_no"),
+			(player_get_team_no, ":player_team", ":player_no"), #if player is currently spectator do not spawn his agent
+			(lt, ":player_team", multi_team_spectator),
+
+			(player_get_troop_id, ":player_troop", ":player_no"), #if troop is not selected do not spawn his agent
+			(ge, ":player_troop", 0),
+			
+			(call_script, "script_multiplayer_buy_agent_equipment", ":player_no"),
+
+			(troop_get_inventory_slot, ":has_horse", ":player_troop", ek_horse),
+			(try_begin),
+				(ge, ":has_horse", 0),
+				(assign, ":is_horseman", 1),
+			(else_try),
+				(assign, ":is_horseman", 0),
+			(try_end),
+			
+			(call_script, "script_multiplayer_get_bots_count", ":player_no"), 
+			(assign, ":bot_count", reg0),
+			
+			(try_begin),
+				#(gt, "$g_prison_cart_point", 0),
+				(gt, "$g_multiplayer_ccoop_enemy_respawn_secs", 31),
+				
+				(assign, reg0, "$g_prison_cart_previous_point"),
+				(display_debug_message, "@{!}prison cart spawn at point {reg0}"),
+				
+				(player_spawn_new_agent, ":player_no", "$g_prison_cart_previous_point"),
+				(call_script, "script_multiplayer_spawn_player_bot_squad_at_point", ":player_no", ":player_team", "$g_prison_cart_previous_point"), 
+			(else_try),
+				(try_begin),
+					(gt, ":bot_count", 0),
+					(call_script, "script_multiplayer_get_spawn_point_close_to_bots", ":player_no"), 
+					(player_spawn_new_agent, ":player_no", reg0),
+					
+					# spawn requested bots
+					(call_script, "script_multiplayer_get_spawn_point_close_to_bots", ":player_no"),
+					(call_script, "script_multiplayer_spawn_player_bot_squad_at_point", ":player_no", ":player_team", reg0),
+				(else_try), 
+					(call_script, "script_multiplayer_find_spawn_point", ":player_team", 1, ":is_horseman"), 
+					(assign, ":point_no", reg0),
+					(player_spawn_new_agent, ":player_no", ":point_no"),
+					(call_script, "script_multiplayer_spawn_player_bot_squad_at_point", ":player_no", ":player_team", ":point_no"), 
+				(end_try),
+			(end_try),
+			
+			(try_begin),
+				(player_get_slot, ":player_first_spawn", ":player_no", slot_player_first_spawn),
+				(gt, ":player_first_spawn", 0),
+				#(player_set_slot, ":player_no", slot_player_join_time, ":player_join_time"),
+				(player_set_slot, ":player_no", slot_player_first_spawn, 0),
+			(try_end),
+			
+			(assign, reg0, 1),  # player spawned
+		(else_try),
+			(assign, reg0, 0),  # player not spawned
+		(end_try),
+	]),
+    
+  # script.multiplayer_set_g_multiplayer_is_game_type_captain
+  # Input: none
+  # Output: none 
+  ("multiplayer_set_g_multiplayer_is_game_type_captain",
+    [ 
+	  (try_begin), 
+		(eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_coop),
+		(assign, "$g_multiplayer_is_game_type_captain", 1),
+	 (else_try),
+		(assign, "$g_multiplayer_is_game_type_captain", 0),
+	 (try_end),
+  ]),
+  
+  
+  # script.cf_multiplayer_can_buy_squad
+  # Input: none
+  # Output: reg0:can buy squad 
+  ("cf_multiplayer_can_buy_squad",
+    [ 
+	  (assign, ":can_buy_squad", 0),
+	  (try_begin), 
+		(eq, "$g_multiplayer_is_game_type_captain", 1),
+		(assign, ":can_buy_squad", 1),
+	  (try_end),
+	  # disable squad buying for second team
+	  # (try_begin),
+	    # (eq, ":can_buy_squad", 1),
+		# (eq, "$g_multiplayer_game_type", multiplayer_game_type_captain_battle),
+	    # (multiplayer_get_my_team, ":my_team"),
+	    # (eq, ":my_team", 1),
+		# (assign, ":can_buy_squad", 0),
+	  # (try_end),
+	  (eq, ":can_buy_squad", 1),
+  ]),    
+	
+	# script.avarage_of_two_points
+	# Input: pos1, pos2
+	# Output: pos1
+	("avarage_of_two_points",
+	[
+		(position_get_x, ":x_pos1", pos1),
+		(position_get_x, ":x_pos2", pos2),
+		(val_add, ":x_pos1", ":x_pos2"),
+		(val_div, ":x_pos1", 2),
+		(position_set_x, pos1, ":x_pos1"),
+		
+		(position_get_y, ":y_pos1", pos1),
+		(position_get_y, ":y_pos2", pos2),
+		(val_add, ":y_pos1", ":y_pos2"),
+		(val_div, ":y_pos1", 2),
+		(position_set_y, pos1, ":y_pos1"),
+		
+		(position_get_z, ":z_pos1", pos1),
+		(position_get_z, ":z_pos2", pos2),
+		(val_add, ":z_pos1", ":z_pos2"),
+		(val_div, ":z_pos1", 2),
+		(position_set_z, pos1, ":z_pos1"),
+	]),
+	
+	# script.multiplayer_ccoop_start_player_and_squad_respawn_period
+	# INPUT: arg1 = spawn_alive_player_squad
+	# OUTPUT: none
+	("multiplayer_ccoop_start_player_and_squad_respawn_period",
+	[
+		(try_begin),
+			(multiplayer_is_server),
+            #(neq, "$g_multiplayer_ccoop_wave_no", 1),
+			
+			(store_script_param, "$g_multiplayer_ccoop_spawn_alive_player_squad_and_minus_one_first_spawn_slots_and_minus_one_first_spawn_slots", 1),
+			
+			# reset first spawn slot
+			(get_max_players, ":max_players"),
+			(try_for_range, ":player_no", 0, ":max_players"),
+				(player_is_active, ":player_no"),
+                #(neg|player_slot_eq, ":player_no", slot_player_first_spawn, -1),
+				(try_begin),
+					(eq, "$g_multiplayer_ccoop_spawn_alive_player_squad_and_minus_one_first_spawn_slots_and_minus_one_first_spawn_slots", 1),
+					(player_set_slot, ":player_no", slot_player_first_spawn, 1),
+				(else_try),
+					(player_get_slot, ":player_first_spawn", ":player_no", slot_player_first_spawn),
+					(ge, ":player_first_spawn", 0),
+					(player_set_slot, ":player_no", slot_player_first_spawn, 1),
+				(try_end),
+                #(multiplayer_send_2_int_to_player, ":player_no", multiplayer_event_other_events, multiplayer_event_other_event_ccoop_lock_companions, 1),
+			(try_end),
+			
+			# start player&squad spawn period
+			(assign, "$g_multiplayer_ccoop_spawn_player_and_squad_counter", 30),
+		(try_end),
+	]),
+      
+
+	 
+	# script.multiplayer_upgrade_player_equipment
+	# INPUT: arg1 = player_no
+	# OUTPUT: none
+	("multiplayer_upgrade_player_equipment",
+	[
+		(store_script_param, ":player_no", 1),
+		
+		(assign, reg0, ":player_no"),
+		(display_debug_message, "@{!}multiplayer_upgrade_player_equipment: {reg0}"),	
+		        
+		(player_get_troop_id, ":player_troop", ":player_no"),
+		(player_get_agent_id, ":player_agent", ":player_no"),
+		(player_get_gold, ":player_gold", ":player_no"),
+		(try_for_range, ":cur_item_slot", 0, ek_horse), # don't include horse
+			(store_add, ":cur_player_slot", ":cur_item_slot", slot_player_cur_selected_item_indices_begin),
+			(store_add, ":cur_player_slot_i", ":cur_item_slot", slot_player_selected_item_indices_begin),
+			(player_get_slot, ":cur_player_slot_i_item", ":player_no", ":cur_player_slot_i"),
+            (agent_get_item_slot, ":agent_item", ":player_agent", ":cur_item_slot"),
+			(try_begin),
+                (this_or_next|lt, ":cur_player_slot_i_item", 0),
+                (this_or_next|is_between, ":agent_item", coop_drops_begin, coop_new_items_end),
+				(player_item_slot_is_picked_up, ":player_no", ":cur_item_slot"),
+				(player_set_slot, ":player_no", ":cur_player_slot", -1),
+                #(str_store_item_name, s0, ":agent_item"),
+                #(display_message, "@setting {s0} as null"),
+			(else_try),
+				#(agent_get_item_slot, ":agent_item", ":player_agent", ":cur_item_slot"),
+				(player_set_slot, ":player_no", ":cur_player_slot", ":agent_item"),
+			(try_end),
+            
+		(try_end),
+		(player_set_slot, ":player_no", slot_player_cur_selected_item_indices_begin + 8, -1), # mark horse as -1
+		(call_script, "script_multiplayer_calculate_cur_selected_items_cost", ":player_no", 0),
+		(assign, ":added_gold", reg0),
+        #(display_message, "@gold to add: {reg0}"),
+		(val_add, ":player_gold", ":added_gold"),
+		
+		(try_for_range, ":i_item", slot_player_selected_item_indices_begin, slot_player_selected_item_indices_end),
+			(player_get_slot, ":selected_item_index", ":player_no", ":i_item"),
+			(store_sub, ":i_cur_selected_item", ":i_item", slot_player_selected_item_indices_begin),
+            (agent_get_item_slot, ":agent_item", ":player_agent", ":i_cur_selected_item"),
+			(try_begin),
+				(this_or_next|lt, ":selected_item_index", 0),
+				(this_or_next|player_item_slot_is_picked_up, ":player_no", ":i_cur_selected_item"),
+				(this_or_next|is_between, ":agent_item", coop_drops_begin, coop_new_items_end),
+                (eq, ":i_cur_selected_item", ek_horse), # remove horse selection for this special case
+				(assign, ":selected_item_index", -1),
+			(try_end),
+			(val_add, ":i_cur_selected_item", slot_player_cur_selected_item_indices_begin),
+			(player_set_slot, ":player_no", ":i_cur_selected_item", ":selected_item_index"),
+		(try_end),
+		(assign, ":end_cond", 1000),
+        
+
+		(try_for_range, ":unused", 0, ":end_cond"),
+			(call_script, "script_multiplayer_calculate_cur_selected_items_cost", ":player_no", 0),
+			(assign, ":total_cost", reg0),
+			(try_begin),
+				(gt, ":total_cost", ":player_gold"),
+				#downgrade one of the selected items
+				#first normalize the prices
+				#then prioritize some of the weapon classes for specific troop classes
+				(call_script, "script_multiplayer_get_troop_class", ":player_troop"),
+				(assign, ":player_troop_class", reg0),
+				
+				(assign, ":max_cost_value", 0),
+				(assign, ":max_cost_value_index", -1),
+				(try_for_range, ":i_item", slot_player_cur_selected_item_indices_begin, slot_player_cur_selected_item_indices_end),
+					(player_get_slot, ":item_id", ":player_no", ":i_item"),
+					(ge, ":item_id", 0), #might be -1 for horses etc.
+					(call_script, "script_multiplayer_get_item_value_for_troop", ":item_id", ":player_troop"),
+					(assign, ":item_value", reg0),
+					(store_sub, ":item_type", ":i_item", slot_player_cur_selected_item_indices_begin),
+					(try_begin), #items
+						(this_or_next|eq, ":item_type", 0),
+						(this_or_next|eq, ":item_type", 1),
+						(this_or_next|eq, ":item_type", 2),
+						(eq, ":item_type", 3),
+						(val_mul, ":item_value", 5),
+					(else_try), #head
+						(eq, ":item_type", 4),
+						(val_mul, ":item_value", 4),
+					(else_try), #body
+						(eq, ":item_type", 5),
+						(val_mul, ":item_value", 2),
+					(else_try), #foot
+						(eq, ":item_type", 6),
+						(val_mul, ":item_value", 8),
+					(else_try), #gloves
+						(eq, ":item_type", 7),
+						(val_mul, ":item_value", 8),
+					(else_try), #horse
+					#base value (most expensive)
+					(try_end),
+					(item_get_slot, ":item_class", ":item_id", slot_item_multiplayer_item_class),
+					(try_begin),
+						(eq, ":player_troop_class", multi_troop_class_infantry),
+						(this_or_next|eq, ":item_class", multi_item_class_type_sword),
+						(this_or_next|eq, ":item_class", multi_item_class_type_axe),
+						(this_or_next|eq, ":item_class", multi_item_class_type_blunt),
+						(this_or_next|eq, ":item_class", multi_item_class_type_war_picks),
+						(this_or_next|eq, ":item_class", multi_item_class_type_two_handed_sword),
+						(this_or_next|eq, ":item_class", multi_item_class_type_small_shield),
+						(eq, ":item_class", multi_item_class_type_two_handed_axe),
+						(val_div, ":item_value", 2),
+					(else_try),
+						(eq, ":player_troop_class", multi_troop_class_spearman),
+						(this_or_next|eq, ":item_class", multi_item_class_type_spear),
+						(eq, ":item_class", multi_item_class_type_large_shield),
+						(val_div, ":item_value", 2),
+					(else_try),
+						(eq, ":player_troop_class", multi_troop_class_cavalry),
+						(this_or_next|eq, ":item_class", multi_item_class_type_lance),
+						(this_or_next|eq, ":item_class", multi_item_class_type_sword),
+						(eq, ":item_class", multi_item_class_type_horse),
+						(val_div, ":item_value", 2),
+					(else_try),
+						(eq, ":player_troop_class", multi_troop_class_archer),
+						(this_or_next|eq, ":item_class", multi_item_class_type_bow),
+						(eq, ":item_class", multi_item_class_type_arrow),
+						(val_div, ":item_value", 2),
+					(else_try),
+						(eq, ":player_troop_class", multi_troop_class_crossbowman),
+						(this_or_next|eq, ":item_class", multi_item_class_type_crossbow),
+						(eq, ":item_class", multi_item_class_type_bolt),
+						(val_div, ":item_value", 2),
+					(else_try),
+						(eq, ":player_troop_class", multi_troop_class_mounted_archer),
+						(this_or_next|eq, ":item_class", multi_item_class_type_bow),
+						(this_or_next|eq, ":item_class", multi_item_class_type_arrow),
+						(eq, ":item_class", multi_item_class_type_horse),
+						(val_div, ":item_value", 2),
+					(else_try),
+						(eq, ":player_troop_class", multi_troop_class_mounted_crossbowman),
+						(this_or_next|eq, ":item_class", multi_item_class_type_crossbow),
+						(this_or_next|eq, ":item_class", multi_item_class_type_bolt),
+						(eq, ":item_class", multi_item_class_type_horse),
+						(val_div, ":item_value", 2),
+					(try_end),
+
+					(try_begin),
+						(gt, ":item_value", ":max_cost_value"),
+						(assign, ":max_cost_value", ":item_value"),
+						(assign, ":max_cost_value_index", ":i_item"),
+					(try_end),
+				(try_end),
+
+				#max_cost_value and max_cost_value_index will definitely be valid
+				#unless no items are left (therefore some items must cost 0 gold)
+				(player_get_slot, ":item_id", ":player_no", ":max_cost_value_index"),
+				(call_script, "script_multiplayer_get_previous_item_for_item_and_troop", ":item_id", ":player_troop"),
+				(assign, ":item_id", reg0),
+				(player_set_slot, ":player_no", ":max_cost_value_index", ":item_id"),
+			(else_try),
+
+				(assign, ":end_cond", 0),
+		        (assign, ":total_cost", reg0),
+                #(display_message, "@total_cost: {reg0}"),
+				(val_sub, ":player_gold", ":total_cost"),
+				(player_set_gold, ":player_no", ":player_gold", multi_max_gold_that_can_be_stored),
+				(try_for_range, ":i_item", slot_player_cur_selected_item_indices_begin, slot_player_cur_selected_item_indices_end),
+					(player_get_slot, ":item_id", ":player_no", ":i_item"),
+                    
+
+					# add the item to agent
+					(try_begin),
+						(ge, ":item_id", 0),
+                        
+						(store_sub, ":item_slot", ":i_item", slot_player_cur_selected_item_indices_begin),
+						#(store_add, ":i_actual_selected_item", ":item_slot", slot_player_selected_item_indices_begin),
+                        #(player_slot_ge, ":player_no", ":i_actual_selected_item", 0),
+						(agent_get_item_slot, ":agent_item", ":player_agent", ":item_slot"),
+						(neq, ":agent_item", ":item_id"),
+                        
+						(neg|is_between, ":agent_item", coop_drops_begin, coop_new_items_end),
+                        
+						(get_max_players, ":num_players"),
+						(try_begin),
+							(ge, ":agent_item", 0),
+                            
+							(agent_unequip_item, ":player_agent", ":agent_item", ":item_slot"),
+														
+							(try_for_range, ":cur_player", 1, ":num_players"),						
+								(player_is_active, ":cur_player"),							
+								(multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_unequip_item,
+									":player_agent", ":agent_item", ":item_slot"),							
+							(try_end),
+						(try_end),
+						(agent_equip_item, ":player_agent", ":item_id"),
+						
+						(try_for_range, ":cur_player", 1, ":num_players"),						
+							(player_is_active, ":cur_player"),							
+							(multiplayer_send_3_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_equip_item,
+								":player_agent", ":item_id"),							
+						(try_end),
+						
+					(try_end),
+				(try_end),
+				(player_set_slot, ":player_no", slot_player_total_equipment_value, ":total_cost"),     
+			(try_end),
+		(try_end),
+	]),
+	
+	# script.cf_multiplayer_upgrade_companion_equipment
+	# INPUT: arg1 = agent_no
+	# OUTPUT: none
+	("cf_multiplayer_upgrade_companion_equipment",
+	[
+     (store_script_param, ":agent_no", 1),
+     #(agent_is_human, ":agent_no"),
+     #(agent_is_alive, ":agent_no"),
+     #(agent_is_non_player, ":agent_no"),
+     #(agent_get_team, ":team_no", ":agent_no"),
+     
+     (agent_get_group, ":agent_group", ":agent_no"),
+     (player_is_active, ":agent_group"),
+     (agent_get_troop_id, ":troop_no", ":agent_no"),
+     
+     #(assign, reg0, ":troop_no"),
+     #(display_message, "@troop no: {reg0}"),
+     
+     (assign, ":matching_companion_found", 0),
+     
+     (try_for_range, ":cur_slot", slot_player_companion_ids_begin, slot_player_companion_ids_end),
+       (player_get_slot, ":companion_no", ":agent_group", ":cur_slot"),
+       (eq, ":troop_no", ":companion_no"),
+       (assign, ":matching_companion_found", 1),
+       #(display_message, "@pass"),
+       (val_sub, ":cur_slot", slot_player_companion_ids_begin),
+       (val_add, ":cur_slot", slot_player_companion_levels_begin),
+       (player_get_slot, ":companion_level", ":agent_group", ":cur_slot"),
+       (val_sub, ":cur_slot", slot_player_companion_levels_begin),
+       (val_add, ":cur_slot", slot_player_companion_classes_begin),
+       (player_get_slot, ":companion_template", ":agent_group", ":cur_slot"),
+     (try_end),
+     
+     #(try_begin),
+     #  (ge, ":companion_template", 0),
+     #  (str_store_troop_name, s0, ":companion_template"),
+     #  (multiplayer_send_string_to_player, ":agent_group", multiplayer_event_show_server_message, "@{!}companion template identified as {s0}"),
+     #(try_end),
+     
+     (eq, ":matching_companion_found", 1),
+     
+     (try_begin),
+       (is_between, ":companion_template", multiplayer_coop_class_templates_begin, multiplayer_coop_class_templates_end),
+       (assign, ":multiplier", 18),
+     (else_try),
+       (assign, ":multiplier", 16),
+     (try_end),
+     
+     (try_begin),
+       (lt, ":companion_level", 3),
+       (store_mul, ":template_leveler", ":companion_level", ":multiplier"),
+       (val_add, ":companion_template", ":template_leveler"),
+     (else_try),
+       (store_mul, ":template_leveler", 3, ":multiplier"), #4 is max level
+       (val_add, ":companion_template", ":template_leveler"),
+     (try_end),
+     
+     #(try_begin),
+     #  (ge, ":companion_template", 0),
+     #  (str_store_troop_name, s0, ":companion_template"),
+     #  (multiplayer_send_string_to_player, ":agent_group", multiplayer_event_show_server_message, "@{!}companion template multiplied to {s0}"),
+     #(try_end),
+       
+     #(assign, reg0, ":companion_template"),
+     #(display_message, "@companion template: {reg0}"),
+
+     (assign, ":has_special_melee", 0),
+     (assign, ":has_special_ranged", 0),
+     #(eq, ":team_no", 0),
+     
+     (troop_equip_items, ":companion_template"),
+     (get_max_players, ":num_players"),
+     
+     (try_for_range, ":cur_slot", 0, 4),
+       (agent_get_item_slot, ":item_id", ":agent_no", ":cur_slot"),
+       (ge, ":item_id", 0),
+       (try_begin),
+         (is_between, ":item_id", coop_drops_begin, coop_new_items_end),
+         #(assign, reg0, ":agent_no"),
+         #(assign, reg1, ":cur_slot"),
+         #(assign, reg2, ":item_id"),
+         #(display_message, "@special item on companion! agent: {reg0} slot: {reg1} item: {reg2}"),
+         (item_get_type, ":item_type", ":item_id"),
+         (try_begin),
+           (this_or_next|eq, ":item_type", itp_type_one_handed_wpn),
+           (this_or_next|eq, ":item_type", itp_type_two_handed_wpn),
+           (eq, ":item_type", itp_type_polearm),
+           (assign, ":has_special_melee", 1),
+         (else_try),
+           (this_or_next|eq, ":item_type", itp_type_bow),
+           (this_or_next|eq, ":item_type", itp_type_crossbow),
+           (eq, ":item_type", itp_type_thrown),
+           (assign, ":has_special_ranged", 1),
+         (try_end),
+       (else_try),
+         (agent_unequip_item, ":agent_no", ":item_id", ":cur_slot"),
+         (try_for_range, ":cur_player", 1, ":num_players"),						
+           (player_is_active, ":cur_player"),
+           (multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_unequip_item,
+             ":agent_no", ":item_id", ":cur_slot"),							
+         (try_end),
+       (try_end),
+     (try_end),
+     
+     (try_for_range, ":cur_slot", 0, 9),
+       #(ge, ":item_id", 0),
+       
+       (troop_get_inventory_slot, ":cur_item", ":companion_template", ":cur_slot"),
+       #(assign, reg0, ":cur_item"),
+       #(display_message, "@item from template {reg0}"),
+       (gt, ":cur_item", 0),
+       #(str_store_item_name, s0, ":cur_item"),
+       #(multiplayer_send_string_to_player, ":agent_group", multiplayer_event_show_server_message, "@{!}companion template has item {s0}"),
+       (item_get_type, ":cur_item_type", ":cur_item"),
+       (try_begin),
+         (is_between, ":cur_item_type", itp_type_head_armor, itp_type_pistol),
+         (assign, ":found_matching_armor_piece", 0),
+         (try_for_range, ":cur_equipped_slot", 4, 8),
+           (agent_get_item_slot, ":cur_item_equipped", ":agent_no", ":cur_equipped_slot"),
+           (ge, ":cur_item_equipped", 0),
+           (item_get_type, ":cur_item_equipped_type", ":cur_item_equipped"),
+           (eq, ":cur_item_type", ":cur_item_equipped_type"),
+           #(str_store_item_name, s1, ":cur_item_equipped"),
+           (assign, ":found_matching_armor_piece", 1),
+           (neq, ":cur_item_equipped", ":cur_item"),
+           #(multiplayer_send_string_to_player, ":agent_group", multiplayer_event_show_server_message, "@{!}found matching armour piece {s1}"),
+           #(display_message, "@found_matching_armor_piece"),
+           (neg|is_between, ":cur_item_equipped", coop_drops_begin, coop_new_items_end),
+           (agent_unequip_item, ":agent_no", ":cur_item_equipped", ":cur_equipped_slot"),
+           (try_for_range, ":cur_player", 1, ":num_players"),						
+             (player_is_active, ":cur_player"),
+             (multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_unequip_item,
+               ":agent_no", ":cur_item_equipped", ":cur_equipped_slot"),							
+           (try_end),
+           (agent_equip_item, ":agent_no", ":cur_item"),
+           #(multiplayer_send_string_to_player, ":agent_group", multiplayer_event_show_server_message, "@{!}equipping {s0}"),
+           (try_for_range, ":cur_player", 1, ":num_players"),						
+             (player_is_active, ":cur_player"),
+             (multiplayer_send_3_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_equip_item,
+               ":agent_no", ":cur_item"),							
+           (try_end),
+         (try_end),
+         (try_begin),
+           (eq, ":found_matching_armor_piece", 0),
+           (agent_equip_item, ":agent_no", ":cur_item"),
+           (try_for_range, ":cur_player", 1, ":num_players"),						
+             (player_is_active, ":cur_player"),
+             (multiplayer_send_3_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_equip_item,
+               ":agent_no", ":cur_item"),							
+           (try_end),
+         (try_end),
+       (else_try),
+         (assign, ":equip_cur_item", 0),
+         (try_begin),
+           (this_or_next|eq, ":cur_item_type", itp_type_one_handed_wpn),
+           (this_or_next|eq, ":cur_item_type", itp_type_two_handed_wpn),
+           (this_or_next|eq, ":cur_item_type", itp_type_shield),
+           (eq, ":cur_item_type", itp_type_polearm),
+           (eq, ":has_special_melee", 0),
+           (assign, ":equip_cur_item", 1),
+         (else_try),
+           (this_or_next|eq, ":cur_item_type", itp_type_bow),
+           (this_or_next|eq, ":cur_item_type", itp_type_crossbow),
+           (this_or_next|eq, ":cur_item_type", itp_type_thrown),
+           (this_or_next|eq, ":cur_item_type", itp_type_bolts),
+           (eq, ":cur_item_type", itp_type_arrows),
+           (eq, ":has_special_ranged", 0),
+           (assign, ":equip_cur_item", 1),
+         (try_end),
+         (eq, ":equip_cur_item", 1),
+         #(multiplayer_send_string_to_player, ":agent_group", multiplayer_event_show_server_message, "@{!}equipping {s0}"),
+         (agent_equip_item, ":agent_no", ":cur_item"),
+         (try_for_range, ":cur_player", 1, ":num_players"),						
+           (player_is_active, ":cur_player"),
+           (multiplayer_send_3_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_equip_item,
+             ":agent_no", ":cur_item"),							
+         (try_end),
+         #(try_end),
+       (try_end),
+     (try_end),
+         
+	]),
+
+
+    
+    
+     
+   #script.mp_spawn_coop_companion
+   ("mp_spawn_coop_companion", #this code is to make sure that companions spawn with or without their horse depending on their class/map
+    [
+      (store_script_param, ":player_no", 1),
+      (store_script_param, ":troop_no", 2),
+      (store_script_param, ":slot_no", 3),
+      (store_script_param, ":player_team", 4),
+      (store_script_param, ":point_no", 5),
+      
+      (troop_equip_items, ":troop_no"),
+
+      
+      (val_add, ":slot_no", 2),
+      (player_get_slot, ":class_id", ":player_no", ":slot_no"),
+      
+      (assign, ":has_horse", 0),
+      
+      (try_for_range, ":cur_slot", 0, 9), #check if the class they are spawning as is mounted (default classes/personal equipment always has a horse)
+        (eq, ":has_horse", 0),
+        (troop_get_inventory_slot, ":cur_item", ":class_id", ":cur_slot"),
+        (gt, ":cur_item", 0),
+        (item_get_type, ":cur_item_type", ":cur_item"),
+        (eq, ":cur_item_type", itp_type_horse),
+        (assign, ":has_horse", 1), #found a horse!
+      (try_end),
+      
+      (store_current_scene, ":cur_scene"),
+      (scene_get_slot, ":scene_disallow_horses", ":cur_scene", slot_scene_ccoop_disallow_horses), #this is set as 1 for all maps that should be played without horses
+      
+      (try_for_range, ":cur_slot", 0, 9),
+        (troop_get_inventory_slot, ":cur_item", ":troop_no", ":cur_slot"),
+        (ge, ":cur_item", 0),
+        (item_get_type, ":cur_item_type", ":cur_item"),
+        (troop_remove_item, ":troop_no", ":cur_item"), 
+        (try_begin),
+          (eq, ":cur_item_type", itp_type_horse),
+          (troop_set_slot, ":troop_no", slot_troop_coop_lord_spawned, ":cur_item"),
+        (else_try),
+          (val_add, ":cur_slot", multi_data_equipment_holder_begin),
+          (troop_set_slot, "trp_multiplayer_data", ":cur_slot", ":cur_item"),
+        (try_end),
+      (try_end),
+      
+      (troop_clear_inventory, ":troop_no"),
+        
+      (try_for_range, ":cur_slot", multi_data_equipment_holder_begin, multi_data_equipment_holder_end),
+        (troop_get_slot, ":cur_item", "trp_multiplayer_data", ":cur_slot"),
+        (gt, ":cur_item", 0),
+        (troop_add_item, ":troop_no", ":cur_item"),
+      (try_end),
+      
+      (try_begin),
+        (eq, ":scene_disallow_horses", 0),
+        (eq, ":has_horse", 1),
+        (troop_get_slot, ":horse_no", ":troop_no", slot_troop_coop_lord_spawned),
+        (troop_add_item, ":troop_no", ":horse_no"),
+        (troop_set_slot, ":troop_no", slot_troop_coop_lord_spawned, -1),
+      (try_end),
+        
+      (troop_equip_items, ":troop_no"),
+        
+      (modify_visitors_at_site, ":cur_scene"),
+      (add_visitors_to_current_scene, ":point_no", ":troop_no", 1, ":player_team", ":player_no"),
+      
+        
+        
+     ]),
+
+  #script.coop_generate_item_drop
+  # INPUT: none
+  # OUTPUT: reg0 = item_id
+  ("coop_generate_item_drop",
+   [
+     (store_script_param, ":player_id", 1),
+     #(store_script_param, ":instance_id", 1),
+     #(store_script_param, ":user_id", 2),
+
+     (store_random_in_range, "$g_ccoop_currently_dropping_item", coop_drops_begin, coop_drops_end), #change this to add variation to the items that drop - any item should work! The description will be hidden for regular items
+     #(assign, "$g_ccoop_currently_dropping_item", "itm_javelin_bow"), ##DEBUG - makes chests always drop the same item - useful for testing!
+     (player_set_slot, ":player_id", slot_player_coop_dropped_item, "$g_ccoop_currently_dropping_item"), #we hold the item in a slot, server-side, to prevent funny business!
+     #(assign, reg0, ":dropped_item"),
+     
+     
+     ]),
+
+  #script.coop_drop_item
+  # INPUT: arg1 = item_id
+  # OUTPUT: none
+  ("coop_drop_item",
+   [
+     (store_script_param, reg0, 1),
+     (store_script_param, reg1, 2),
+     (store_script_param, reg2, 3),
+     
+     #script simply starts the presentation but could have extra features added
+
+     (start_presentation, "prsnt_coop_assign_drop_to_group_member"),
+     
+     
+     ]),
+     
+  #try brackets for this need to be checked and rearranged
+  #script.cf_coop_give_item_to_assigned_group_member
+  # INPUT: arg1 = item_id, arg2 = item_id 
+  # OUTPUT: none
+  ("cf_coop_give_item_to_assigned_group_member",
+   [
+     (store_script_param, ":player_no", 1),
+     (store_script_param, ":assigned_agent_id", 2),
+     (player_is_active, ":player_no"),
+     
+     (assign, ":cancel_drop", 0), #script can be awkward because it relies on data sent by clients! 
+     
+     
+     
+     
+     
+     (assign, ":total_to_be_equipped", 0), #we need to check how many weapon slots the player is using and drop the item if there isn't enough space
+     
+     (player_get_slot, ":item_id", ":player_no", slot_player_coop_dropped_item),
+     (ge, ":item_id", 0), #we should also make sure that the item is real - this is kept server side but bad code can change slots accidentally! ehem...
+     
+     (try_begin),
+       (eq, ":assigned_agent_id", 0), #this is sent as 0, when the client wants to equip the item to their own character - behaviour for players and companions is different
+       (player_get_agent_id, ":assigned_agent_id", ":player_no"), #but we need the agent id anyway...
+       (assign, ":group_id", ":player_no"),
+       (try_begin),
+         (agent_is_active, ":assigned_agent_id"), 
+         (agent_is_alive, ":assigned_agent_id"), #let's make sure they didn't die at a bad time!
+         (assign, ":num_equipped_weapons", 0),
+         (item_get_slot, ":item_has_ammo", ":item_id", slot_item_ccoop_has_ammo), #javelin bow needs two slots (one for ammo) - if the player doesn't have room for both, we just drop everything
+         (val_add, ":item_has_ammo", 1), #we use this variable but a better name would be something like ":wep_slots_required" - all weapons need at least one
+         (try_for_range, ":cur_slot", 0, 4),
+           (agent_get_item_slot, ":cur_item", ":assigned_agent_id", ":cur_slot"),
+           (ge, ":cur_item", 0),
+           (val_add, ":num_equipped_weapons", 1), #count how many weapon slots they are using
+         (try_end),
+         (try_begin),
+           (item_get_type, ":item_type", ":item_id"),
+           (ge, ":item_type", itp_type_head_armor),
+           (assign, ":item_has_ammo", 0), #armours always overwrite the existing item
+         (try_end),
+           
+         (store_add, ":total_to_be_equipped", ":num_equipped_weapons", ":item_has_ammo"), #save the total weapon slots that would be required if we equipped this weapon
+       (else_try),
+         (assign, ":cancel_drop", 1),
+         (player_set_slot, ":player_no", slot_player_coop_dropped_item, -1),
+       (try_end),
+     (else_try),
+       (agent_is_active, ":assigned_agent_id"), #if the assignee isn't the player, let's make sure it's a real agent anyway
+       (agent_is_alive, ":assigned_agent_id"),
+       (agent_is_human, ":assigned_agent_id"),
+       (agent_get_group, ":group_id", ":assigned_agent_id"), #we use this in a check below
+     (else_try), #fail script
+       (assign, ":cancel_drop", 1),
+       (player_set_slot, ":player_no", slot_player_coop_dropped_item, -1),
+     (try_end),
+     
+     (eq, ":cancel_drop", 0),
+     
+     
+     
+     (try_begin),
+       (gt, ":total_to_be_equipped", 4), #if we don't have room, the item falls to the floor... grab it, quick!
+       (assign, ":cancel_drop", 1),
+       (player_set_slot, ":player_no", slot_player_coop_dropped_item, -1), #keep this slot empty while players aren't assigning an item - otherwise a script could allow them to assign it later, which is cheating!
+       (agent_get_position, pos1, ":assigned_agent_id"),
+       (position_move_z, pos1, 20), #prevents the item from spawning in the ground... most of the time
+       (set_spawn_position, pos1),
+       (spawn_item, ":item_id"),
+       (str_store_string, s0, "str_ccoop_dropping_item_on_ground"),
+       (multiplayer_send_string_to_player, ":player_no", multiplayer_event_show_server_message, s0), #tell the player what's happened
+       (try_begin),
+         (eq, ":item_id", "itm_javelin_bow"),
+         (spawn_item, "itm_javelin_bow_ammo"), #and give them the ammo from the jav bow!
+       (try_end),
+     (try_end),
+     
+     (eq, ":cancel_drop", 0), #are we still good?
+     
+     (get_max_players, ":num_players"), #we'll be using this in our equipping events
+     
+     (try_begin),
+       (eq, ":group_id", ":player_no"), #just in case a player tries to assign a drop to someone else's companion!
+
+       (player_is_active, ":group_id"), #let's not have an error in case they disconnected
+       
+       (item_get_type, ":item_type", ":item_id"), #different behaviour for weapons/armour etc.
+       
+       (try_begin), #for non players, remove existing weapons that are melee/ranged so they always only have one of each
+         (agent_is_non_player, ":assigned_agent_id"),
+         
+         
+         (try_begin),
+           (this_or_next|eq, ":item_type", itp_type_one_handed_wpn),
+           (this_or_next|eq, ":item_type", itp_type_two_handed_wpn),
+           (eq, ":item_type", itp_type_polearm),
+           (try_for_range, ":cur_slot", 0, 4),
+             (agent_get_item_slot, ":cur_item", ":assigned_agent_id", ":cur_slot"),
+             (ge, ":cur_item", 0),
+             (item_get_type, ":cur_item_type", ":cur_item"),
+             (this_or_next|eq, ":cur_item_type", itp_type_one_handed_wpn),
+             (this_or_next|eq, ":cur_item_type", itp_type_two_handed_wpn),
+             (this_or_next|eq, ":cur_item_type", itp_type_shield),
+             (eq, ":cur_item_type", itp_type_polearm),
+             (agent_unequip_item, ":assigned_agent_id", ":cur_item", ":cur_slot"),
+             (try_for_range, ":cur_player", 0, ":num_players"),						
+               (player_is_active, ":cur_player"),
+			   (multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_unequip_item,
+			   	":assigned_agent_id", ":cur_item", ":cur_slot"),							
+             (try_end),
+           (try_end),
+         (else_try),
+           (this_or_next|eq, ":item_type", itp_type_bow),
+           (this_or_next|eq, ":item_type", itp_type_crossbow),
+           (eq, ":item_type", itp_type_thrown),
+           (try_for_range, ":cur_slot", 0, 4),
+             (agent_get_item_slot, ":cur_item", ":assigned_agent_id", ":cur_slot"),
+             (ge, ":cur_item", 0),
+             (item_get_type, ":cur_item_type", ":cur_item"),
+             (this_or_next|eq, ":cur_item_type", itp_type_bow),
+             (this_or_next|eq, ":cur_item_type", itp_type_crossbow),
+             (this_or_next|eq, ":cur_item_type", itp_type_thrown),
+             (this_or_next|eq, ":cur_item_type", itp_type_bolts),
+             (eq, ":cur_item_type", itp_type_arrows),
+             (agent_unequip_item, ":assigned_agent_id", ":cur_item", ":cur_slot"),
+             (try_for_range, ":cur_player", 0, ":num_players"),						
+               (player_is_active, ":cur_player"),
+			   (multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_unequip_item,
+			   	":assigned_agent_id", ":cur_item", ":cur_slot"),							
+             (try_end),
+           (try_end),
+         (try_end),
+       (try_end),
+       
+       ##should be set as script to be called with above network messages
+       (try_begin),
+         (is_between, ":item_type", itp_type_head_armor, itp_type_pistol), #for armours we always replace the existing item directly
+         (try_for_range, ":cur_slot", 4, 8),
+           (agent_get_item_slot, ":cur_item", ":assigned_agent_id", ":cur_slot"),
+           (ge, ":cur_item", 0),
+           (item_get_type, ":cur_item_type", ":cur_item"),
+           (eq, ":cur_item_type", ":item_type"),
+           (agent_unequip_item, ":assigned_agent_id", ":cur_item"),
+           (try_for_range, ":cur_player", 0, ":num_players"),						
+             (player_is_active, ":cur_player"),
+			 (multiplayer_send_4_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_unequip_item,
+			    ":assigned_agent_id", ":cur_item", ":cur_slot"),							
+           (try_end),
+           (try_begin), #and we shouldn't forget to remove their special effects!
+             (eq, ":cur_item", "itm_running_boots"),
+             (agent_set_speed_modifier, ":assigned_agent_id", 100),
+           (else_try),
+             (eq, ":cur_item", "itm_power_gloves"),
+             (agent_set_damage_modifier, ":assigned_agent_id", 100),
+           (end_try),
+         (try_end),
+       (try_end),
+
+       (agent_equip_item, ":assigned_agent_id", ":item_id"), #and now we're ready to equip the item
+       (try_for_range, ":cur_player", 0, ":num_players"),						
+         (player_is_active, ":cur_player"),
+         (multiplayer_send_3_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_equip_item,
+           ":assigned_agent_id", ":item_id"),							
+       (try_end),
+       
+       #additional items and effects
+       (try_begin),
+         (eq, ":item_id", "itm_javelin_bow"),
+         (agent_equip_item, ":assigned_agent_id", "itm_javelin_bow_ammo"),
+         (try_for_range, ":cur_player", 0, ":num_players"),						
+           (player_is_active, ":cur_player"),
+           (multiplayer_send_3_int_to_player, ":cur_player", multiplayer_event_other_events, multiplayer_event_other_event_equip_item,
+             ":assigned_agent_id", "itm_javelin_bow_ammo"),	#don't forget to add the ammo for the javelin bow!
+         (try_end),
+       (else_try),
+         (eq, ":item_id", "itm_running_boots"), #and add any new effects...
+         (agent_set_speed_modifier, ":assigned_agent_id", 150),
+       (else_try),
+         (eq, ":item_id", "itm_power_gloves"),
+         (agent_set_damage_modifier, ":assigned_agent_id", 150),
+       (else_try),
+         (eq, ":item_id", "itm_kicking_boots"),
+         (agent_is_non_player, ":assigned_agent_id"),
+         (agent_set_kick_allowed, ":assigned_agent_id", 1),
+       (try_end),
+     (try_end),
+     
+     (player_set_slot, ":player_no", slot_player_coop_dropped_item, -1), #again, prevent players from trying to equip items when they shouldn't
+     
+     ]),
+     
+  #script.add_player_to_cur_tableau_for_coop
+  # INPUT: type
+  # OUTPUT: none
+  ("add_player_to_cur_tableau_for_coop", [ #we use this for the image of the player when assigning an item from a chest
+    #(store_script_param, ":troop_no", 1),
+    #(store_script_param, ":canvas_no", 2),
+    (cur_tableau_set_override_flags, af_override_everything),
+    
+    (multiplayer_get_my_player, ":my_player_no"),
+    
+    (assign, ":canvas_no", "trp_coop_companion_equipment_ui_0"),
+    
+    (player_get_agent_id, ":my_agent_no", ":my_player_no"), #player is always alive so we just show their current equipment
+    
+    (try_for_range, ":cur_inv_slot", 0, 8),
+      (agent_get_item_slot, ":cur_item", ":my_agent_no", ":cur_inv_slot"),
+      (ge, ":cur_item", 0),
+      (cur_tableau_add_override_item, ":cur_item"),
+    (try_end),
+    
+    
+    (try_begin),
+      (player_get_gender , ":is_female", ":my_player_no"),
+      (eq, ":is_female", 1),
+      (val_add, ":canvas_no", 1),
+    (try_end),
+    
+    #(assign, reg0, ":canvas_no"),
+    #(display_message, "@canvas no: {reg0}"),
+    
+    (str_store_player_face_keys, s0, ":my_player_no"),
+    (troop_set_face_keys, ":canvas_no", s0),
+            
+    (store_mod, ":animation", ":my_agent_no", 4),
+    
+    (val_add, ":animation", "anim_pose_1"),
+
+    
+
+    (set_fixed_point_multiplier, 100),
+    (cur_tableau_set_camera_parameters, 1, 6, 6, 10, 10000),
+    (assign, ":cam_height", 145),
+    (assign, ":camera_distance", 350),
+    (assign, ":camera_pitch", 2),
+
+    (init_position, pos5),
+    (position_set_z, pos5, ":cam_height"),
+    # camera looks towards -z axis
+    (position_rotate_x, pos5, -90),
+    (position_rotate_z, pos5, 180),
+    # now apply yaw and pitch
+    (assign, ":camera_yaw", -50),
+    (position_move_x, pos5, -10, 0),
+    (position_rotate_y, pos5, ":camera_yaw"),
+    (position_rotate_x, pos5, ":camera_pitch"),
+    (position_move_z, pos5, ":camera_distance", 0),
+    (position_move_y, pos5, 60, 0),
+      
+
+    (init_position, pos2),
+    (cur_tableau_add_troop, ":canvas_no", pos2, ":animation", 0),
+    (cur_tableau_set_camera_position, pos5),
+
+    (copy_position, pos8, pos5),
+    (position_rotate_x, pos8, -90), #y axis aligned with camera now. z is up
+    (position_rotate_z, pos8, 30),
+    (position_rotate_x, pos8, -50),
+    (cur_tableau_add_sun_light, pos8, 175,150,125),
+    ]),
+    
+  #script.add_troop_to_cur_tableau_for_coop
+  # INPUT: type
+  # OUTPUT: none
+  ("add_troop_to_cur_tableau_for_coop", [
+    (store_script_param, ":troop_no", 1),
+    #(store_script_param, ":canvas_no", 2),
+    (cur_tableau_set_override_flags, af_override_everything), 
+    
+    (multiplayer_get_my_player, ":my_player_no"),
+    (assign, ":companion_alive", 0),
+    (assign, ":canvas_no", "trp_coop_companion_equipment_ui_0"), #we use different troops for each companion... for simplicity
+    (try_for_agents, ":cur_agent"), #lets find the agent for our companion
+      (eq, ":companion_alive", 0),
+      (agent_is_active, ":cur_agent"), #living companions show their current equipment, while dead companions show what they're going to spawn with next
+      (agent_is_alive, ":cur_agent"),
+      (agent_is_non_player, ":cur_agent"),
+      (agent_get_troop_id, ":cur_troop_id", ":cur_agent"),
+      (eq, ":cur_troop_id", ":troop_no"),
+      (agent_get_group, ":cur_agent_group", ":cur_agent"),
+      (eq, ":cur_agent_group", ":my_player_no"),
+      (try_for_range, ":cur_slot", slot_player_companion_ids_begin, slot_player_companion_ids_end),
+        (player_slot_eq, ":my_player_no", ":cur_slot", ":cur_troop_id"),
+        (try_for_range, ":cur_inv_slot", 0, 8),
+          (agent_get_item_slot, ":cur_item", ":cur_agent", ":cur_inv_slot"),
+          (ge, ":cur_item", 0),
+          (cur_tableau_add_override_item, ":cur_item"),
+        (try_end),
+        (try_begin),
+          (gt, ":cur_slot", slot_player_companion_ids_begin),
+          (val_add, ":canvas_no", 2),
+        (try_end),
+      (try_end),
+      (assign, ":companion_alive", 1), #so we'll be using their current gear for the tableau
+    (try_end),
+    
+    (try_begin),
+      (eq, ":companion_alive", 0), #for dead companions, we check their class and level to get the right template
+      (try_for_range, ":cur_slot", slot_player_companion_ids_begin, slot_player_companion_ids_end),
+        (player_slot_eq, ":my_player_no", ":cur_slot", ":troop_no"), #check which companion we're using (since this isn't sent as a parameter...)
+        (try_begin),
+          (gt, ":cur_slot", slot_player_companion_ids_begin),
+          (val_add, ":canvas_no", 2), #the second companion uses different troops
+        (try_end),
+        (val_add, ":cur_slot", 2),
+        (player_get_slot, ":template_no", ":my_player_no", ":cur_slot"), #get their class
+        (val_add, ":cur_slot", 2),
+        (player_get_slot, ":level_no", ":my_player_no", ":cur_slot"), #and upgrade it for their level
+        (try_begin),
+          (ge, ":template_no", "trp_npc1_1"), #companion class troops come after faction class troops
+          (val_mul, ":level_no", 16), #there are 16 at each level tier (one for each companion) so multiply by 16 to get to the right level
+          (val_add, ":template_no", ":level_no"),
+        (else_try),
+          (val_mul, ":level_no", 18), #18 at each level tier for faction classes (6 factions * 3 troops, one ranged, one melee, one cav)
+          (val_add, ":template_no", ":level_no"),
+        (try_end),
+        (try_for_range, ":cur_inv_slot", 0, 8),
+          (troop_get_inventory_slot, ":cur_item", ":template_no", ":cur_inv_slot"),
+          (ge, ":cur_item", 0),
+          (cur_tableau_add_override_item, ":cur_item"),
+        (try_end),
+      (try_end),
+    (try_end),
+    
+    (try_begin),
+      (troop_get_type, ":is_female", ":troop_no"),
+      (eq, ":is_female", 1),
+      (val_add, ":canvas_no", 1), #the female blank canvas troop is directly after the male for each companion... this line could be (val_add, ":canvas_no", ":is_female"),
+    (try_end),
+    
+    #(assign, reg0, ":canvas_no"),
+    #(display_message, "@canvas no: {reg0}"),
+    
+    (str_store_troop_face_keys, s0, ":troop_no"),
+    (troop_set_face_keys, ":canvas_no", s0), #give the right face to the canvas...
+            
+    (try_begin), #these lines just add some variety to the poses - it's not really random but that would be complicated, since it needs to be consistent when this script is run for the alpha layer
+      (eq, ":companion_alive", 1),
+      (store_mod, ":animation", ":cur_agent", 4), #for alive troops, it uses the agent id, which is pretty close to random
+    (else_try),
+      (store_mod, ":animation", ":template_no", 4), #for dead troops it's based on the class
+    (try_end),
+    
+    (val_add, ":animation", "anim_pose_1"), #there are a few poses after this one, which it chooses from
+
+    
+
+    (set_fixed_point_multiplier, 100),
+    (cur_tableau_set_camera_parameters, 1, 6, 6, 10, 10000),
+    (assign, ":cam_height", 145),
+    (assign, ":camera_distance", 350),
+    (assign, ":camera_pitch", 2),
+
+    (init_position, pos5),
+    (position_set_z, pos5, ":cam_height"),
+    # camera looks towards -z axis
+    (position_rotate_x, pos5, -90),
+    (position_rotate_z, pos5, 180),
+    # now apply yaw and pitch
+    (try_begin),
+      (lt, ":canvas_no", "trp_coop_companion_equipment_ui_1"), #use different camera angles for each companion because it looks cooler - also it looks a bit weird if they face towards the edge of the screen
+      (assign, ":camera_yaw", -50),
+      (position_move_x, pos5, -10, 0),
+    (else_try),
+      (assign, ":camera_yaw", -10),
+      (position_move_x, pos5, 10, 0),
+    (try_end),
+    (position_rotate_y, pos5, ":camera_yaw"),
+    (position_rotate_x, pos5, ":camera_pitch"),
+    (position_move_z, pos5, ":camera_distance", 0),
+    (position_move_y, pos5, 60, 0),
+      
+
+    (init_position, pos2),
+    (cur_tableau_add_troop, ":canvas_no", pos2, ":animation", 0),
+    (cur_tableau_set_camera_position, pos5),
+
+    (copy_position, pos8, pos5),
+    (position_rotate_x, pos8, -90), #y axis aligned with camera now. z is up
+    (position_rotate_z, pos8, 30),
+    (position_rotate_x, pos8, -50),
+    (cur_tableau_add_sun_light, pos8, 175,150,125),
+    ]),
+   #INVASION MODE END
 ]

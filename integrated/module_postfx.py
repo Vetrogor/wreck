@@ -1,4 +1,4 @@
-from compiler import *
+from compiler import * # should be after all imports
 
 ####################################################################################################################
 #  Each postfx_param contains the following fields:

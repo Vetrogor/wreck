@@ -58,3 +58,8 @@ target/
 
 # PyCharm
 .idea/
+
+# Module Specifics
+variables.txt
+*.bak
+ID_*.py

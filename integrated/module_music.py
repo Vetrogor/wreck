@@ -1,4 +1,4 @@
-from compiler import *
+from compiler import * # should be after all imports
 
 ####################################################################################################################
 #  Each track record contains the following fields:

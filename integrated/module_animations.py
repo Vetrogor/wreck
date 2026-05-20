@@ -1,4 +1,4 @@
-from compiler import *
+from compiler import * # should be after all imports
 
 ####################################################################################################################
 #  There are two animation arrays (one for human and one for horse). Each animation in these arrays contains the following fields:
@@ -70,6 +70,8 @@ blend_in_parried = arf_blend_in_3
 
 blend_in_walk = arf_blend_in_3
 blend_in_continue = arf_blend_in_1
+
+
 
 #### Animations begin here
 

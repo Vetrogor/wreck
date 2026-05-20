@@ -1,4 +1,4 @@
-from compiler import *
+from compiler import * # should be after all imports
 
 ####################################################################################################################
 #  Each party record contains the following fields:
@@ -291,20 +291,20 @@ parties = [
 
 
 #  bridge_a
-  ("Bridge_1","{!}1",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(39.37, 65.10),[], -44.8),
-  ("Bridge_2","{!}2",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(56.44, 77.88),[], 4.28),
-  ("Bridge_3","{!}3",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(70.87, 87.95),[], 64.5),
-  ("Bridge_4","{!}4",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(93.71, 62.13),[], -2.13),
-  ("Bridge_5","{!}5",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(11.02, 72.61),[], 21.5),
-  ("Bridge_6","{!}6",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-8.83, 52.24),[], -73.5),
-  ("Bridge_7","{!}7",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-29.79, 76.84),[], -64),
-  ("Bridge_8","{!}8",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-64.05, -6),[], 1.72),
-  ("Bridge_9","{!}9",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-64.95, -9.60),[], -33.76),
-  ("Bridge_10","{!}10",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-75.32, -75.27),[], -44.07),
-  ("Bridge_11","{!}11",icon.bridge_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-24.39, 67.82),[], 81.3),
-  ("Bridge_12","{!}12",icon.bridge_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-114.33, -1.94),[], -35.5),
-  ("Bridge_13","{!}13",icon.bridge_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-84.02, -7),[], -17.7),
-  ("Bridge_14","{!}14",icon.bridge_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-23.36, 75.8),[], 66.6),
+  ("bridge_1","{!}1",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(39.37, 65.10),[], -44.8),
+  ("bridge_2","{!}2",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(56.44, 77.88),[], 4.28),
+  ("bridge_3","{!}3",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(70.87, 87.95),[], 64.5),
+  ("bridge_4","{!}4",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(93.71, 62.13),[], -2.13),
+  ("bridge_5","{!}5",icon.bridge_snow_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(11.02, 72.61),[], 21.5),
+  ("bridge_6","{!}6",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-8.83, 52.24),[], -73.5),
+  ("bridge_7","{!}7",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-29.79, 76.84),[], -64),
+  ("bridge_8","{!}8",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-64.05, -6),[], 1.72),
+  ("bridge_9","{!}9",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-64.95, -9.60),[], -33.76),
+  ("bridge_10","{!}10",icon.bridge_b|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-75.32, -75.27),[], -44.07),
+  ("bridge_11","{!}11",icon.bridge_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-24.39, 67.82),[], 81.3),
+  ("bridge_12","{!}12",icon.bridge_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-114.33, -1.94),[], -35.5),
+  ("bridge_13","{!}13",icon.bridge_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-84.02, -7),[], -17.7),
+  ("bridge_14","{!}14",icon.bridge_a|pf_is_static|pf_always_visible|pf_no_label, no_menu, pt.none, fac.neutral,0,ai_bhvr_hold,0,(-23.36, 75.8),[], 66.6),
 
   ("looter_spawn_point"   ,"{!}looter_sp",pf_disabled|pf_is_static, no_menu, pt.none, fac.outlaws,0,ai_bhvr_hold,0,(26, 77),[(trp.looter,15,0)]),
   ("steppe_bandit_spawn_point"  ,"the steppes",pf_disabled|pf_is_static, no_menu, pt.none, fac.outlaws,0,ai_bhvr_hold,0,(125, 9),[(trp.looter,15,0)]),
