@@ -23,6 +23,11 @@ simple_triggers = [
    [
     ]),
 
+  (0, [
+    (key_clicked, key_x),
+    (party_add_members, "p_main_party", "trp_sea_raider_leader", 1),
+  ]),
+
 
   (1,
    [
