@@ -99,7 +99,7 @@ ti_on_agent_killed_or_wounded = -26.0 # Agent has been defeated in battle (kille
     # Trigger result: 0 = do not alter the result, 1 = force kill, 2 = force wound.
     # <trigger_param_3> will not change value in the second and subsequent <ti_on_agent_killed_or_wounded> triggers.
     # <agent_is_wounded> operand will change the returning value after all <ti_on_agent_killed_or_wounded> triggers finished.
-    # If horse killed somebody shows it's rider as killer/attacker.
+    # If horse killed somebody shows it's rider as killer/attacker, i.e. passes rider as param 2.
 
 ti_on_agent_knocked_down      = -27.0 # Agent has been knocked down, used in combination with (agent_set_no_death_knock_down_only) operation.
     # trigger param 1 = defeated agent_id
@@ -116,13 +116,13 @@ ti_on_agent_hit               = -28.0 # Agent has been damaged with a weapon att
     #     WSE param 8 = missile item modifier
     #     WSE param 9 = damage type
     #            reg0 = weapon item_id
-    #        WSE reg1 = hit bone
     #            pos0 = position of the hit area, rotation fields contain the direction of the blow
     # Notes:
     #       If (set_trigger_result) is equal or greater than zero, it will override the inflicted damage.
     #       Trigger fire even when 0 damage was inflicted.
     #       If multiple triggers changed damage only the last <set_trigger_result> will be applied.
     #       If <agent_set_hit_points> sets to 0 inside trigger block, agent will be killed after trigger finished even when result damage is none.
+    #           But if damage is 0 the experience from kill is not added. Needs at least 1 damage to fix it.
 
 ti_on_leave_area              = -30.0 # Player has walked to scene border and activated it to leave the area.
 
@@ -148,11 +148,16 @@ ti_on_item_wielded            = -57.0 # An agent has selected a weapon to wield
     # trigger param 1 = agent id
     # trigger param 2 = item id
     #     WSE param 3 = item slot
+    # Notes:
+    #        Shields are processed unnatural way. Reed "header_operations.py/Agent equipment" for more info.
 
 ti_on_item_unwielded          = -58.0 # An agent has sheathed his current weapon or switched to another one
     # trigger param 1 = agent_id
     # trigger param 2 = item_id
     #     WSE param 3 = item slot
+    # Notes:
+    #        Shields are processed unnatural way. Reed "header_operations.py/Agent equipment" for more info.
+    #        Expendable items will be removed after trigger ends probably.
 
 ti_on_order_issued            = -71.0 # An agent has issued a tactical order
     # trigger param 1 = order_code (see mordr_* constants in header_mission_templates.py)
@@ -178,6 +183,24 @@ ti_on_agent_fill_movement_capsule = -110.0
     # Trigger Result: If result >= 0, replace capsule radius with this value (fixed point), point A with pos0 and point B with pos1.
 
 # PRESENTATION TRIGGERS (used in module_presentations)
+
+ti_on_agent_block_crushed  = -111.0 #can only be used in module_mission_templates triggers
+# Trigger Param 1: receiver agent no
+# Trigger Param 2: dealer agent no
+# Trigger Param 3: inflicted damage
+# Trigger Param 4: item kind no
+# Trigger Param 5: item modifier
+# Trigger Result: if set, rewrite crush block result
+
+ti_on_agent_routed  = -112.0 #can only be used in module_mission_templates triggers
+# Trigger Param 1: agent no
+# Trigger Result: if set, rewrite agent status. 1 - dead, 2 - wounded
+
+ti_on_agent_footstep_sound_played  = -113.0 #can only be used in module_mission_templates triggers
+# Trigger Param 1: agent no
+# Trigger Param 2: sound no
+# Trigger Param 3: is custom sound
+# Trigger Result: if set, rewrite sound no
 
 ti_on_presentation_load               = -60.0 # Presentation has been loaded by the engine. Use this trigger to initialize the presentation and it's overlays.
 
@@ -287,7 +310,7 @@ ti_on_agent_start_reloading = -105.0 #can only be used in module_mission_templat
 ti_on_agent_end_reloading = -106.0 #can only be used in module_mission_templates triggers
 # Trigger Param 1: agent no
 
-ti_on_shield_penetrated = -107.0 #can only be used in module_mission_templates triggers (requires WSE2)
+ti_on_shield_penetrated = -107.0 # (WSE2) can only be used in module_items triggers
 # Trigger Param 1: receiver agent no
 # Trigger Param 2: dealer agent no
 # Trigger Param 3: inflicted damage
@@ -295,6 +318,7 @@ ti_on_shield_penetrated = -107.0 #can only be used in module_mission_templates t
 # Trigger Param 5: item modifier
 # Trigger Param 6: missile item kind no
 # Trigger Param 7: missile item modifier
+# Trigger Result: if set, rewrite penetrate shield result
 
 ti_on_scene_prop_is_deforming = -108.0 #can only be used in module_scene_props triggers
 # Trigger Param 1: prop instance no
