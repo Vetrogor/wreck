@@ -4001,7 +4001,7 @@ scripts = [
      (try_end),
 
      (modify_visitors_at_site,"scn_wedding"),
-     (reset_visitors,0),
+     (reset_visitors),
      (set_visitor, 0, "$g_wedding_groom_troop"),
      (set_visitor, 1, "$g_wedding_bride_troop"),
      (set_visitor, 2, "$g_wedding_brides_dad_troop"),
@@ -4692,7 +4692,7 @@ scripts = [
           (try_begin),
             (eq, ":note_index", 0),
             (str_store_faction_name_link, s56, ":orig_faction"),
-            (str_store_string, s0, "@{s54} is a claimant to the throne of {s56}.", 0),
+            (str_store_string, s0, "@{s54} is a claimant to the throne of {s56}."),
             (set_trigger_result, 1),
           (try_end),
         (else_try),
@@ -4766,7 +4766,7 @@ scripts = [
           (assign, reg6, ":troop_is_player_faction"),
           
           (troop_get_slot, reg17, ":troop_no", slot_troop_wealth), #DEBUGS
-          (str_store_string, s0, "str_lord_info_string", 0),
+          (str_store_string, s0, "str_lord_info_string"),
           #lord recruitment changes end
           (add_troop_note_tableau_mesh, ":troop_no", "tableau_troop_note_mesh"),
           (set_trigger_result, 1),
@@ -4843,7 +4843,7 @@ scripts = [
         (try_end),
         (call_script, "script_get_prosperity_text_to_s50", ":center_no"),
         #(party_get_slot, reg7, ":center_no", slot_town_prosperity),
-        (str_store_string, s0, "@{s2}Its prosperity is: {s50}", 0),
+        (str_store_string, s0, "@{s2}Its prosperity is: {s50}"),
       
         (set_trigger_result, 1),
       (try_end),
@@ -5063,7 +5063,7 @@ scripts = [
 			  (str_store_string, s21, "@{!}DEBUG : {s21}.^CHEAT MODE ASSESSMENT: {s14}^"), 
             (try_end),
           (try_end),
-          (str_store_string, s0, "str_the_s5_is_ruled_by_s6_it_occupies_s8_its_vassals_are_s10__s21", 0),
+          (str_store_string, s0, "str_the_s5_is_ruled_by_s6_it_occupies_s8_its_vassals_are_s10__s21"),
           (set_trigger_result, 1),
         (try_end),
       (else_try),
@@ -5072,7 +5072,7 @@ scripts = [
         (try_begin),
           (eq, ":note_index", 0),
           (str_store_faction_name, s5, ":faction_no"),
-          (str_store_string, s0, "@{s5} has been defeated!", 0),
+          (str_store_string, s0, "@{s5} has been defeated!"),
           (set_trigger_result, 1),
         (else_try),
           (eq, ":note_index", 1),
@@ -9201,7 +9201,7 @@ scripts = [
             (get_distance_between_positions, ":dist_2", pos0, pos1),
             (try_begin),
               (lt, ":dist_2", 300),
-              (assign, ":friend_near_score", 300, ":dist_2"),
+              (assign, ":friend_near_score", 300),
             (else_try),
               (assign, ":friend_near_score", 0),
             (try_end),
@@ -20080,7 +20080,7 @@ scripts = [
           (eq, ":besiege_mode", 0),
           (lt, ":reln_with_player", 0),
           (gt, ":reln_with_enemy", 0),
-          (party_get_slot, ":party_type", ":party_no"),
+          (party_get_slot, ":party_type", ":party_no", slot_party_type),
           
           (assign, ":enemy_is_bandit_party_and_level_is_greater_than_6", 0),
           (try_begin),
@@ -20130,7 +20130,7 @@ scripts = [
           (try_end),          
           (eq, ":do_join", 1),
           
-          (party_get_slot, ":party_type", ":party_no"),
+          (party_get_slot, ":party_type", ":party_no", slot_party_type),
           (eq, ":party_type", spt_kingdom_hero_party),
           (party_stack_get_troop_id, ":leader", ":party_no", 0),
           #(troop_get_slot, ":player_relation", ":leader", slot_troop_player_relation),
@@ -21371,7 +21371,7 @@ scripts = [
 #Rebellion changes begin: 
       (try_begin),
         (eq, ":party_type", spt_kingdom_hero_party),
-        (party_stack_get_troop_id, ":leader", ":party_no"),
+        (party_stack_get_troop_id, ":leader", ":party_no", 0),
         (troop_get_slot, ":party_faction",  ":leader", slot_troop_original_faction),
       (try_end),
 #Rebellion changes end
@@ -22228,7 +22228,7 @@ scripts = [
 
                #give loot gold to raid leader
                (troop_get_slot, ":raid_leader_gold", ":raid_leader", slot_troop_wealth),
-               (party_get_slot, ":village_prosperity", ":village_no"),
+               (party_get_slot, ":village_prosperity", ":village_no", slot_town_prosperity),
                (store_mul, ":value_of_loot", ":village_prosperity", 60), #average is 3000
                (val_add, ":raid_leader_gold", ":value_of_loot"),
                (troop_set_slot, ":raid_leader", slot_troop_wealth, ":raid_leader_gold"),			   			   
@@ -30948,7 +30948,7 @@ scripts = [
     (try_end),
     (try_begin),
       (eq, ":troop_no", "trp_player"),
-      (faction_get_slot, ":faction_leader", "$players_kingdom"),
+      (faction_get_slot, ":faction_leader", "$players_kingdom", slot_faction_leader),
       (call_script, "script_troop_get_player_relation", ":faction_leader"),
       (assign, ":leader_relation", reg0),
       #(troop_get_slot, ":leader_relation", ":faction_leader", slot_troop_player_relation),
@@ -31528,7 +31528,7 @@ scripts = [
 	#Name faction
 	(try_begin),
 		(is_between, ":liege", active_npcs_begin, active_npcs_end),
-		(store_faction_of_troop, ":liege_faction"),
+		(store_faction_of_troop, ":liege_faction", ":liege"),
 		(is_between, ":liege_faction", npc_kingdoms_begin, npc_kingdoms_end),
 		(faction_get_slot, ":adjective_string", ":liege_faction", slot_faction_adjective),
 		(str_store_string, s1, ":adjective_string"),
@@ -33047,7 +33047,7 @@ scripts = [
 ##       (try_begin),
 ##         (gt, ":horse_item", 0),
 ##         (assign, ":eye_height", 210),
-##         (cur_tableau_add_horse, ":horse_item", pos2, anim.horse_stand, 0),
+##         (cur_tableau_add_horse, ":horse_item", pos2, anim.horse_stand),
 ##         (assign, ":animation", anim.ride_0),
 ##         (position_set_z, pos5, 125),
 ##         (try_begin),
@@ -33407,7 +33407,7 @@ scripts = [
        (try_begin),
          (gt, ":horse_item", 0),
          (eq, ":hide_weapons", 0),
-         (cur_tableau_add_horse, ":horse_item", pos2, "anim_horse_stand", 0),
+         (cur_tableau_add_horse, ":horse_item", pos2, "anim_horse_stand"),
          (assign, ":animation", "anim_ride_0"),
          (assign, ":camera_yaw", 23),
          (assign, ":cam_height", 150),
@@ -36308,7 +36308,7 @@ scripts = [
      (assign, ":troop_object_faction", -1),
      
      (try_begin),
-       (party_is_active, ":center_object", 0),
+       (party_is_active, ":center_object"),
        (party_get_slot, ":center_object_lord", ":center_object", slot_town_lord),
        (store_faction_of_party, ":center_object_faction", ":center_object"),
 	 (else_try),
@@ -49508,9 +49508,9 @@ scripts = [
 			# place left door
 			(scene_prop_get_instance, ":prison_cart_door_left", "spr_prison_cart_door_left", 0),
 			(init_position, pos2),		
-			(position_set_x, pos2, 84, 0),
-			(position_set_y, pos2, -314, 0), 
-			(position_set_z, pos2, 121, 0), 
+			(position_set_x, pos2, 84),
+			(position_set_y, pos2, -314), 
+			(position_set_z, pos2, 121), 
 			(position_transform_position_to_parent, pos3, pos1, pos2),
 			(prop_instance_set_position, ":prison_cart_door_left", pos3),
 			(scene_prop_set_hit_points, ":prison_cart_door_left", 300),
@@ -49518,9 +49518,9 @@ scripts = [
 			# place right door
 			(scene_prop_get_instance, ":prison_cart_door_right", "spr_prison_cart_door_right", 0),			
 			(init_position, pos2),
-			(position_set_x, pos2, -84, 0), 
-			(position_set_y, pos2, -315, 0), 
-			(position_set_z, pos2, 123, 0),
+			(position_set_x, pos2, -84), 
+			(position_set_y, pos2, -315), 
+			(position_set_z, pos2, 123),
 			(position_transform_position_to_parent, pos3, pos1, pos2),
 			(prop_instance_set_position, ":prison_cart_door_right", pos3),
 			(scene_prop_set_hit_points, ":prison_cart_door_right", 300),					
@@ -49597,7 +49597,7 @@ scripts = [
 	   (troop_get_inventory_slot, ":horse_item", ":troop_no", ek_horse),
        (try_begin),
          (gt, ":horse_item", 0),
-         (cur_tableau_add_horse, ":horse_item", pos2, "anim_horse_stand", 0),
+         (cur_tableau_add_horse, ":horse_item", pos2, "anim_horse_stand"),
          (assign, ":animation", "anim_ride_0"),
          (assign, ":camera_pitch", -20),
 		 (assign, ":camera_yaw", -25),

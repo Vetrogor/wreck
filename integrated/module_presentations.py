@@ -24,7 +24,6 @@ presentations = [
         (assign, "$g_presentation_credits_obj_11", -1),
         (assign, "$g_presentation_credits_obj_12", -1),
         (assign, "$g_presentation_credits_obj_1_alpha", 0),
-        (assign, "$g_presentation_credits_obj_2_alpha", 0),
         (assign, "$g_presentation_credits_obj_3_alpha", 0),
         (assign, "$g_presentation_credits_obj_4_alpha", 0),
         (assign, "$g_presentation_credits_obj_5_alpha", 0),
@@ -822,7 +821,7 @@ presentations = [
       (position_set_y, pos1, ":cur_y"),
       (overlay_set_position, "$g_presentation_obj_custom_battle_designer_21", pos1),
 
-      (create_slider_overlay, "$g_presentation_obj_custom_battle_designer_3", 200),
+      (create_slider_overlay, "$g_presentation_obj_custom_battle_designer_3", 0, 200),
       (overlay_set_boundaries, "$g_presentation_obj_custom_battle_designer_3", 1000, 75000),
       (overlay_set_val, "$g_presentation_obj_custom_battle_designer_3", "$g_quick_battle_army_2_size"),
       (position_set_x, pos1, 900),
@@ -838,12 +837,12 @@ presentations = [
       (position_set_y, pos1, ":cur_y"),
       (overlay_set_position, "$g_presentation_obj_custom_battle_designer_22", pos1),
 
-      (create_game_button_overlay, "$g_presentation_obj_custom_battle_designer_19", "str_start", 0),
+      (create_game_button_overlay, "$g_presentation_obj_custom_battle_designer_19", "str_start"),
       (position_set_x, pos1, 415),
       (position_set_y, pos1, 10),
       (overlay_set_position, "$g_presentation_obj_custom_battle_designer_19", pos1),
 
-      (create_game_button_overlay, "$g_presentation_obj_custom_battle_designer_20", "str_back", 0),
+      (create_game_button_overlay, "$g_presentation_obj_custom_battle_designer_20", "str_back"),
       (position_set_x, pos1, 585),
       (position_set_y, pos1, 10),
       (overlay_set_position, "$g_presentation_obj_custom_battle_designer_20", pos1),
@@ -3750,13 +3749,13 @@ presentations = [
       (position_set_y, pos1, 65),
       (overlay_set_position, reg0, pos1),
 
-      (create_in_game_button_overlay, "$g_presentation_obj_item_select_10", "str_reset_to_default", 0),
+      (create_in_game_button_overlay, "$g_presentation_obj_item_select_10", "str_reset_to_default"),
       (overlay_set_color, "$g_presentation_obj_item_select_10", 0xFFFFFF),
       (position_set_x, pos1, 605),
       (position_set_y, pos1, 25),
       (overlay_set_position, "$g_presentation_obj_item_select_10", pos1),
 
-      (create_in_game_button_overlay, "$g_presentation_obj_item_select_11", "str_done", 0),
+      (create_in_game_button_overlay, "$g_presentation_obj_item_select_11", "str_done"),
       (overlay_set_color, "$g_presentation_obj_item_select_11", 0xFFFFFF),
       (position_set_x, pos1, 395),
       (position_set_y, pos1, 25),

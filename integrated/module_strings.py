@@ -28,6 +28,7 @@ strings = [
   ("s7_raiders", "{s7} Raiders"),
 
   ("bandits_eliminated_by_another", "The troublesome bandits have been eliminated by another party."),
+  ("bandits_eliminated_by_another", "The troublesome bandits have been eliminated by another party."),
   ("msg_battle_won","Battle won! Press tab key to leave..."),
   ("tutorial_map1","You are now viewing the overland map. Left-click on the map to move your party to that location, enter the selected town, or pursue the selected party. Time will pause on the overland map if your party is not moving, waiting or resting. To wait anywhere simply press and hold down the space bar."),
 

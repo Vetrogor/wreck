@@ -39,14 +39,6 @@ def parse_int(value):
 	except: pass
 	return int(value)
 
-# Add scripts names without 'script_' that will be excluded from troop slots counting.
-troop_slots_exclude = ['init_troop_flags']
-# Add troops without 'trp_' to exclude from used slots searching.
-troop_arrays = ['temp_troop']
-# Length of operations check
-from header_operations import *
-length_array = dict([(store_mul, 5), (store_div, 5), (val_mul, 4), (val_div, 4), (store_add, 5), (store_sub, 5), (val_sub, 4), (val_add, 4), (store_mod, 5), (val_mod, 4), (store_or, 5), (store_and, 5), (val_or, 4), (val_and, 4)])
-
 # Standard W.R.E.C.K. exception class. Used to differentiate Python-generated exceptions from internal exceptions,
 # and to aggregate error information on different levels.
 class MSException(Exception):
@@ -199,6 +191,7 @@ class VARIABLE(object):
 	def formatted_name(self):
 		if self.is_expression: return '<expr>'
 		if self.module is None: return '?.%s' % self.name
+		if self.module[2] == 's':  return 'str_%s' % self.name
 		return '%s.%s' % (self.module[2], self.name)
 
 	def __str__(self):
@@ -1013,6 +1006,7 @@ def preprocess_entities_internal(glob):
 			else:    raise MSException('illegal upgrade in %s: %s not defined in upgrade(%s, %s)', module, base.formatted_name(), base.formatted_name(), upg1.formatted_name())
 		try:
 			troop_tuple = glob['troops'][parse_int(base)]
+			if troop_tuple[14] != 0 or troop_tuple[15] != 0: WRECK.warnings.append('To many upgrades for {0}trp_{9}{3}'.format(*COLORAMA, base.name))
 			troop_tuple[14] = upg1
 			if upg2: troop_tuple[15] = upg2
 		except Exception as e:
@@ -1919,9 +1913,46 @@ def parse_module_code(code_block, script_name, check_can_fail = False):
 
 		if command[0] in length_array:
 			check = length_array.get(command[0])
-			if len(command) > check: WRECK.notices.append("Too many parameters in {0}{9}{6} line {0}{10}{6} operation {0}{12}{6}".format(*COLORAMA, script_name, index, opcode_to_string(command[0]), command_to_string(command)))
-			elif len(command) < check: WRECK.notices.append("Not enough parameters in {0}{9}{6} line {0}{10}{6} operation {0}{12}{6}".format(*COLORAMA, script_name, index, opcode_to_string(command[0]), command_to_string(command)))
-
+			cur_len = len(command) - 2
+			notice_message = " in {0}{9}{6} index {0}{10}{6} operation {0}{11}{6}".format(*COLORAMA, script_name, index, command_to_string(command))
+			if type(check) is int:
+				if cur_len > check:
+					notice_case = "Too many parameters"
+					notice_combined = notice_case + notice_message
+					if tag == 'mt':
+						if not (command, trigger, block, num) in WRECK.mt_notices:
+									WRECK.notices.append(notice_combined)
+									WRECK.mt_notices.append((command, trigger, block, num))
+					else:
+						WRECK.notices.append(notice_combined)
+				elif cur_len < check:
+					notice_case = "Not enough parameters"
+					notice_combined = notice_case + notice_message
+					if tag == 'mt':
+						if not (command, trigger, block, num) in WRECK.mt_notices:
+									WRECK.notices.append(notice_combined)
+									WRECK.mt_notices.append((command, trigger, block, num))
+					else:
+						WRECK.notices.append(notice_combined)
+			else:
+				if cur_len > check[1]:
+					notice_case = "Too many parameters"
+					notice_combined = notice_case + notice_message
+					if tag == 'mt':
+						if not (command, trigger, block, num) in WRECK.mt_notices:
+									WRECK.notices.append(notice_combined)
+									WRECK.mt_notices.append((command, trigger, block, num))
+					else:
+						WRECK.notices.append(notice_combined)
+				elif cur_len < check[0]:
+					notice_case = "Not enough parameters"
+					notice_combined = notice_case + notice_message
+					if tag == 'mt':
+						if not (command, trigger, block, num) in WRECK.mt_notices:
+									WRECK.notices.append(notice_combined)
+									WRECK.mt_notices.append((command, trigger, block, num))
+					else:
+						WRECK.notices.append(notice_combined)
 	if current_depth != 0:
 		explanation = 'missing' if (current_depth > 0) else 'extra'
 		error_message = 'try/end operations do not match in {0}{9}{1}{8}: {0}{10}{1}{8} try_end(s) {0}{11}{1}{8}.'.format(*COLORAMA, script_name, abs(current_depth), explanation)
@@ -1974,10 +2005,11 @@ def compressed_tuple(entity):
 def command_to_string(command):
 	output = [opcode_to_string(command[0]),]
 	for i in range(2, len(command)):
-		#if type(command[i] is VARIABLE): output.append(command[i].name)
-		#elif type(command[i]) is int: output.append(command[i])
-		#else: output.append(command[i])
-		output.append(repr(command[i]))
+		if type(command[i]) is str: output.append(command[i])
+		elif type(command[i]) is int: output.append(command[i])
+		elif type(command[i]) is float: output.append(str(command[i]))
+		else: output.append(command[i].formatted_name())
+		#output.append(repr(command[i])) # alternative
 	return output
 
 def check_syntax(entity, parser, uid = 0):
@@ -2326,3 +2358,310 @@ neq = neg|eq|noteq_marker
 if __name__ == '__main__':
 	value = '0x00000003b9a94de8000903220000424380000c5000002e08'
 	print(unparse_terrain_aggregate(value))
+
+# Add scripts names without 'script_' that will be excluded from troop slots counting.
+troop_slots_exclude = ['init_troop_flags']
+# Add troops without 'trp_' to exclude from used slots searching.
+troop_arrays = ['temp_troop']
+# Tags for error messages.
+tags = ['anim', 'fac', 'itm', 'icon', 'mnu', 'mesh', 'mt', 'track', 'psys', 'p', 'pt', 'prsnt', 'qst', 'spr', 'scn', 'script', 'skl', 'snd', 'tableau', 'trp', 'str']
+# Length of operations check, operations counters included, i.e. +1 to length.
+length_array = dict([
+	(store_mul, 3), (store_div, 3), (val_mul, 2), (val_div, 2), (store_add, 3), (store_sub, 3), (val_sub, 2), (val_add, 2), (store_mod, 3), (val_mod, 2), (store_or, 3),
+	(store_and, 3), (val_or, 2), (val_and, 2),
+	(faction_set_slot, 3), (faction_get_slot, 3), (faction_slot_eq, 3), (faction_slot_ge, 3),
+	(party_template_set_slot, 3), (party_template_get_slot, 3), (party_template_slot_eq, 3), (party_template_slot_ge, 3),
+	(party_set_slot, 3), (party_get_slot, 3), (party_slot_eq, 3), (party_slot_ge, 3),
+	(troop_set_slot, 3), (troop_get_slot, 3), (troop_slot_eq, 3), (troop_slot_ge, 3),
+	(quest_set_slot, 3), (quest_get_slot, 3), (quest_slot_eq, 3), (quest_slot_ge, 3),
+	(item_set_slot, 3), (item_get_slot, 3), (item_slot_eq, 3), (item_slot_ge, 3),
+	(scene_set_slot, 3), (scene_get_slot, 3), (scene_slot_eq, 3), (scene_slot_ge, 3),
+	(scene_prop_set_slot, 3), (scene_prop_get_slot, 3), (scene_prop_slot_eq, 3), (scene_prop_slot_ge, 3),
+	(team_set_slot, 3), (team_get_slot, 3), (team_slot_eq, 3), (team_slot_ge, 3),
+	(agent_set_slot, 3), (agent_get_slot, 3), (agent_slot_eq, 3), (agent_slot_ge, 3),
+	(player_set_slot, 3), (player_get_slot, 3), (player_slot_eq, 3), (player_slot_ge, 3),
+	(try_for_range, 3), (try_for_range_backwards, 3), (try_for_parties, 1), (try_for_agents, (1, 3)), (try_for_prop_instances, (1, 3)), (try_for_players, (1, 2)),
+	(gt, 2), (ge, 2), (eq, 2), (is_between, 3), (assign, 2), (val_min, 2), (val_max, 2), (val_clamp, 3), (val_abs, 1), (val_lshift, 2), (val_rshift, 2),
+	(store_sqrt, 2), (store_pow, 3), (store_sin, 2), (store_cos, 2), (store_tan, 2), (store_asin, 2), (store_acos, 2), (store_atan, 2), (store_atan2, 3),
+	(store_random, 2), (store_random_in_range, 3), (shuffle_range, 2), (set_fixed_point_multiplier, 1), (convert_to_fixed_point, 1), (convert_from_fixed_point, 1),
+	(store_script_param_1, 1), (store_script_param_2, 1), (store_script_param, 2), (set_result_string, 1), (store_trigger_param_1, 1), (store_trigger_param_2, 1),
+	(store_trigger_param_3, 1), (store_trigger_param, 2), (get_trigger_object_position, 1), (set_trigger_result, 1),
+	(key_is_down, 1), (key_clicked, 1), (game_key_is_down, 1), (game_key_clicked, 1), (omit_key_once, 1), (mouse_get_position, 1),
+	(get_global_cloud_amount, 1), (set_global_cloud_amount, 1), (get_global_haze_amount, 1), (set_global_haze_amount, 1),
+	(store_current_hours, 1), (store_time_of_day, 1), (store_current_day, 1), (rest_for_hours, (1, 3)), (rest_for_hours_interactive, (1, 3)),
+	(get_operation_set_version, 1), (set_player_troop, 1), (show_object_details_overlay, 1), (allow_ironman, 1),
+	(options_get_damage_to_player, 1), (options_set_damage_to_player, 1), (options_get_damage_to_friends, 1), (options_set_damage_to_friends, 1),
+	(options_get_combat_ai, 1), (options_set_combat_ai, 1), (game_get_reduce_campaign_ai, 1), (options_get_campaign_ai, 1), (options_set_campaign_ai, 1),
+	(options_get_combat_speed, 1), (options_set_combat_speed, 1), (options_get_battle_size, 1), (options_set_battle_size, 1), (get_average_game_difficulty, 1),
+	(get_achievement_stat, 3), (set_achievement_stat, 3), (unlock_achievement, 1), (get_player_agent_kill_count , (1, 2)), (get_player_agent_own_troop_kill_count, (1, 2)),
+	(set_relation, 3), (store_relation, 3), (faction_set_name, 2), (faction_set_color, 2), (faction_get_color, 2),
+	(hero_can_join, (0, 1)), (hero_can_join_as_prisoner, (0, 1)), (troops_can_join, 1), (troops_can_join_as_prisoner, 1), (party_can_join_party, (2, 3)),
+	(main_party_has_troop, 1), (party_is_in_town, 2), (party_is_in_any_town, 1), (party_is_active, 1),
+	(set_party_creation_random_limits, 2), (set_spawn_radius, 1), (spawn_around_party, 2), (disable_party, 1), (enable_party, 1), (remove_party, 1),
+	(party_get_current_terrain, 2), (party_relocate_near_party, 3), (party_get_position, 2), (party_set_position, 2), (set_camera_follow_party, 1),
+	(party_attach_to_party, 2), (party_detach, 1), (party_collect_attachments_to_party, 2), (party_get_cur_town, 2), (party_get_attached_to, 2), (party_get_num_attached_parties, 2),
+	(party_get_attached_party_with_rank, 3), (party_set_name, 2), (party_set_extra_text, 2), (party_get_icon, 2), (party_set_icon, 2), (party_set_banner_icon, 2),
+	(party_set_extra_icon, 6), (party_add_particle_system, 2), (party_clear_particle_systems, 1), (context_menu_add_item, 2), (party_get_template_id, 2), (party_set_faction, 2),
+	(store_faction_of_party, 2), (store_random_party_in_range, 3), (store01_random_parties_in_range, 2), (store_distance_to_party_from_party, 3),
+	(store_num_parties_of_template, 2), (store_random_party_of_template, 2), (store_num_parties_created, 2), (store_num_parties_destroyed, 2), (store_num_parties_destroyed_by_player, 2),
+	(party_get_morale, 2), (party_set_morale, 2), (troop_join, 1), (troop_join_as_prisoner, 1), (add_companion_party, 1), (party_add_members, 3), (party_add_prisoners, 3),
+	(party_add_leader, (2, 3)), (party_force_add_members, 3), (party_force_add_prisoners, 3), (party_add_template, (2, 3)), (distribute_party_among_party_group, 2),
+	(remove_member_from_party, (1, 2)), (remove_regular_prisoners, 1), (remove_troops_from_companions, 2), (remove_troops_from_prisoners, 2),
+	(party_remove_members, 3), (party_remove_prisoners, 3), (party_clear, 1), (add_gold_to_party, 2), (party_get_num_companions, 2), (party_get_num_prisoners, 2),
+	(party_count_members_of_type, 3), (party_count_companions_of_type, 3), (party_count_prisoners_of_type, 3), (party_get_free_companions_capacity, 2), (party_get_free_prisoners_capacity, 2),
+	(party_get_num_companion_stacks, 2), (party_get_num_prisoner_stacks, 2), (party_stack_get_troop_id, 3), (party_stack_get_size, 3), (party_stack_get_num_wounded, 3),
+	(party_stack_get_troop_dna, 3), (party_prisoner_stack_get_troop_id, 3), (party_prisoner_stack_get_size, 3), (party_prisoner_stack_get_troop_dna, 3),
+	(store_num_free_stacks, 2), (store_num_free_prisoner_stacks, 2), (store_party_size, (1, 2)), (store_party_size_wo_prisoners, (1, 2)), (store_troop_kind_count, 2),
+	(store_num_regular_prisoners, 1), (store_troop_count_companions, (2, 3)), (store_troop_count_prisoners, (2, 3)), (store_main_party_wounded, 1),
+	(party_add_xp_to_stack, 3), (party_upgrade_with_xp, (2, 3)), (party_add_xp, 2), (party_get_skill_level, 3), (heal_party, 1), (party_wound_members, 3),
+	(party_remove_members_wounded_first, 3), (party_quick_attach_to_current_battle, 2), (party_leave_cur_battle, 1), (party_set_next_battle_simulation_time, 2),
+	(party_get_battle_opponent, 2), (inflict_casualties_to_party_group, 3), (party_end_battle, 1),
+	(party_set_marshall, 2), (party_set_flags, 3), (party_set_aggressiveness, 2), (party_set_courage, 2), (party_get_ai_initiative, 2), (party_set_ai_initiative, 2),
+	(party_set_ai_behavior, 2), (party_set_ai_object, 2), (party_set_ai_target_position, 2), (party_set_ai_patrol_radius, 2), (party_ignore_player, 2),
+	(party_set_bandit_attraction, 2), (party_get_helpfulness, 2), (party_set_helpfulness, 2), (get_party_ai_behavior, 2), (get_party_ai_object, 2), (party_get_ai_target_position, 2),
+	(get_party_ai_current_behavior, 2), (get_party_ai_current_object, 2), (party_set_ignore_with_player_party, 2), (party_get_ignore_with_player_party, 2),
+	(troop_has_item_equipped, 2), (troop_is_mounted, 1), (troop_is_guarantee_ranged, 1), (troop_is_guarantee_horse, 1), (troop_is_hero, 1), (troop_is_wounded, 1), (player_has_item, 1),
+	(troop_set_type, 2), (troop_get_type, 2), (troop_set_class, 2), (troop_get_class, 2), (class_set_name, 2), (add_xp_to_troop, (1, 2)), (add_xp_as_reward, 1), (troop_get_xp, 2),
+	(store_attribute_level, 3), (troop_raise_attribute, 3), (store_skill_level, (2, 3)), (troop_raise_skill, 3), (store_proficiency_level, 3), (troop_raise_proficiency, 3),
+	(troop_raise_proficiency_linear, 3), (troop_add_proficiency_points, 2), (store_troop_health, (2, 3)), (troop_set_health, (2, 3)), (troop_get_upgrade_troop, 3),
+	(store_character_level, (1, 2)), (get_level_boundary, 2), (add_gold_as_xp, (1, 2)), (troop_set_auto_equip, 2), (troop_ensure_inventory_space, 2), (troop_sort_inventory, 1),
+	(troop_add_item, (2, 3)), (troop_remove_item, 2), (troop_clear_inventory, 1), (troop_equip_items, 1), (troop_inventory_slot_set_item_amount, 3),
+	(troop_inventory_slot_get_item_amount, 3), (troop_inventory_slot_get_item_max_amount, 3), (troop_add_items, 3), (troop_remove_items, 3), (troop_loot_troop, 3),
+	(troop_get_inventory_capacity, 2), (troop_get_inventory_slot, 3), (troop_get_inventory_slot_modifier, 3), (troop_set_inventory_slot, 3), (troop_set_inventory_slot_modifier, 3),
+	(store_item_kind_count, (2, 3)), (store_free_inventory_capacity, (1, 2)), (set_price_rate_for_item, 2), (set_price_rate_for_item_type, 2), (set_merchandise_modifier_quality, 1),
+	(set_merchandise_max_value, 1), (reset_item_probabilities, 1), (set_item_probability_in_merchandise, 2), (troop_add_merchandise, 3), (troop_add_merchandise_with_faction, 4),
+	(troop_set_name, 2), (troop_set_plural_name, 2), (troop_set_face_key_from_current_profile, 1), (troop_add_gold, 2), (troop_remove_gold, 2), (store_troop_gold, (1, 2)),
+	(troop_set_faction, 2), (store_troop_faction, 2), (store_faction_of_troop, 2), (troop_set_age, 2), (store_troop_value, 2), (str_store_player_face_keys, 2), (player_set_face_keys, 2),
+	(str_store_troop_face_keys, (2, 3)), (troop_set_face_keys, (2, 3)), (face_keys_get_hair, 2), (face_keys_set_hair, 2), (face_keys_get_beard, 2), (face_keys_set_beard, 2),
+	(face_keys_get_face_texture, 2), (face_keys_set_face_texture, 2), (face_keys_get_hair_texture, 2), (face_keys_set_hair_texture, 2), (face_keys_get_hair_color, 2),
+	(face_keys_set_hair_color, 2), (face_keys_get_age, 2), (face_keys_set_age, 2), (face_keys_get_skin_color, 2), (face_keys_set_skin_color, 2), (face_keys_get_morph_key, 3),
+	(face_keys_set_morph_key, 3),
+	(check_quest_active, 1), (check_quest_finished, 1), (check_quest_succeeded, 1), (check_quest_failed, 1), (check_quest_concluded, 1), (start_quest, (1, 2)), (conclude_quest, 1),
+	(succeed_quest, 1), (fail_quest, 1), (complete_quest, 1), (cancel_quest, 1), (setup_quest_text, 1), (store_partner_quest, 1), (setup_quest_giver, 2), (store_random_quest_in_range, 3),
+	(set_quest_progression, 2), (store_random_troop_to_raise, 3), (store_random_troop_to_capture, 3), (store_quest_number, 2), (store_quest_item, 2), (store_quest_troop, 2),
+	(item_has_property, 2), (item_has_capability, 2), (item_has_modifier, 2), (item_has_faction, 2), (item_get_type, 2), (store_item_value, 2), (store_random_horse, 1),
+	(store_random_equipment, 1), (store_random_armor, 1), (cur_item_add_mesh, (1, 4)), (cur_item_set_material, (2, 4)), (item_get_weight, 2), (item_get_value, 2),
+	(item_get_difficulty, 2), (item_get_head_armor, 2), (item_get_body_armor, 2), (item_get_leg_armor, 2), (item_get_hit_points, 2), (item_get_weapon_length, 2), (item_get_speed_rating, 2),
+	(item_get_missile_speed, 2), (item_get_max_ammo, 2), (item_get_accuracy, 2), (item_get_shield_height, 2), (item_get_horse_scale, 2), (item_get_horse_speed, 2),
+	(item_get_horse_maneuver, 2), (item_get_food_quality, 2), (item_get_abundance, 2), (item_get_thrust_damage, 2), (item_get_thrust_damage_type, 2), (item_get_swing_damage, 2),
+	(item_get_swing_damage_type, 2), (item_get_horse_charge_damage, 2),
+	(play_sound_at_position, (2, 3)), (play_sound, (1, 2)), (play_track, (1, 2)), (play_cue_track, 1), (music_set_situation, 1), (music_set_culture, 1), (stop_all_sounds, (0, 1)),
+	(store_last_sound_channel, 1), (stop_sound_channel, 1),
+	(init_position, 1), (copy_position, 2), (position_copy_origin, 2), (position_copy_rotation, 2), (position_transform_position_to_parent, 3), (position_transform_position_to_local, 3),
+	(position_get_x, 2), (position_get_y, 2), (position_get_z, 2), (position_set_x, 2), (position_set_y, 2), (position_set_z, 2), (position_move_x, (2, 3)), (position_move_y, (2, 3)),
+	(position_move_z, (2, 3)), (position_set_z_to_ground_level, 1), (position_get_distance_to_terrain, 2), (position_get_distance_to_ground_level, 2), (position_get_rotation_around_x, 2),
+	(position_get_rotation_around_y, 2), (position_get_rotation_around_z, 2), (position_rotate_x, 2), (position_rotate_y, 2), (position_rotate_z, (2, 3)),
+	(position_rotate_x_floating, 2), (position_rotate_y_floating, 2), (position_rotate_z_floating, (2, 3)), (position_get_scale_x, 2), (position_get_scale_y, 2), (position_get_scale_z, 2),
+	(position_set_scale_x, 2), (position_set_scale_y, 2), (position_set_scale_z, 2), (get_angle_between_positions, 3), (position_has_line_of_sight_to_position, 2),
+	(get_distance_between_positions, 3), (get_distance_between_positions_in_meters, 3), (get_sq_distance_between_positions, 3), (get_sq_distance_between_positions_in_meters, 3),
+	(position_is_behind_position, 2), (get_sq_distance_between_position_heights, 3), (position_normalize_origin, 2), (position_get_screen_projection, 2),
+	(map_get_random_position_around_position, 3), (map_get_land_position_around_position, 3), (map_get_water_position_around_position, 3),
+	(troop_set_note_available, 2), (add_troop_note_tableau_mesh, 2), (add_troop_note_from_dialog, 3), (add_troop_note_from_sreg, 4), (faction_set_note_available, 2),
+	(add_faction_note_tableau_mesh, 2), (add_faction_note_from_dialog, 3), (add_faction_note_from_sreg, 4), (party_set_note_available, 2), (add_party_note_tableau_mesh, 2),
+	(add_party_note_from_dialog, 3), (add_party_note_from_sreg, 4), (quest_set_note_available, 2), (add_quest_note_tableau_mesh, 2), (add_quest_note_from_dialog, 3),
+	(add_quest_note_from_sreg, 4), (add_info_page_note_tableau_mesh, 2), (add_info_page_note_from_dialog, 3), (add_info_page_note_from_sreg, 4),
+	(cur_item_set_tableau_material, 2), (cur_scene_prop_set_tableau_material, 2), (cur_map_icon_set_tableau_material, 2), (cur_agent_set_banner_tableau_material, 2),
+	(cur_tableau_add_tableau_mesh, 3), (cur_tableau_render_as_alpha_mask, 0), (cur_tableau_set_background_color, 1), (cur_tableau_set_ambient_light, 3), (cur_tableau_set_camera_position, 1),
+	(cur_tableau_set_camera_parameters, 5), (cur_tableau_add_point_light, 4), (cur_tableau_add_sun_light, 4), (cur_tableau_add_mesh, 4), (cur_tableau_add_mesh_with_vertex_color, 5),
+	(cur_tableau_add_mesh_with_scale_and_vertex_color, 5), (cur_tableau_add_map_icon, 3), (cur_tableau_add_troop, 4), (cur_tableau_add_horse, 3), (cur_tableau_set_override_flags, 1),
+	(cur_tableau_clear_override_items, 0), (cur_tableau_add_override_item, 1),
+	(str_is_empty, 1), (str_clear, 1), (str_store_string, 2), (str_store_string_reg, 2), (str_store_troop_name, 2), (str_store_troop_name_plural, 2), (str_store_troop_name_by_count, 3),
+	(str_store_item_name, 2), (str_store_item_name_plural, 2), (str_store_item_name_by_count, 2), (str_store_party_name, 2), (str_store_agent_name, 2), (str_store_faction_name, 2),
+	(str_store_quest_name, 2), (str_store_info_page_name, 2), (str_store_date, 2), (str_store_troop_name_link, 2), (str_store_party_name_link, 2), (str_store_faction_name_link, 2),
+	(str_store_quest_name_link, 2), (str_store_info_page_name_link, 2), (str_store_class_name, 2), (game_key_get_mapped_key_name, 2), (str_store_player_username, 2),
+	(str_store_server_password, 1), (str_store_server_name, 1), (str_store_welcome_message, 1), (str_encode_url, 1),
+	(display_debug_message, (1, 2)), (display_log_message, (1, 2)), (display_message, (1, 2)), (set_show_messages, 1), (tutorial_box, 2), (dialog_box, (1, 2)), (question_box, (1, 3)),
+	(tutorial_message, (1, 3)), (tutorial_message_set_position, 2), (tutorial_message_set_size, 2), (tutorial_message_set_center_justify, 1), (tutorial_message_set_background, 1),
+	(entering_town, 1), (encountered_party_is_attacker, 0), (conversation_screen_is_active, 0), (in_meta_mission, 0), (change_screen_return, 0), (change_screen_loot, 1),
+	(change_screen_trade, (0, 1)), (change_screen_exchange_members, (0, 2)), (change_screen_trade_prisoners, 0), (change_screen_buy_mercenaries, 0), (change_screen_view_character, 0),
+	(change_screen_training, 0), (change_screen_mission, 0), (change_screen_map_conversation, 1), (change_screen_exchange_with_party, 1), (change_screen_equip_other, (0, 1)),
+	(change_screen_map, 0), (change_screen_notes, 2), (change_screen_quit, 0), (change_screen_give_members, (0, 1)), (change_screen_controls, 0), (change_screen_options, 0),
+	(set_mercenary_source_party, 1), (start_map_conversation, (1, 2)), (set_background_mesh, 1), (set_game_menu_tableau_mesh, 3), (jump_to_menu, 1), (disable_menu_option, 0),
+	(set_tooltip_text, 1), (set_party_battle_mode, 0), (finish_party_battle_mode, 0), (start_encounter, 1), (leave_encounter, 0), (encounter_attack, 0), (select_enemy, 1),
+	(set_passage_menu, 1), (start_mission_conversation, 1), (set_conversation_speaker_troop, 1), (set_conversation_speaker_agent, 1), (store_conversation_agent, 1),
+	(store_conversation_troop, 1), (store_partner_faction, 1), (store_encountered_party, 1), (store_encountered_party2, 1), (set_encountered_party, 1), (end_current_battle, 0),
+	(store_repeat_object, 1), (talk_info_show, 1), (talk_info_set_relation_bar, 1), (talk_info_set_line, 2),
+	(all_enemies_defeated, (0, 1)), (race_completed_by_player, 0), (num_active_teams_le, 1), (main_hero_fallen, 0), (scene_allows_mounted_units, 0), (is_zoom_disabled, 0),
+	(mission_tpl_are_all_agents_spawned, 0), (add_troop_to_site, 3), (remove_troop_from_site, 2), (modify_visitors_at_site, 1), (reset_visitors, 0), (set_visitor, (2, 3)),
+	(set_visitors, 3), (add_visitors_to_current_scene, (3, 5)), (mission_tpl_entry_set_override_flags, 3), (mission_tpl_entry_clear_override_items, 2),
+	(mission_tpl_entry_add_override_item, 3), (set_mission_result, 1), (finish_mission, (0, 1)), (set_jump_mission, 1), (jump_to_scene, (1, 2)), (set_jump_entry, 1),
+	(store_current_scene, 1), (close_order_menu, 0), (entry_point_get_position, 2), (entry_point_set_position, 2), (entry_point_is_auto_generated, 1), (scene_set_day_time, 1),
+	(set_rain, 2), (set_fog_distance, (1, 2)), (set_skybox, 2), (set_startup_sun_light, 3), (set_startup_ambient_light, 3), (set_startup_ground_ambient_light, 3),
+	(get_startup_sun_light, 1), (get_startup_ambient_light, 1), (get_startup_ground_ambient_light, 1), (get_battle_advantage, 1), (set_battle_advantage, 1),
+	(get_scene_boundaries, 2), (mission_enable_talk, 0), (mission_disable_talk, 0), (mission_get_time_speed, 1), (mission_set_time_speed, 1), (mission_time_speed_move_to_value, 2),
+	(mission_set_duel_mode, 1), (store_zoom_amount, 1), (set_zoom_amount, 1), (reset_mission_timer_a, 0), (reset_mission_timer_b, 0), (reset_mission_timer_c, 0),
+	(store_mission_timer_a, 1), (store_mission_timer_b, 1), (store_mission_timer_c, 1), (store_mission_timer_a_msec, 1), (store_mission_timer_b_msec, 1), (store_mission_timer_c_msec, 1),
+	(is_camera_in_first_person, 0), (set_camera_in_first_person, 1), (mission_cam_set_mode, (1, 3)), (mission_cam_set_screen_color, 1), (mission_cam_get_position, 1),
+	(mission_cam_set_position, 1), (mission_cam_animate_to_position, 3), (mission_cam_get_aperture, 1), (mission_cam_set_aperture, 1), (mission_cam_animate_to_aperture, 3),
+	(mission_cam_animate_to_position_and_aperture, 4), (mission_cam_set_target_agent, 2), (mission_cam_clear_target_agent, 0), (mission_cam_set_animation, 1),
+	(mouse_get_world_projection, 2), (cast_ray, (3, 4)), (set_postfx, 1), (set_river_shader_to_mud, 0), (rebuild_shadow_map, 0),
+	(set_shader_param_int, 2), (set_shader_param_float, 2), (set_shader_param_float4, 5), (set_shader_param_float4x4, 13),
+	(prop_instance_is_valid, 1), (prop_instance_is_animating, 2), (prop_instance_intersects_with_prop_instance, 2), (scene_prop_has_agent_on_it, 2),
+	(prop_instance_get_scene_prop_kind, 2), (scene_prop_get_num_instances, 2), (scene_prop_get_instance, 3), (scene_prop_enable_after_time, 2), (set_spawn_position, 1),
+	(spawn_scene_prop, 1), (prop_instance_get_variation_id, 2), (prop_instance_get_variation_id_2, 2), (replace_prop_instance, 2), (replace_scene_props, 2), (scene_prop_fade_out, (2, 3)),
+	(scene_prop_fade_in, 2), (prop_instance_set_material, 3), (scene_prop_get_visibility, 2), (scene_prop_set_visibility, 2), (scene_prop_get_hit_points, 2), 
+	(scene_prop_get_max_hit_points, 2), (scene_prop_set_hit_points, 2), (scene_prop_set_cur_hit_points, 2), (prop_instance_receive_damage, 3), (prop_instance_refill_hit_points, 1),
+	(scene_prop_get_team, 2), (scene_prop_set_team, 2), (scene_prop_set_prune_time, 2), (prop_instance_get_position, 2), (prop_instance_get_starting_position, 2),
+	(prop_instance_set_position, (2, 3)), (prop_instance_animate_to_position, 3), (prop_instance_get_animation_target_position, 2), (prop_instance_stop_animating, 1),
+	(prop_instance_get_scale, 2), (prop_instance_set_scale, 4), (prop_instance_enable_physics, 2), (prop_instance_initialize_rotation_angles, 1), (prop_instance_rotate_to_position, 4),
+	(prop_instance_clear_attached_missiles, 1), (prop_instance_dynamics_set_properties, 2), (prop_instance_dynamics_set_velocity, 2), (prop_instance_dynamics_set_omega, 2),
+	(prop_instance_dynamics_apply_impulse, 2), (prop_instance_deform_to_time, 2), (prop_instance_deform_in_range, 4), (prop_instance_deform_in_cycle_loop, 4),
+	(prop_instance_get_current_deform_progress, 2), (prop_instance_get_current_deform_frame, 2), (prop_instance_play_sound, (2, 3)), (prop_instance_stop_sound, 1),
+	(scene_item_get_num_instances, 2), (scene_item_get_instance, 3), (scene_spawned_item_get_num_instances, 2), (scene_spawned_item_get_instance, 3),
+	(replace_scene_items_with_scene_props, 2), (spawn_item, (1, 3)), (spawn_item_without_refill, (1, 3)), (set_current_color, 3), (set_position_delta, 3), (add_point_light, (0, 2)),
+	(add_point_light_to_entity, (0, 2)), (particle_system_add_new, (1, 2)), (particle_system_emit, (2, 3)), (particle_system_burst, (2, 3)), (particle_system_burst_no_sync, (2, 3)),
+	(prop_instance_add_particle_system, 3), (prop_instance_stop_all_particle_systems, 1),
+	(agent_is_in_special_mode, 1), (agent_is_routed, 1), (agent_is_alive, 1), (agent_is_wounded, 1), (agent_is_human, 1), (agent_is_ally, 1), (agent_is_non_player, 1),
+	(agent_is_defender, 1), (agent_is_active, 1), (agent_has_item_equipped, 2), (agent_is_in_parried_animation, 1), (agent_is_alarmed, 1), (class_is_listening_order, 2),
+	(teams_are_enemies, 2), (agent_is_in_line_of_sight, 2), (add_reinforcements_to_entry, 2), (spawn_agent, 1), (spawn_horse, (1, 2)), (remove_agent, 1), (agent_fade_out, 1),
+	(agent_play_sound, 2), (agent_stop_sound, 1), (agent_set_visibility, 2), (get_player_agent_no, 1), (agent_get_kill_count, (2, 3)), (agent_get_position, 2),
+	(agent_set_position, 2), (agent_get_horse, 2), (agent_get_rider, 2), (agent_get_party_id, 2), (agent_get_entry_no, 2), (agent_get_troop_id, 2), (agent_get_item_id, 2),
+	(store_agent_hit_points, (2, 3)), (agent_set_hit_points, (2, 3)), (agent_set_max_hit_points, (2, 3)), (agent_deliver_damage_to_agent, (2, 4)),
+	(agent_deliver_damage_to_agent_advanced, (4, 5)), (add_missile, (6, 7)), (agent_get_speed, 2), (agent_get_damage_modifier, 2), (agent_get_accuracy_modifier, 2),
+	(agent_get_speed_modifier, 2), (agent_get_reload_speed_modifier, 2), (agent_get_use_speed_modifier, 2), (agent_set_no_death_knock_down_only, 2),
+	(agent_set_horse_speed_factor, 2), (agent_set_speed_limit, 2), (agent_set_damage_modifier, 2), (agent_set_accuracy_modifier, 2), (agent_set_speed_modifier, 2),
+	(agent_set_reload_speed_modifier, 2), (agent_set_use_speed_modifier, 2), (agent_set_ranged_damage_modifier, 2), (agent_get_time_elapsed_since_removed, 2),
+	(str_store_agent_face_keys, 2), (agent_refill_wielded_shield_hit_points, 1), (agent_set_invulnerable_shield, 2), (agent_get_wielded_item, (2, 3)),
+	(agent_get_ammo, (2, 3)), (agent_get_item_cur_ammo, 3), (agent_refill_ammo, 1), (agent_set_wielded_item, 2), (agent_equip_item, (2, 3)), (agent_unequip_item, (2, 3)),
+	(agent_set_ammo, 3), (agent_get_item_slot, 3), (agent_get_ammo_for_slot, 3), (agent_set_no_dynamics, 2), (agent_get_animation, (2, 3)), (agent_set_animation, (2, 3)),
+	(agent_set_stand_animation, 2), (agent_set_walk_forward_animation, 2), (agent_set_animation_progress, 2), (agent_ai_set_can_crouch, 2), (agent_get_crouch_mode, 2),
+	(agent_set_crouch_mode, 2), (agent_get_attached_scene_prop, 2), (agent_set_attached_scene_prop, 2), (agent_set_attached_scene_prop_x, 2),
+	(agent_set_attached_scene_prop_y, 2), (agent_set_attached_scene_prop_z, 2), (agent_get_bone_position, (3, 4)), (agent_ai_set_interact_with_player, 2),
+	(agent_set_is_alarmed, 2), (agent_clear_relations_with_agents, 1), (agent_add_relation_with_agent, 3), (agent_get_number_of_enemies_following, 2),
+	(agent_ai_get_num_cached_enemies, 2), (agent_ai_get_cached_enemy, 3), (agent_get_attack_action, 2), (agent_get_defend_action, 2), (agent_get_action_dir, 2),
+	(agent_set_attack_action, (2, 3)), (agent_set_defend_action, (2, 3)), (agent_set_scripted_destination, (2, 4)), (agent_set_scripted_destination_no_attack, (2, 3)),
+	(agent_get_scripted_destination, 2), (agent_force_rethink, 1), (agent_clear_scripted_mode, 1), (agent_ai_set_always_attack_in_melee, 2),
+	(agent_get_simple_behavior, 2), (agent_ai_get_behavior_target, 2), (agent_get_combat_state, 2), (agent_ai_get_move_target, 2), (agent_get_look_position, 2),
+	(agent_set_look_target_position, 2), (agent_ai_get_look_target, 2), (agent_set_look_target_agent, 2), (agent_start_running_away, (1, 2)), (agent_stop_running_away, 1),
+	(agent_ai_set_aggressiveness, 2), (agent_set_kick_allowed, 2), (set_cheer_at_no_enemy, 1), (agent_add_offer_with_timeout, 3), (agent_check_offer_from_agent, 2),
+	(agent_get_group, 2), (agent_set_group, 2), (agent_get_team, 2), (agent_set_team, 2), (agent_get_class, 2), (agent_get_division, 2), (agent_set_division, 2),
+	(team_get_hold_fire_order, 3), (team_get_movement_order, 3), (team_get_riding_order, 3), (team_get_weapon_usage_order, 3), (team_give_order, 3), (team_set_order_position, 3),
+	(team_get_leader, 2), (team_set_leader, 2), (team_get_order_position, 3), (team_set_order_listener, (2, 3)), (team_set_relation, 3), (store_remaining_team_no, 1),
+	(team_get_gap_distance, 3), (store_normalized_team_count, 2), 
+	(is_presentation_active, 1), (start_presentation, 1), (start_background_presentation, 1), (presentation_set_duration, 1), (create_text_overlay, (2, 3)), (create_mesh_overlay, 2),
+	(create_mesh_overlay_with_item_id, 2), (create_mesh_overlay_with_tableau_material, (3, 4)), (create_button_overlay, (2, 3)), (create_game_button_overlay, 2),
+	(create_in_game_button_overlay, 2), (create_image_button_overlay, 3), (create_image_button_overlay_with_tableau_material, 4), (create_slider_overlay, 3),
+	(create_progress_overlay, 3), (create_number_box_overlay, 3), (create_text_box_overlay, 1), (create_simple_text_box_overlay, 1), (create_check_box_overlay, 3),
+	(create_listbox_overlay, 3), (create_combo_label_overlay, 1), (create_combo_button_overlay, 1), (overlay_add_item, 2), (set_container_overlay, 1), (overlay_set_container_overlay, 2),
+	(overlay_get_position, 2), (overlay_set_val, 2), (overlay_set_text, 2), (overlay_set_boundaries, 3), (overlay_set_position, 2), (overlay_set_size, 2), (overlay_set_area_size, 2),
+	(overlay_set_additional_render_height, 2), (overlay_animate_to_position, 3), (overlay_animate_to_size, 3), (overlay_set_mesh_rotation, 2), (overlay_set_material, 2),
+	(overlay_set_color, 2), (overlay_set_alpha, 2), (overlay_set_hilight_color, 2), (overlay_set_hilight_alpha, 2), (overlay_animate_to_color, 3), (overlay_animate_to_alpha, 3),
+	(overlay_animate_to_highlight_color, 3), (overlay_animate_to_highlight_alpha, 3), (overlay_set_display, 2), (overlay_obtain_focus, 1), (overlay_set_tooltip, 2),
+	(show_item_details, 3), (show_item_details_with_modifier, 4), (close_item_details, 0), (show_troop_details, 3),
+	(player_is_active, 1), (multiplayer_is_server, 0), (multiplayer_is_dedicated_server, 0), (game_in_multiplayer_mode, 0), (player_is_admin, 1), (player_is_busy_with_menus, 1),
+	(player_item_slot_is_picked_up, 2), (send_message_to_url, 2), (multiplayer_send_message_to_server, 1), (multiplayer_send_int_to_server, 2), (multiplayer_send_2_int_to_server, 3),
+	(multiplayer_send_3_int_to_server, 4), (multiplayer_send_4_int_to_server, 5), (multiplayer_send_string_to_server, 2), (multiplayer_send_message_to_player, 2),
+	(multiplayer_send_int_to_player, 3), (multiplayer_send_2_int_to_player, 4), (multiplayer_send_3_int_to_player, 5), (multiplayer_send_4_int_to_player, 6),
+	(multiplayer_send_string_to_player, 3), (get_max_players, 1), (player_get_team_no, 2), (player_set_team_no, 2), (player_get_troop_id, 2), (player_set_troop_id, 2),
+	(player_get_agent_id, 2), (agent_get_player_id, 2), (player_get_gold, 2), (player_set_gold, (2, 3)), (player_spawn_new_agent, 2), (player_add_spawn_item, 3),
+	(multiplayer_get_my_team, 1), (multiplayer_get_my_troop, 1), (multiplayer_set_my_troop, 1), (multiplayer_get_my_gold, 1), (multiplayer_get_my_player, 1),
+	(multiplayer_make_everyone_enemy, 0), (player_control_agent, 2), (player_get_item_id, 3), (player_get_banner_id, 2), (player_set_is_admin, 2), (player_get_score, 2),
+	(player_set_score, 2), (player_get_kill_count, 2), (player_set_kill_count, 2), (player_get_death_count, 2), (player_set_death_count, 2), (player_get_ping, 2),
+	(player_get_is_muted, 2), (player_set_is_muted, (2, 3)), (player_get_unique_id, 2), (player_get_gender, 2), (player_save_picked_up_items_for_next_spawn, 1),
+	(player_get_value_of_original_items, 2), (profile_get_banner_id, 1), (profile_set_banner_id, 1), (team_get_bot_kill_count, 2), (team_set_bot_kill_count, 2),
+	(team_get_bot_death_count, 2), (team_set_bot_death_count, 2), (team_get_kill_count, 2), (team_get_score, 2), (team_set_score, 2), (team_set_faction, 2), (team_get_faction, 2),
+	(multiplayer_clear_scene, 0), (multiplayer_find_spawn_point, (3, 4)), (set_spawn_effector_scene_prop_kind, 2), (set_spawn_effector_scene_prop_id, 2),
+	(start_multiplayer_mission, 3), (kick_player, 1), (ban_player, 3), (save_ban_info_of_player, 1), (ban_player_using_saved_ban_info, 0), (server_add_message_to_log, 1),
+	(server_get_renaming_server_allowed, 1), (server_get_changing_game_type_allowed, 1), (server_get_combat_speed, 1), (server_set_combat_speed, 1), (server_get_friendly_fire, 1),
+	(server_set_friendly_fire, 1), (server_get_control_block_dir, 1), (server_set_control_block_dir, 1), (server_set_password, 1), (server_get_add_to_game_servers_list, 1),
+	(server_set_add_to_game_servers_list, 1), (server_get_ghost_mode, 1), (server_set_ghost_mode, 1), (server_set_name, 1), (server_get_max_num_players, 1), (server_set_max_num_players, 1),
+	(server_set_welcome_message, 1), (server_get_melee_friendly_fire, 1), (server_set_melee_friendly_fire, 1), (server_get_friendly_fire_damage_self_ratio, 1),
+	(server_set_friendly_fire_damage_self_ratio, 1), (server_get_friendly_fire_damage_friend_ratio, 1), (server_set_friendly_fire_damage_friend_ratio, 1), (server_get_anti_cheat, 1),
+	(server_set_anti_cheat, 1),
+	(set_physics_delta_time, 1), (ai_mesh_face_group_show_hide, 2), (auto_set_meta_mission_at_end_commited, 0),
+])
+try:
+	if is_vanilla_warband:
+		length_array.update(dict([
+			(break_loop, 0), (continue_loop, 0), (try_for_dict_keys, 2), (key_is_down, (1, 2)), (key_clicked, (1, 2)), (game_key_is_down, (1, 2)), (game_key_clicked, (1, 2)),
+			(server_set_max_num_players, (1, 2)), (position_rotate_x, (2, 3)), (position_rotate_y, (2, 3)), (position_rotate_z, (2, 3)), (position_rotate_z_floating, (2, 3)),
+			(position_rotate_x_floating, (2, 3)), (position_rotate_y_floating, (2, 3)),  (is_vanilla_warband, 0), (start_map_conversation, (1, 5)),
+			(agent_set_animation_progress, (2, 3)), (prop_instance_receive_damage, (3, 4)), (add_point_light, (0, 3)), (add_point_light_to_entity, (0, 3)),
+			(val_shr, 2), (store_shr, 3), (val_lshr, 2), (store_lshr, 3), (val_shl, 2), (store_shl, 3), (val_xor, 2), (store_xor, 3), (val_not, 1), (store_not, 2),
+			(player_set_skin, 2), (player_stop_controlling_agent, 1), (player_set_banner_id, 2), (player_set_username, 2), (player_temp_ban, 2), (player_get_wse2_version, 2),
+			(player_get_party_id, 2), (player_set_party_id, 2), (register_get, 2), (register_set, 2), (store_wse_version, 2), (item_slot_gt, 3),
+			(party_template_slot_gt, 3), (troop_slot_gt, 3), (faction_slot_gt, 3), (quest_slot_gt, 3), (scene_slot_gt, 3), (party_slot_gt, 3), (player_slot_gt, 3),
+			(team_slot_gt, 3), (agent_slot_gt, 3), (scene_prop_slot_gt, 3), (store_current_trigger, 1), (return_values, (0, 16)), (store_num_return_values, 1),
+			(store_return_value, 2), (set_forced_lod, 1), (send_message_to_url_advanced, (2, 6)), (mtsrand, 1), (mtrand, 3), (get_time, (1, 2)), (order_flag_is_active, 0),
+			(play_bink_file, (1, 2)), (process_advanced_url_messages, 0), (sleep_ms, 1), (timer_reset, (1, 2)), (timer_get_elapsed_time, 2), (shell_open_url, 1),
+			(set_main_party, 1), (get_main_party, 1), (make_screenshot, 2), (send_post_message_to_url_advanced, (3, 7)), (set_random_seed, 1), (store_application_time, 1),
+			(is_party_skill, 1), (get_campaign_time, 1), (set_campaign_time, 1), (get_mouse_map_coordinates, 1), (profiler_start, 0), (profiler_stop, 0),
+			(profiler_is_recording, 0), (profiler_mark, 1), (conversation_screen_auto_update_choice, 0), (game_key_get_key, 2), (key_released, (1, 2)),
+			(game_key_released, (1, 2)), (dict_create, 1), (dict_free, 1), (dict_load_file, (2, 4)), (dict_load_dict, (2, 3)), (dict_save, (2, 3)), (dict_clear, 1),
+			(dict_is_empty, 1), (dict_has_key, 2), (dict_get_size, 2), (dict_delete_file, (1, 2)), (dict_get_str, (3, 4)), (dict_get_int, (3, 4)),
+			(dict_set_str, 3), (dict_set_int, 3), (dict_get_key_by_iterator, 3), (dict_get_pos, (3, 4)), (dict_set_pos, 3), (dict_load_file_json, (2, 3)), (dict_save_json, 2),
+			(dict_from_url_encoded_json, (2, 3)), (dict_to_url_encoded_json, 2), (dict_erase, 2), (dict_delete_file_json, 1),
+			(agent_get_item_modifier, 2), (agent_get_item_slot_modifier, 3), (agent_get_animation_progress, (2, 3)), (agent_get_dna, 2), (agent_get_ground_scene_prop, 2),
+			(agent_set_item_slot_ammo, 3), (agent_get_item_slot_hit_points, 3), (agent_set_item_slot_hit_points, 3), (agent_get_wielded_item_slot_no, (2, 3)), (agent_get_scale, 2),
+			(agent_set_forced_lod, 2), (agent_get_item_slot_flags, 3), (agent_ai_get_move_target_position, 2), (agent_set_horse, 2), (agent_ai_set_simple_behavior, (2, 3)),
+			(agent_accelerate, (2, 3)), (agent_set_item_slot_modifier, 3), (agent_body_meta_mesh_set_vertex_keys_time_point, 3), (agent_body_meta_mesh_set_visibility, 3),
+			(agent_set_personal_animation, 3), (agent_get_personal_animation, 3), (agent_set_default_animations, 1), (agent_cancel_current_animation, 2),
+			(agent_get_ranged_damage_modifier, 2), (agent_add_stun, 2), (agent_body_meta_mesh_deform_in_range, 5), (agent_body_meta_mesh_deform_in_cycle_loop, 5),
+			(agent_body_meta_mesh_get_current_deform_progress, 3), (agent_body_meta_mesh_get_current_deform_frame, 3), (agent_set_footstep_sound, 3),
+			(agent_get_horse_rotation_velocity, 2), (agent_get_current_vertical_speed, 2), (agent_set_current_vertical_speed, 2), (agent_get_position_in_group, 2),
+			(agent_get_current_ai_mesh_face_group, 2), (agent_set_time_speed_multiplier, 2), (agent_get_time_speed_multiplier, 2), (agent_kick, 1), (agent_set_dropped_items_prune_time, 2),
+			(agent_set_missile_items_prune_time, 2), (agent_set_action_speed_modifier, 2), (agent_get_action_speed_modifier, 2), (agent_set_left_hand_weapon_collision, 2),
+			(agent_ai_set_can_weapon_switch, 2), (agent_ai_set_can_fight, 2), (agent_fade_out_advanced, 2), (agent_fade_in_advanced, 2), (agent_set_voice_sound, 3),
+			(agent_set_enable_tilt, 2), (agent_set_rider_rotation_angles, 4), (agent_get_rider_rotation_angles, 4), (agent_set_default_rider_rotation_angles, 1),
+			(agent_ai_set_can_aim, 2), (agent_set_can_multihit, (2, 3)), (agent_has_multihit, 1), (agent_set_crush_through, 2), (agent_get_crush_through, 2),
+			(agent_set_trigger_disabled, 3), (agent_is_trigger_disabled, 2), (agent_set_can_piercing, (2, 3)), (agent_has_piercing, 1),
+			(multiplayer_send_chat_message_to_player, (3, 4)), (multiplayer_send_composite_message_to_player, 3), (multiplayer_send_composite_message_to_server, 2),
+			(multiplayer_get_cur_profile, 1), (multiplayer_get_num_profiles, 1), (multiplayer_message_init, 1), (multiplayer_message_put_string, 2), (multiplayer_message_put_int, (2, 3)),
+			(multiplayer_message_put_position, (2, 3)), (multiplayer_message_put_coordinate, (2, 3)), (multiplayer_cur_message_get_string, 1), (multiplayer_cur_message_get_int, (1, 2)),
+			(multiplayer_cur_message_get_position, (1, 2)), (multiplayer_cur_message_get_coordinate, (1, 2)), (multiplayer_cur_profile_get_skin, 1),
+			(multiplayer_connect_to_server, (2, 3)), (multiplayer_is_campaign, 0),
+			(server_set_password_admin, 1), (server_set_password_private, 1), (server_map_rotation_get_count, 1), (server_map_rotation_get_index, 1), (server_map_rotation_set_index, 1),
+			(server_map_rotation_get_map, 2), (server_map_rotation_add_map, (1, 2)), (server_map_rotation_remove_map, (0, 1)), (server_get_horse_friendly_fire, 1),
+			(server_set_horse_friendly_fire, 1), (server_get_show_crosshair, 1), (server_set_show_crosshair, 1), (get_server_option_at_connect, (1, 2)), (server_set_password_rcon, 1),
+			(execute_server_console_command, 2), (add_anonymous_player, 2), (remove_anonymous_player, 1), (clear_anonymous_players, 0), (server_set_ghost_mode_advanced, 5),
+			(store_cur_mission_template_no, 1), (set_show_use_tooltip, (1, 2)), (set_ally_collision_threshold, 2), (particle_system_remove, (0, 1)), (get_spectated_agent_no, 1),
+			(prop_instance_set_forced_lod, 2), (prop_instance_set_variation_id, 2), (prop_instance_set_variation_id_2, 2), (stop_time, 1), (missile_get_path_point_position, 3),
+			(get_water_level, 1), (missile_remove_on_hit, 0), (missile_is_valid, 1), (missile_get_cur_position, 2), (set_prop_collision_threshold, 3), (get_camera_position, 1),
+			(prop_instance_remove_particle_system, (1, 2)), (prop_instance_remove_light, 1), (prop_instance_get_sound_progress, 2), (set_horse_friendly_fire, 1),
+			(cast_ray_agents, (3, 4)), (ai_mesh_face_group_translate, 2), (set_show_crosshair, 1), (shift_entry_point, 1), (missile_remove, 1), (scene_prop_remove, 1),
+			(troop_get_skill_points, 2), (troop_set_skill_points, 2), (troop_get_attribute_points, 2), (troop_set_attribute_points, 2), (troop_get_proficiency_points, 2),
+			(troop_set_proficiency_points, 2), (troop_has_flag, 2), (troop_set_skill, 3), (troop_set_attribute, 3), (troop_set_proficiency, 3),
+			(item_set_thrust_damage, 2), (item_set_thrust_damage_type, 2), (item_set_swing_damage, 2), (item_set_swing_damage_type, 2), (item_set_head_armor, 2),
+			(item_set_body_armor, 2), (item_set_leg_armor, 2), (item_set_speed_rating, 2), (item_set_missile_speed, 2), (item_set_horse_blood_particles, 3),
+			(item_set_horse_blood_color, 2), (cur_item_mesh_set_color, 2), (cur_item_add_mesh_with_material, (2, 5)), (item_set_horse_skeleton_model, 2),
+			(party_stack_get_experience, 3), (party_stack_get_num_upgradeable, 3), (party_has_flag, 2), (party_heal_members, 3), (party_switch_stacks, 3),
+			(party_stack_upgrade, 4), (party_stack_set_num_upgradeable, 3), (party_get_banner_icon, 2), (party_get_extra_icon, 2), (party_get_player_id, 2), (party_is_non_player, 1),
+			(position_get_vector_to_position, 4), (position_align_to_ground, (1, 3)), (position_get_length, 2), (get_dot_product_of_positions, 3), (get_cross_product_of_positions, 3),
+			(str_equals, (2, 3)), (str_contains, (2, 3)), (str_starts_with, (2, 3)), (str_ends_with, (2, 3)), (str_is_alpha, (1, 2)), (str_is_digit, (1, 2)), (str_is_whitespace, (1, 2)),
+			(str_length, 2), (str_index_of, (3, 5)), (str_last_index_of, (3, 5)), (str_get_char, (2, 3)), (str_to_num, (2, 3)), (str_compare, (3, 4)), (str_split, (4, 6)),
+			(str_sort, (1, 4)), (str_store_lower, 2), (str_store_upper, 2), (str_store_trim, (2, 3)), (str_store_replace, 4), (str_store_md5, 2), (str_store_substring, (2, 4)),
+			(str_store_reverse, 2), (str_store_join, (3, 4)), (str_store_replace_spaces_with_underscores, 2), (str_store_replace_underscores_with_spaces, 2),
+			(str_store_multiplayer_profile_name, 2), (str_store_module_setting, 2), (str_store_server_password_admin, 1), (str_store_server_password_private, 1),
+			(str_store_overlay_text, 2), (str_store_player_ip, 2), (str_store_game_variable, 2), (str_store_skill_name, 2), (str_store_float, (2, 3)), (str_sanitize, 1),
+			(str_store_item_id, 2), (str_is_integer, 1), (str_store_multiplayer_profile_face_keys, 2), (str_store_server_password_rcon, 1), (str_store_item_mesh_name, 2),
+			(str_regex_match, 2), (str_regex_search, 2), (str_regex_get_matches, (4, 5)), (str_store_regex_replace, 4), (str_decode_url, 2), (str_store_skill_desc, 2),
+			(options_get_verbose_casualties, 1), (options_set_verbose_casualties, 1), (options_get_cheat_mode, 1), (options_set_cheat_mode, 1), (options_get_realistic_headshots, 1),
+			(options_set_realistic_headshots, 1),
+			(fld, 2), (fld_str, 2), (fld_pos_x, 2), (fld_pos_y, 2), (fld_pos_z, 2), (fst, 2), (fcpy, 2), (feq, 2), (fgt, 2), (flt, 2), (fge, 2), (fle, 2), (fsub, 3), (fmul, 3),
+			(fdiv, 3), (fmin, 3), (fmax, 3), (fclamp, 4), (fsqrt, 2), (fabs, 2), (fceil, 2), (ffloor, 2), (fexp, 2), (fpow, 3), (fln, 2), (flog, (2, 3)), (fmod, 3), (fsin, 2),
+			(fcos, 2), (ftan, 2), (fsinh, 2), (fcosh, 2), (ftanh, 2), (fasin, 2), (facos, 2), (fatan, 2), (fatan2, 3), (feval, 1), (fadd, 3),
+			(scene_set_flags, 2), (scene_set_water_level, 2), (scene_set_bounds, 5), (scene_set_outer_terrain, 2), (scene_set_terrain_seed, 2), (scene_set_river_seed, 2),
+			(scene_set_flora_seed, 2), (scene_set_deep_water, 2), (scene_set_place_river, 2), (scene_set_disable_grass, 2), (scene_set_valley_size, 2), (scene_set_hill_height, 2),
+			(scene_set_ruggedness, 2), (scene_set_vegetation, 2), (scene_set_size, 3), (scene_set_region_type, 2), (scene_set_region_detail, 2),
+			(edit_mode_get_num_selected_prop_instances, 1), (edit_mode_get_selected_prop_instance, 2), (edit_mode_select_prop_instance, 1), (edit_mode_deselect_prop_instance, 1),
+			(edit_mode_get_highlighted_prop_instance, 1), (edit_mode_set_highlighted_prop_instance, (0, 1)), (edit_mode_set_enabled, 1), (edit_mode_in_edit_objects_mode, 0),
+			(update_material, 2), (reload_item_kinds, (0, 2)), (reload_troops, (0, 2)), (reload_parties, (0, 2)),
+			(menu_create_new, (2, 6)), (menu_add_item, (2, 5)), (menu_clear_items, 1), (menu_clear_generated, 0),
+			(overlay_get_val, 2), (presentation_activate, 1), (overlay_button_set_type, 3), (overlay_get_scroll_pos, (2, 3)), (overlay_set_scroll_pos, (2, 3)), (overlay_enable, 2),
+			(overlay_item_set_text, 3),
+			(array_create, (3, 16)), (array_free, 1), (array_copy, 2), (array_save_file, 2), (array_load_file, 2), (array_delete_file, 1), (array_set_val, (3, 16)),
+			(array_set_val_all, 2), (array_get_val, (3, 16)), (array_push, 2), (array_pop, 2), (array_resize_dim, 3), (array_get_dim_size, 3), (array_get_dim_count, 2),
+			(array_get_type_id, 2), (array_sort, (2, 15)), (array_sort_custom, (2, 15)), (array_eq, (3, 16)), (array_neq, (3, 16)), (array_gt, (3, 16)), (array_ge, (3, 16)),
+			(array_lt, (3, 16)), (array_le, (3, 16)),
+			(lua_get_top, 1), (lua_set_top, 1), (lua_insert, 1), (lua_remove, 1), (lua_pop, 1), (lua_to_int, 2), (lua_to_str, 2), (lua_to_pos, 2), (lua_push_int, 1),
+			(lua_push_str, 1), (lua_push_pos, 1), (lua_get_type, 2), (lua_call, 2), (lua_triggerCallback, (2, 3)), (lua_test, 1),
+			(skin_set_blood_color, 2),
+			(game_key_get_mapped_key_name, (2, 3)), (options_get_damage_to_player, (1, 2)), (options_set_damage_to_player, (1, 2)), (options_get_damage_to_friends, (1, 2)),
+			(options_set_damage_to_friends, (1, 2)), (set_camera_follow_party, (1, 2)), (start_encounter, (1, 2)),
+			(party_get_battle_opponent, 2), (agent_get_attached_scene_prop, (2, 3)), (agent_set_attached_scene_prop, (2, 5)), (agent_set_attached_scene_prop_x, (2, 3)),
+			(agent_set_attached_scene_prop_z, (2, 3)), (entry_point_get_position, (2, 3)), (agent_set_attached_scene_prop_y, (2, 3)), (prop_instance_intersects_with_prop_instance, (2, 3)),
+			(str_store_player_username, (2, 3)), (game_key_get_key, (2, 4)), (str_store_module_setting, 3), (overlay_get_scroll_pos, (2, 3)), (overlay_set_scroll_pos, (2, 3)),
+		]))
+except Exception as e:
+	#(print("failed", e))
+	pass

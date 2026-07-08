@@ -1,13 +1,17 @@
-WRECK_VERSION = '1.1.5b'
+WRECK_VERSION = '1.1.5'
 
 # Whats new in this version:
 # 1) "TypeError list is not hashable" in module_skins.py
 # 2) neq - neg errors fix thanks to Swyter
-# 3) 'slots' argument to show used slots
+# 3) 'slots' argument to show used slots. It is not 100% accurated. Compiler checks only set operations. 
+#    When the slot is set the engine allocates slots in memory for entity in number that is greater than slot and is a power of 2.
+#    For example, if you set slot = 1000, the engine allocates 1024 slots in memory for that troop.
 # 4) Troop's skills check against maximum allowed value specified in 'module_skills.py'.
 # 5) Messages improved with colorama.
-# 6) Added operations length check for some like <store_add>, <val_add> etc.
-# 7) Added check of the hero troops weapon equipment.
+# 6) Added operations length check for all operations.
+# 7) Added check of the hero troops weapon equipment. Allowed only one armor for civilian and not civilian outfit.
+# 8) Integrated WRECK warning: "Too many troop upgrades".
+# 9) Formated name of strings changed from "s.some_text" to "str_some_text" for beginner's readability.
 
 # The MIT License (MIT)
 #
@@ -70,6 +74,7 @@ else:
 		import colorama
 
 		colorama.init()
+#                     0-white    1-errors    2-green    3-yellow    4-blue      5-magenta   6-notices   7-white    8-lighter
 		COLORAMA = ('\x1b[0m', '\x1b[31m', '\x1b[32m', '\x1b[33m', '\x1b[34m', '\x1b[35m', '\x1b[36m', '\x1b[37m', '\x1b[1m')
 	except:
 		COLORAMA = ('', '', '', '', '', '', '', '')
@@ -225,22 +230,27 @@ try:
 		WRECK.current_module = None
 
 	except Exception as e:
-		print('{1}{8}FAILED.\nMODULE {0}`{module!s}` {1}{8}ERROR:\n{error!s}{0}'.format(*COLORAMA, module=WRECK.current_module,
-																			error=(e.formatted() if isinstance(e,
-																											   MSException) else formatted_exception())))
-		if isinstance(e, TypeError) and (
-				('object is not callable' in str(e)) or ('indices must be integers' in str(e))):
 			exc_type, exc_value, exc_traceback = sys.exc_info()
 			error_info = extract_tb(exc_traceback)[-1]
-			print(
-				'{6}Compiler hint: this error is typically caused by a missing comma.\n  Please check that tuples are followed by commas in {0}`{path!s}` {6}above line {0}{line}{6}:\n    {0}{code!s}'.format(
-					*COLORAMA, path=path_split(error_info[0])[1], line=error_info[1], code=error_info[3]))
-		if isinstance(e, SyntaxError):
-			print(
-				'{6}  Compiler hint: this error is typically caused by a missing or exceeding brackets, quotes, and commas inside a tuple.{0}'.format(
-					*COLORAMA))
-		WRECK.time_loaded = gettime()
-		raise MSException()
+			module = WRECK.current_module
+			print('{1}{8}FAILED.\nMODULE {0}`{9}` {1}{8}ERROR'.format(*COLORAMA, module))
+			if isinstance(e, NameError):
+				var_name = str(e).split('\'')[1]
+				print('    Name {0}{9}{1}{8} is not defined. Line: {0}{10}{1}{8}.'.format(*COLORAMA, var_name, error_info[1]))
+				var_tag_name = var_name.split("_", 1)
+				if var_tag_name[0] in tags:
+					if (module == 'troops') or (module == 'parties') or (module == 'party_templates'): WRECK.notices.append('Are you missing a dot for {0}{9}{6} variable?'.format(*COLORAMA, var_tag_name[0] + '.' + var_tag_name[1]))
+					else: WRECK.notices.append('Are you missing quotes for {0}{9}{6} variable?'.format(*COLORAMA, var_name))
+			else:
+				print('{error!s}{0}'.format(*COLORAMA, error=(e.formatted() if isinstance(e, MSException) else formatted_exception())))
+				if isinstance(e, TypeError) and (('object is not callable' in str(e)) or ('indices must be integers' in str(e))):
+					print(
+						'{0}{6}Compiler hint: this error is typically caused by a missing comma.\n  Please check that tuples are followed by commas in {0}`{path!s}` {6}above line {0}{line}{6}:\n    {0}{code!s}'.format(
+						*COLORAMA, path=path_split(error_info[0])[1], line=error_info[1], code=error_info[3]))
+				elif isinstance(e, SyntaxError):
+					print('{0}{6}  Compiler hint: this error is typically caused by a missing or exceeding brackets, quotes, and commas inside a tuple.{0}'.format(*COLORAMA))
+			WRECK.time_loaded = gettime()
+			raise MSException()
 	print('{2}DONE.{0}'.format(*COLORAMA))
 	WRECK.time_loaded = gettime()
 

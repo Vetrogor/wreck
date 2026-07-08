@@ -2210,7 +2210,7 @@ simple_triggers = [
              (try_begin),
                (ge, ":faction_marshall", 0),
                (troop_get_slot, ":faction_marshall_party", ":faction_marshall", slot_troop_leaded_party),
-               (party_is_active, ":faction_marshall_party", 0),
+               (party_is_active, ":faction_marshall_party"),
                (eq, ":commander_party", ":faction_marshall_party"),
                (assign, ":continue", 0),
              (try_end),
@@ -3173,7 +3173,7 @@ simple_triggers = [
   (3,
    [
      (assign, "$g_random_army_quest", -1),
-     (check_quest_active, "qst_follow_army", 1),
+     (check_quest_active, "qst_follow_army"),
      (is_between, "$players_kingdom", kingdoms_begin, kingdoms_end),
 #Rebellion changes begin
 #     (neg|is_between, "$players_kingdom", rebel_factions_begin, rebel_factions_end),

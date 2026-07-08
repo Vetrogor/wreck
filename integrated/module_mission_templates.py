@@ -686,7 +686,7 @@ custom_battle_check_victory_condition = (
     (store_mission_timer_a,reg(1)),
     (ge,reg(1),10),
     (all_enemies_defeated, 2),
-    (neg|main_hero_fallen, 0),
+    (neg|main_hero_fallen),
     (set_mission_result,1),
     (display_message,"str_msg_battle_won"),
     (assign, "$g_battle_won",1),
@@ -884,7 +884,7 @@ common_battle_check_victory_condition = (
     (store_mission_timer_a,reg(1)),
     (ge,reg(1),10),
     (all_enemies_defeated, 5),
-    (neg|main_hero_fallen, 0),
+    (neg|main_hero_fallen),
     (set_mission_result,1),
     (display_message,"str_msg_battle_won"),
     (assign,"$g_battle_won",1),
@@ -1749,7 +1749,7 @@ mission_templates = [
 	
    (3, 0, 0, 
    [     
-     (main_hero_fallen, 0),
+     (main_hero_fallen),
    ],	  
    [
      (try_begin),
@@ -1774,7 +1774,7 @@ mission_templates = [
    (3, 0, 0, 
    [
      (eq, "$talk_context", tc_escape),
-	 (neg|main_hero_fallen,0),
+	 (neg|main_hero_fallen),
      (store_mission_timer_a, ":time"),
      (ge, ":time", 10),
 		
@@ -2519,7 +2519,7 @@ mission_templates = [
          (store_mission_timer_a,reg(1)),
          (ge,reg(1),10),
          (all_enemies_defeated, 5),
-         (neg|main_hero_fallen, 0),
+         (neg|main_hero_fallen),
          (set_mission_result,1),
          (display_message,"str_msg_battle_won"),
          (assign,"$g_battle_won",1),
@@ -2604,7 +2604,7 @@ mission_templates = [
 ##           [(add_reinforcements_to_entry,3,4),(val_add,"$attacker_reinforcement_stage",1)]),
 ##      (1, 60, ti_once, [(store_mission_timer_a,reg(1)),
 ##                        (ge,reg(1),10),(all_enemies_defeated,2),
-##                        (neg|main_hero_fallen,0),
+##                        (neg|main_hero_fallen),
 ##                        (set_mission_result,1),
 ##                        (assign, "$g_battle_result", 1),
 ##                        (display_message,"str_msg_battle_won"),
@@ -2660,7 +2660,7 @@ mission_templates = [
 ##      (1, 60, ti_once, [(store_mission_timer_a,reg(1)),
 ##                        (ge,reg(1),10),
 ##                        (all_enemies_defeated,2),
-##                        (neg|main_hero_fallen,0),
+##                        (neg|main_hero_fallen),
 ##                        (set_mission_result,1),
 ##                        (assign, "$g_battle_result", 1),
 ##                        (display_message,"str_msg_battle_won"),
@@ -2668,7 +2668,7 @@ mission_templates = [
 ##                        ],
 ##       [(finish_mission,1)]),
 ##      (10, 0, 0, [], [(eq,"$battle_won",1),(display_message,"str_msg_battle_won")]),
-##      (1, 4, ti_once, [(main_hero_fallen,0)],
+##      (1, 4, ti_once, [(main_hero_fallen)],
 ##       [(set_mission_result,-1),(finish_mission,1)]),
 ##      (ti_inventory_key_pressed, 0, 0, [(display_message,"str_use_baggage_for_inventory")], []),
 ##    ],
@@ -2706,7 +2706,7 @@ mission_templates = [
 ##           [(add_reinforcements_to_entry,2,3),(val_add,"$friend_reinforcement_stage",1)]),
 ##      (1, 60, ti_once, [(store_mission_timer_a,reg(1)),
 ##                        (ge,reg(1),10),(all_enemies_defeated,2),
-##                        (neg|main_hero_fallen,0),
+##                        (neg|main_hero_fallen),
 ##                        (set_mission_result,1),
 ##                        (assign, "$g_battle_result", 1),
 ##                        (display_message,"str_msg_battle_won"),
@@ -2920,7 +2920,7 @@ mission_templates = [
       (1, 60, ti_once, [(store_mission_timer_a, reg(1)),
                         (ge, reg(1), 10),
                         (all_enemies_defeated, 2),
-                        (neg|main_hero_fallen,0),
+                        (neg|main_hero_fallen),
                         (set_mission_result,1),
                         (display_message,"str_msg_battle_won"),
                         (assign, "$g_battle_won", 1),
@@ -3298,7 +3298,7 @@ mission_templates = [
       
       (3, 0, 0, 
       [     
-        (main_hero_fallen, 0),
+        (main_hero_fallen),
       ],	  
       [
         (try_begin),
@@ -3325,7 +3325,7 @@ mission_templates = [
       (3, 0, 0, 
       [
         (eq, "$talk_context", tc_escape),
-        (neg|main_hero_fallen,0),
+        (neg|main_hero_fallen),
         (store_mission_timer_a, ":time"),
         (ge, ":time", 10),      
         (all_enemies_defeated), #1 is default enemy team for in-town battles
@@ -3415,7 +3415,7 @@ mission_templates = [
          (set_jump_entry, 5),
          (jump_to_scene, "$g_training_ground_melee_training_scene"),
          ]),
-      (1, 3, ti_once, [(main_hero_fallen,0)],
+      (1, 3, ti_once, [(main_hero_fallen)],
        [
          (set_jump_mission, "mt_training_ground_trainer_talk"),
          (modify_visitors_at_site, "$g_training_ground_melee_training_scene"),
@@ -3812,7 +3812,7 @@ mission_templates = [
          
       (0, 3, 0,
        [
-          (main_hero_fallen,0),
+          (main_hero_fallen),
         ],
        [
          (jump_to_menu,"mnu_captivity_start_castle_defeat"),
@@ -8597,13 +8597,13 @@ mission_templates = [
            (entry_point_get_position, pos3, multi_base_point_team_1),
 
            (set_spawn_position, pos3),
-           (spawn_scene_prop, "spr_headquarters_pole_code_only", 0),           
+           (spawn_scene_prop, "spr_headquarters_pole_code_only"),           
            (set_spawn_position, pos3),
-           (spawn_scene_prop, "$team_1_flag_scene_prop", 0),           
+           (spawn_scene_prop, "$team_1_flag_scene_prop"),           
            (set_spawn_position, pos3),
-           (spawn_scene_prop, "$team_2_flag_scene_prop", 0),                    
+           (spawn_scene_prop, "$team_2_flag_scene_prop"),                    
            (set_spawn_position, pos3),
-           (spawn_scene_prop, "spr_headquarters_flag_gray_code_only", 0),           
+           (spawn_scene_prop, "spr_headquarters_flag_gray_code_only"),           
          
            (store_add, ":cur_flag_slot", multi_data_flag_owner_begin, "$g_number_of_flags"),
            (troop_set_slot, "trp_multiplayer_data", ":cur_flag_slot", 1),
@@ -8613,13 +8613,13 @@ mission_templates = [
            (entry_point_get_position, pos3, multi_base_point_team_2),
          
            (set_spawn_position, pos3),
-           (spawn_scene_prop, "spr_headquarters_pole_code_only", 0),                    
+           (spawn_scene_prop, "spr_headquarters_pole_code_only"),                    
            (set_spawn_position, pos3),
-           (spawn_scene_prop, "$team_1_flag_scene_prop", 0),                    
+           (spawn_scene_prop, "$team_1_flag_scene_prop"),                    
            (set_spawn_position, pos3),
-           (spawn_scene_prop, "$team_2_flag_scene_prop", 0),                    
+           (spawn_scene_prop, "$team_2_flag_scene_prop"),                    
            (set_spawn_position, pos3),
-           (spawn_scene_prop, "spr_headquarters_flag_gray_code_only", 0),                    
+           (spawn_scene_prop, "spr_headquarters_flag_gray_code_only"),                    
            (store_add, ":cur_flag_slot", multi_data_flag_owner_begin, "$g_number_of_flags"),
            (troop_set_slot, "trp_multiplayer_data", ":cur_flag_slot", 2),
            (val_add, "$g_number_of_flags", 1),
@@ -8646,7 +8646,7 @@ mission_templates = [
                (prop_instance_get_position, pos0, ":flag_id"),
         
                (set_spawn_position, pos0),
-               (spawn_scene_prop, "spr_headquarters_pole_code_only", 0),               
+               (spawn_scene_prop, "spr_headquarters_pole_code_only"),               
          
                #place other flags
                (try_for_range, ":headquarters_flag_no_will_be_added", "spr_headquarters_flag_red", ":end_cond"),
@@ -9614,11 +9614,11 @@ mission_templates = [
 
            (entry_point_get_position, pos0, multi_base_point_team_1),
            (set_spawn_position, pos0),
-           (spawn_scene_prop, "$team_1_flag_scene_prop", 0),
+           (spawn_scene_prop, "$team_1_flag_scene_prop"),
          
            (entry_point_get_position, pos0, multi_base_point_team_2),
            (set_spawn_position, pos0),
-           (spawn_scene_prop, "$team_2_flag_scene_prop", 0),
+           (spawn_scene_prop, "$team_2_flag_scene_prop"),
          (try_end),
 
          (call_script, "script_initialize_all_scene_prop_slots"),
@@ -10324,10 +10324,10 @@ mission_templates = [
            #place base flags
            (entry_point_get_position, pos1, multi_siege_flag_point),
            (set_spawn_position, pos1),
-           (spawn_scene_prop, "spr_headquarters_pole_code_only", 0),         
+           (spawn_scene_prop, "spr_headquarters_pole_code_only"),         
            (position_move_z, pos1, multi_headquarters_pole_height),         
            (set_spawn_position, pos1),
-           (spawn_scene_prop, "$team_1_flag_scene_prop", 0),
+           (spawn_scene_prop, "$team_1_flag_scene_prop"),
            (store_add, ":cur_flag_slot", multi_data_flag_owner_begin, "$g_number_of_flags"),
            (troop_set_slot, "trp_multiplayer_data", ":cur_flag_slot", 1),
          (try_end),
@@ -11282,21 +11282,21 @@ mission_templates = [
 
            (position_move_x, pos0, 100), 
            (set_spawn_position, pos0),
-           (spawn_scene_prop, "spr_headquarters_pole_code_only", 0),
+           (spawn_scene_prop, "spr_headquarters_pole_code_only"),
 
            (position_move_x, pos0, -200), 
            (set_spawn_position, pos0),
-           (spawn_scene_prop, "spr_headquarters_pole_code_only", 0),
+           (spawn_scene_prop, "spr_headquarters_pole_code_only"),
 
            (scene_prop_get_instance, ":pole_1_id", "spr_headquarters_pole_code_only", 0),
            (prop_instance_get_position, pos0, ":pole_1_id"),
-           (spawn_scene_prop, "$team_1_flag_scene_prop", 0),
+           (spawn_scene_prop, "$team_1_flag_scene_prop"),
            (position_move_z, pos0, multi_headquarters_flag_initial_height),
            (prop_instance_set_position, reg0, pos0),
          
            (scene_prop_get_instance, ":pole_2_id", "spr_headquarters_pole_code_only", 1),
            (prop_instance_get_position, pos0, ":pole_2_id"),
-           (spawn_scene_prop, "$team_2_flag_scene_prop", 0),
+           (spawn_scene_prop, "$team_2_flag_scene_prop"),
            (position_move_z, pos0, multi_headquarters_flag_initial_height),
            (prop_instance_set_position, reg0, pos0),
 
@@ -11651,7 +11651,7 @@ mission_templates = [
          (get_max_players, ":num_players"),
          (try_for_range, ":player_no", 1, ":num_players"), #0 is server so starting from 1
            (player_is_active, ":player_no"),
-           (multiplayer_send_int_to_player, ":player_no", multiplayer_event_start_death_mode),
+           (multiplayer_send_message_to_player, ":player_no", multiplayer_event_start_death_mode),
          (try_end),
 
          (scene_prop_get_instance, ":pole_1_id", "spr_headquarters_pole_code_only", 0),

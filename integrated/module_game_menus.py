@@ -358,19 +358,19 @@ game_menus = [
 ##      [(eq,1,0),],
 ##      "Tutorial #1: Basic movement and weapon selection. {s1}",
 ##      [
-##        #(modify_visitors_at_site,"scn_tutorial_1"),(reset_visitors,0),
+##        #(modify_visitors_at_site,"scn_tutorial_1"),(reset_visitors),
 ####           (set_jump_mission,"mt_tutorial_1"),
 ####           (jump_to_scene,"scn_tutorial_1"),(change_screen_mission)]),
 ##      ]),
 ##      
 ##      ("tutorial_2",[(eq,1,0),],"Tutorial #2: Fighting with a shield. {s2}",[
-####           (modify_visitors_at_site,"scn_tutorial_2"),(reset_visitors,0),
+####           (modify_visitors_at_site,"scn_tutorial_2"),(reset_visitors),
 ####           (set_visitor,1,"trp_tutorial_maceman"),
 ####           (set_visitor,2,"trp_tutorial_archer"),
 ####           (set_jump_mission,"mt_tutorial_2"),
 ####           (jump_to_scene,"scn_tutorial_2"),(change_screen_mission)]),
 ##           (modify_visitors_at_site,"scn_tutorial_training_ground"),
-##           (reset_visitors, 0),
+##           (reset_visitors),
 ##           (set_player_troop, "trp_player"),
 ##           (set_visitor,0,"trp_player"),
 ##           (set_jump_mission,"mt_ai_training"),
@@ -378,14 +378,14 @@ game_menus = [
 ##           (change_screen_mission)]),
 ##
 ##      ("tutorial_3",[(eq,1,0),],"Tutorial #3: Fighting without a shield. {s3}",[
-##           (modify_visitors_at_site,"scn_tutorial_3"),(reset_visitors,0),
+##           (modify_visitors_at_site,"scn_tutorial_3"),(reset_visitors),
 ##           (set_visitor,1,"trp_tutorial_maceman"),
 ##           (set_visitor,2,"trp_tutorial_swordsman"),
 ##           (set_jump_mission,"mt_tutorial_3"),
 ##           (jump_to_scene,"scn_tutorial_3"),(change_screen_mission)]),
 ##      ("tutorial_3b",[(eq,0,1)],"Tutorial 3 b",[(try_begin),
 ##                                                  (ge, "$tutorial_3_state", 12),
-##                                                  (modify_visitors_at_site,"scn_tutorial_3"),(reset_visitors,0),
+##                                                  (modify_visitors_at_site,"scn_tutorial_3"),(reset_visitors),
 ##                                                  (set_visitor,1,"trp_tutorial_maceman"),
 ##                                                  (set_visitor,2,"trp_tutorial_swordsman"),
 ##                                                  (set_jump_mission,"mt_tutorial_3_2"),
@@ -396,7 +396,7 @@ game_menus = [
 ##                                                (try_end)], "Next level"),
 ##      ("tutorial_4",[(eq,1,0),],"Tutorial #4: Riding a horse. {s4}",[
 ##           (modify_visitors_at_site,"scn_tutorial_training_ground"),
-##           (reset_visitors, 0),
+##           (reset_visitors),
 ##           (set_player_troop, "trp_player"),
 ##           (assign, "$g_player_troop", "trp_player"),
 ##           (troop_raise_attribute, "$g_player_troop", ca_strength, 12),
@@ -446,7 +446,7 @@ game_menus = [
 ##      ],
 ##      "Tutorial #5: Commanding a band of soldiers. {s5}",
 ##      [
-##        (modify_visitors_at_site,"scn_tutorial_5"),(reset_visitors,0),
+##        (modify_visitors_at_site,"scn_tutorial_5"),(reset_visitors),
 ##        (set_visitor,0,"trp_player"),
 ##        (set_visitor,1,"trp_vaegir_infantry"),
 ##        (set_visitor,2,"trp_vaegir_infantry"),
@@ -467,7 +467,7 @@ game_menus = [
       ("continue",[],"Continue...",
       [
         (modify_visitors_at_site,"scn_tutorial_training_ground"),
-        (reset_visitors, 0),
+        (reset_visitors),
         (set_player_troop, "trp_player"),
         (assign, "$g_player_troop", "trp_player"),
         (troop_raise_attribute, "$g_player_troop", ca_strength, 12),
@@ -1960,7 +1960,7 @@ game_menus = [
 #custom_banner_begin
 #             (start_presentation, "prsnt_custom_banner"),
            (else_try),
-             (change_screen_return, 0),
+             (change_screen_return),
            (try_end),
            (set_show_messages, 1),
         ]),
@@ -2005,7 +2005,7 @@ game_menus = [
     "auto_return",0,
     "{!}This menu automatically returns to caller.",
     "none",
-    [(change_screen_return, 0)],
+    [(change_screen_return)],
     [
     ]
   ),
@@ -4446,7 +4446,7 @@ game_menus = [
 			
 			(quest_get_slot, ":quest_party", "qst_track_down_bandits", slot_quest_target_party),
 			(party_is_active, ":quest_party"),
-			(party_get_attached_to, ":quest_party_attached"),
+			(party_get_attached_to, ":quest_party_attached", ":quest_party"),
 			(this_or_next|eq, ":quest_party", "$g_enemy_party"),
 				(eq, ":quest_party_attached", "$g_enemy_party"),
 			(call_script, "script_succeed_quest", "qst_track_down_bandits"),	
@@ -4501,7 +4501,7 @@ game_menus = [
           (gt, ":num_ally_stacks", 0),
           (store_faction_of_party, ":ally_faction","$g_ally_party"),
           (call_script, "script_change_player_relation_with_faction", ":ally_faction", ":faction_reln_boost"),
-          (party_stack_get_troop_id, ":ally_leader", "$g_ally_party"),
+          (party_stack_get_troop_id, ":ally_leader", "$g_ally_party", 0),
           (party_stack_get_troop_dna, ":ally_leader_dna", "$g_ally_party", 0),
           (try_begin),
             (troop_is_hero, ":ally_leader"),
@@ -5792,7 +5792,7 @@ game_menus = [
            (jump_to_menu, "mnu_castle_besiege"),
            ]),
 
-      ("castle_leave",[],"Leave.",[(change_screen_return,0)]),
+      ("castle_leave",[],"Leave.",[(change_screen_return)]),
       ("castle_cheat_interior",[(eq, "$cheat_mode", 1)], "{!}CHEAT! Interior.",[(set_jump_mission,"mt_ai_training"),
                                                        (party_get_slot, ":castle_scene", "$current_town", slot_town_castle),
                                                        (jump_to_scene,":castle_scene"),
@@ -5846,7 +5846,7 @@ game_menus = [
        ]),
       ("guard_leave",[],
        "Leave.",
-       [(change_screen_return,0)]),
+       [(change_screen_return)]),
     ]
   ),
   (
@@ -6635,7 +6635,7 @@ game_menus = [
           (eq, "$player_has_homage", 0),
           (assign, reg8, 0),
           (try_begin),
-            (party_slot_eq, "$g_encountered_party", spt_town),
+            (party_slot_eq, "$g_encountered_party", slot_party_type, spt_town),
             (assign, reg8, 1),
           (try_end),
           (str_store_string, s5, "@However, since you are not a sworn {man/follower} of {s9}, there is no chance he would recognize you as the {lord/lady} of this {reg8?town:castle}."),
@@ -7665,7 +7665,7 @@ game_menus = [
       ("village_reports",[(eq, "$cheat_mode", 1),], "{!}CHEAT! Show reports.",
        [(jump_to_menu,"mnu_center_reports"),
            ]),
-      ("village_leave",[],"Leave...",[(change_screen_return,0)]),
+      ("village_leave",[],"Leave...",[(change_screen_return)]),
       
     ],
   ),
@@ -9783,7 +9783,7 @@ game_menus = [
       ("town_leave",[],"Leave...",
       [
         (assign, "$g_permitted_to_center",0),
-        (change_screen_return,0),
+        (change_screen_return),
       ],"Leave Area."),
 
       ("castle_cheat_interior",

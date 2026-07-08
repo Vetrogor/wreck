@@ -481,9 +481,9 @@ def preprocess_entities(glob):
 			c = item_id_repr[i]
 			if c == "_":
 				#c = u"\u25AC"
-				c = "`"
+				c = ".."
 			s = s + c
-		item_id_repr = 'itm`' + s
+		item_id_repr = 'itm..' + s
 		export = (str_id, item_id_repr)
 		glob['strings'].append(export)
 	
@@ -502,7 +502,7 @@ def preprocess_entities(glob):
 			c = animation_real_name[i]
 			if c == "_":
 				#c = u"\u25AC"
-				c = "`"
+				c = ".."
 			s = s + c
 		animation_real_name = s
 		str_offset = int(getattr(WRECK.s, str_id)) & 0xFFFFFFF # Strip opmask
@@ -858,6 +858,13 @@ def troop_is_unmoveable(troop, *argl):
 		(gt, l._unkillable_, 0),
 	]
 
+def troop_is_guarantee_shield(troop, *argl):
+	return [
+		(troop_get_slot, l._flags_, trp.troop_flags, troop),
+		(store_and, l._bit_, l._flags_, tf_guarantee_shield),
+		(gt, l._bit_, 0),
+	]
+
 def skin_get_scale(destination, type, *argl):
 	return [
 		(troop_get_slot, destination, "trp_skin_scales", type),
@@ -1119,7 +1126,7 @@ extend_syntax(troop_is_unkillable)        # (troop_is_unkillable, <troop_id>),
 														# Check if troop is unkillable.
 extend_syntax(troop_is_unmoveable)        # (troop_is_unmoveable, <troop_id>),
                                           # Check if troop is tf_unmoveable_in_party_window.
-
+extend_syntax(troop_is_guarantee_shield)  # (troop_is_guarantee_shield, <troop_id>),
 extend_syntax(skin_get_scale)             # (skin_get_scale, <destination>, <skin>),
                                           # Get the scale of the skin in percents. I.e. fpm = 100.
 extend_syntax(item_get_real_difficulty)   # (item_get_real_difficulty, <destination>, <item_id>, [<imod_value>]),

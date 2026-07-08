@@ -858,6 +858,13 @@ def troop_is_unmoveable(troop, *argl):
 		(gt, l._unkillable_, 0),
 	]
 
+def troop_is_guarantee_shield(troop, *argl):
+	return [
+		(troop_get_slot, l._flags_, trp.troop_flags, troop),
+		(store_and, l._bit_, l._flags_, tf_guarantee_shield),
+		(gt, l._bit_, 0),
+	]
+
 def skin_get_scale(destination, type, *argl):
 	return [
 		(troop_get_slot, destination, "trp_skin_scales", type),
@@ -1119,7 +1126,7 @@ extend_syntax(troop_is_unkillable)        # (troop_is_unkillable, <troop_id>),
 														# Check if troop is unkillable.
 extend_syntax(troop_is_unmoveable)        # (troop_is_unmoveable, <troop_id>),
                                           # Check if troop is tf_unmoveable_in_party_window.
-
+extend_syntax(troop_is_guarantee_shield)  # (troop_is_guarantee_shield, <troop_id>),
 extend_syntax(skin_get_scale)             # (skin_get_scale, <destination>, <skin>),
                                           # Get the scale of the skin in percents. I.e. fpm = 100.
 extend_syntax(item_get_real_difficulty)   # (item_get_real_difficulty, <destination>, <item_id>, [<imod_value>]),
