@@ -1,0 +1,1 @@
+Copy content of the folders to your module system folder. Running is usually with bat files.
