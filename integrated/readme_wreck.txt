@@ -21,6 +21,19 @@ if __main__.__file__ == 'compile.py':#This is WRECK compiler?
 | Change log |
 --------------
 
+v1.1.5
+1) "TypeError list is not hashable" in module_skins.py
+2) neq - neg errors fix thanks to Swyter
+3) 'slots' argument to show used slots. It is not 100% accurated. Compiler checks only set operations. 
+   When the slot is set the engine allocates slots in memory for entity in number that is greater than slot and is a power of 2.
+   For example, if you set slot = 1000, the engine allocates 1024 slots in memory for that troop.
+4) Troop's skills check against maximum allowed value specified in 'module_skills.py'.
+5) Messages improved with colorama.
+6) Added operations length check for all operations.
+7) Added check of the hero troops weapon equipment. Allowed only one armor for civilian and not civilian outfit.
+8) Integrated WRECK warning: "Too many troop upgrades".
+9) Formated name of strings changed from "s.some_text" to "str_some_text" for beginner's readability.
+
 v1.1.4
 1) Added an error of using this_or_next without closing condtion.
 2) New macro operands from 'Universal Mission Scripts Handler'.
