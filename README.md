@@ -1,5 +1,5 @@
 # W.R.E.C.K.
-Warband Refined &amp; Enhanced Compiler Kit v.1.1.4
+Warband Refined &amp; Enhanced Compiler Kit
 
 This version is required Puthon 3. Older versions that work on Python 2 can be founded on the forum thread.
 
